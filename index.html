@@ -486,8 +486,8 @@ function ovReport(){
 function paper(doc){
   var h='<div class="paper"><span class="stamp s'+(doc.real||0)+'">'+['ILLUSTRATIVE','PROVIDED','FROM DOCUMENTS','NOT SUPPLIED'][doc.real||0]+'</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
   doc.rows.forEach(function(r){h+='<div class="row"'+(r[2]?' data-k="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></div>'});
-  if(doc.tbl){h+='<table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
-    doc.tbl.r.forEach(function(r){var k=r[doc.tbl.h.length];h+='<tr'+(k?' data-k="'+k+'"':'')+'>'+r.slice(0,doc.tbl.h.length).map(function(x){return '<td>'+esc(x)+'</td>'}).join('')+'</tr>'});h+='</tbody></table>'}
+  if(doc.tbl){h+='<div style="overflow-x:auto"><table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
+    doc.tbl.r.forEach(function(r){var k=r[doc.tbl.h.length];h+='<tr'+(k?' data-k="'+k+'"':'')+'>'+r.slice(0,doc.tbl.h.length).map(function(x){return '<td>'+esc(x)+'</td>'}).join('')+'</tr>'});h+='</tbody></table></div>'}
   if(doc.note)h+='<div class="note">'+esc(doc.note)+'</div>';
   return h+'</div>';
 }
@@ -949,6 +949,131 @@ return {id:'forza',name:'Poland meat to UK, Forza (real)',h2:'Cooked meat produc
  trailNote:'Findings come from the supplied documents of one real consignment.',
  layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Registry checks for Poland, such as TRACES NT and the GB approved establishments list, are not part of this demonstration.</p>',
  phases:PH,roles:ROLES_F,docvis:DV,cls:CLS_F,ovd:[],ovmap:{},ovres:{},C:{}};
+})();
+
+PK.maspo=(function(){
+var NSF='Not supplied with this consignment';
+var PH=[
+/* 1 */
+{n:'Parties, terms and origin statement',loc:'Poland',
+ intro:'The load is one groupage truck with 71 invoices from one seller to one customer. VeriPura reads the invoices and checks parties, terms and the origin statement.',
+ docs:[
+  {t:'Commercial invoices (sample of 71)',ref:'INVOICE 2602-EX/01/00719 · 1 OF 71',real:1,rows:[['Seller','MASPO SP. Z O.O., Gęsia 3, Lublin'],['Seller EORI','PL712015588400000','eori'],['Receiver and customer','MASPO LTD (944), Unit 6, Tinsley Industrial Estate, Shepcote Way, Sheffield S9 1TH','cust'],['Receiver EORI','GB894039493000','eori'],['Invoice date','10.02.2026'],['Transaction date','12.02.2026'],['Incoterms','DAP Glasgow'],['Origin statement','Exporter reference PLREX390000200739, products of Union preferential origin except where indicated','rex'],['Invoice total','GBP 198.73 on 8 lines','tot']],tbl:{h:['No.','Item','CN code','Net kg','Value GBP'],r:[['1','Pork bacon from the barrel','1602 49 19','19.924','114.76'],['2','Podwawelska golden sausage','1601 00 99','2.989','14.89'],['3','Captain mortadella','1601 00 99','10.517','32.71'],['4','Italian brawn','1601 00 99','2.663','10.57'],['5','Pâté with poultry, 131 g','1602 20 90','3.144','9.60']]},note:'Lines 6 to 8 are baguettes, 5.40 each. Bank details left out.'}
+ ],
+ checks:[
+  {a:'Party Guard',p:'Seller and customer across the 71 invoices',s:'ok',d:'All 71 invoices name MASPO SP. Z O.O. as seller and MASPO LTD (customer 944), Sheffield, as receiver.',r:'Invoices 00719 to 00789',k:['cust']},
+  {a:'Customs Guard',p:'EORI numbers on the invoice',s:'ok',d:'Both EORI numbers are present and well formed. The live EORI check was not run in this demonstration.',r:'Invoice header',k:['eori']},
+  {a:'Origin Guard',p:'Statement on origin',s:'ok',d:'The invoice carries an exporter reference number and a statement of preferential origin, with an exception for goods marked otherwise.',r:'Invoice footer, UK-EU TCA origin rules',k:['rex']},
+  {a:'Customs Guard',p:'Invoice total against its lines',s:'ok',d:'The eight line values add up to GBP 198.73, the invoice total.',r:'Invoice 00719',k:['tot']}
+ ],
+ twin:{h:'Transaction record created',li:['71 invoices recorded against one seller and one customer.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0201 · event: invoices.recorded',tag:'prop'}},
+/* 2 */
+{n:'Invoices and declaration line sheet',loc:'Poland',
+ intro:'The line sheet breaks the 71 invoices into 4,146 declaration lines. VeriPura reconciles the sheet with the invoices.',
+ docs:[
+  {t:'Declaration line sheet',ref:'MASPO DEMO 4_PAC.XLSX · 4,146 LINES',real:1,rows:[['Lines','4,146 on 71 invoices','ln'],['Total net mass','16,728.189 kg','mass'],['Total gross mass','18,268.917 kg','mass'],['Total value','GBP 62,595.92','val'],['Customs procedure code','4000000 on every line','cpc'],['VAT rate flag','Z on 3,881 lines, S on 265','vat'],['Preference code','300 on 3,942 lines, 100 on 204'],['Lines where quantity times unit price differs from the line value by over 5p','108','up']],note:'Built from the spreadsheet supplied.'},
+  {t:'Commercial invoices, totals',ref:'71 INVOICES',real:1,rows:[['Invoices','71, numbered 2602-EX/01/00719 to 00789','inv'],['Invoice date','10.02.2026 on all 71'],['Sum of invoice totals','GBP 62,595.92','val2']]}
+ ],
+ checks:[
+  {a:'Customs Guard',p:'Invoice totals against the line sheet',s:'ok',d:'The total of each of the 71 invoices equals the sheet total for that invoice, to the penny. Together they come to GBP 62,595.92.',r:'Invoices, line sheet',k:['val','val2','inv']},
+  {a:'Customs Guard',p:'Gross mass against net mass',s:'ok',d:'Gross mass is not below net mass on any of the 4,146 lines. Totals are 18,268.917 kg gross and 16,728.189 kg net.',r:'Line sheet',k:['mass']},
+  {a:'Customs Guard',p:'Procedure code',s:'ok',d:'Every line carries procedure code 4000000, as expected for one import release.',r:'Line sheet',k:['cpc']},
+  {a:'Customs Guard',p:'Quantity times unit price',s:'rev',d:'On 108 lines the quantity times the unit price differs from the line value by more than 5p. On line 1, 20 times 5.73 is 114.60 and the line value is 114.76. The unit prices look rounded.',r:'Line sheet',k:['up']},
+  {a:'Customs Guard',p:'VAT rate flag',s:'nc',d:'The sheet marks 3,881 lines Z and 265 lines S. The VAT rules for each commodity were not applied in this demonstration.',r:'Line sheet',k:['vat']}
+ ],
+ twin:{h:'Reconciliation recorded',li:['Invoice totals and line totals recorded as agreeing.','Lines with a price rounding difference listed for the agent.'],ev:'TWIN-DEMO-0202 · event: lines.reconciled',tag:'prop'}},
+/* 3 */
+{n:'Certificates and CHEDs',loc:'Poland to Great Britain',
+ intro:'Each product family needs its own certificate and CHED. VeriPura maps every line to a CHED and a certificate and checks that nothing is shared or missing.',
+ docs:[
+  {t:'Certificate and CHED map',ref:'BUILT FROM THE LINE SHEET',real:2,rows:[['Medium-risk CHEDs','8, each with one EHC and one TRACES certificate','cert'],['Low-risk CHEDs','1, with no EHC','c9'],['Lines with no CHED','843 on 16 invoices']],tbl:{h:['CHED','EHC model','TRACES certificate','Risk','Invoices','Lines','Net kg'],r:[['GB.2026.7227019','GBHC300','EXPORT.EU.PL.2026.0008916','medium','17','25','53.781','c1'],['GB.2026.7227022','GBHC310','EXPORT.EU.PL.2026.0008919','medium','24','178','1,712.313','c2'],['GB.2026.7227025','GBHC330','EXPORT.EU.PL.2026.0008921','medium','24','191','810.528','c3'],['GB.2026.7227026','GBHC350','EXPORT.EU.PL.2026.0008923','medium','9','10','17.377','c4'],['GB.2026.7227028','GBHC352','EXPORT.EU.PL.2026.0008926','medium','36','1,830','5,285.216','c5'],['GB.2026.7227031','GBHC401','EXPORT.EU.PL.2026.0008936','medium','31','180','479.810','c6'],['GB.2026.7227034','GBHC412','EXPORT.EU.PL.2026.0008939','medium','13','24','216.000','c7'],['GB.2026.7227035','GBHC420','EXPORT.EU.PL.2026.0008940','medium','10','13','120.276','c8'],['GB.2026.7227038','none','none','low','46','852','2,968.103','c9']]}},
+  {t:'Export Health Certificates (8)',ref:'NOT SUPPLIED',real:3,rows:[['Document','Eight EHCs, one per model','ehc'],['Status',NSF,'ehc']]},
+  {t:'CHED-P documents (9)',ref:'NOT SUPPLIED',real:3,rows:[['Document','Nine CHEDs, eight medium risk and one low risk','chd'],['Status',NSF,'chd']]}
+ ],
+ checks:[
+  {a:'Certificate Guard',p:'One certificate per medium-risk CHED',s:'ok',d:'Each of the eight medium-risk CHEDs links to one EHC model and one TRACES certificate number. None is shared and none is missing.',r:'Certificate and CHED map',k:['c1','c2','c3','c4','c5','c6','c7','c8','cert']},
+  {a:'Certificate Guard',p:'Commodity families against certificate models',s:'rev',d:'Lines group by chapter in a regular way: 0207 under GBHC330, 0203 and 0209 under GBHC310, 0201 under GBHC300, 1604 and 0305 under GBHC401, 0401 under GBHC412, 0407 under GBHC420. Raw sausages (1601) sit under GBHC350 while other 1601 lines sit under GBHC352. The scope of each model should be confirmed on the current GOV.UK list.',r:'Certificate and CHED map, GOV.UK model certificates',k:['c4','c5']},
+  {a:'Certificate Guard',p:'Weights per certificate',s:'nc',d:'The map gives a net mass for each certificate, for example 5,285.216 kg for GBHC352. The EHCs were not supplied, so the weights could not be compared.',r:'EHCs, certificate map',k:['ehc']},
+  {a:'Pre-notification Guard',p:'CHED documents',s:'nc',d:'The nine CHEDs were not supplied. Only their references appear in the map, so notice periods and parties could not be checked.',r:'CHED documents',k:['chd']}
+ ],
+ twin:{h:'Certificate map recorded',li:['Each CHED linked to its certificate and to the invoices it covers.','Port health could see one load per certificate. Proposed.'],ev:'TWIN-DEMO-0203 · event: certificates.mapped',tag:'prop'}},
+/* 4 */
+{n:'Risk category and lines without a CHED',loc:'Great Britain',
+ intro:'Some goods need a CHED but no certificate and some need neither. VeriPura checks that each line is in the right group.',
+ docs:[
+  {t:'Low-risk CHED lines',ref:'GB.2026.7227038 · BUILT FROM THE LINE SHEET',real:2,rows:[['Lines','852 on 46 invoices, net 2,968.103 kg'],['EHC','None']],tbl:{h:['Chapter','Lines','Examples'],r:[['04 Dairy','463','Cheese 288, fermented milk products 115','m04'],['16 Meat and fish preparations','175','Pâté with poultry, pork jelly, chicken ready meals, 3 fish lines','m16'],['19 Cereal and bakery','123',''],['Other chapters','91','']]}},
+  {t:'Lines without a CHED',ref:'BUILT FROM THE LINE SHEET',real:2,rows:[['Lines','843 on 16 invoices, net 5,064.785 kg'],['Chapters','07 to 33, mainly 20, 19, 21, 22, 18, 17'],['Lines in chapters 02, 03, 04 or 16','0','n0']]}
+ ],
+ checks:[
+  {a:'Risk Guard',p:'Lines without a CHED',s:'ok',d:'None of the 843 lines is in chapter 02, 03, 04 or 16. They are ambient groceries, drinks, sweets and similar goods.',r:'Line sheet',k:['n0']},
+  {a:'Risk Guard',p:'Meat products on the low-risk CHED',s:'rev',d:'175 lines in chapter 16 sit on the low-risk CHED with no EHC. Shelf-stable products can be low risk, but the documents give no storage conditions. Your team should confirm each product is ambient and shelf stable.',r:'BTOM risk categories, low-risk CHED lines',k:['m16']},
+  {a:'Risk Guard',p:'Dairy on the low-risk CHED',s:'rev',d:'463 dairy lines sit on the low-risk CHED. The data give no heat treatment or storage conditions, so the risk category could not be confirmed.',r:'BTOM risk categories, low-risk CHED lines',k:['m04']}
+ ],
+ twin:{h:'Risk grouping recorded',li:['Each line assigned to a medium-risk CHED, the low-risk CHED or no CHED.','Port health sees the SPS groups only. Proposed.'],ev:'TWIN-DEMO-0204 · event: risk.grouped',tag:'prop'}},
+/* 5 */
+{n:'Origin, preference and catch certificates',loc:'Poland',
+ intro:'A groupage load mixes goods of many origins. VeriPura compares each line’s origin with its preference code and looks for catch certificates on fish.',
+ docs:[
+  {t:'Origin and preference summary',ref:'BUILT FROM THE LINE SHEET',real:2,rows:[['Preference 300','3,942 lines, all of EU origin (Poland 3,766)'],['Preference 100, non-EU origin','152 lines: Norway 102, Ukraine 25, China 6, Faroe Islands 5, Turkey 3, Egypt 3, others 8','ne'],['Preference 100, EU origin','52 lines: Poland 43, Bulgaria 8, Croatia 1','eu100']],note:'Examples on Polish origin with preference 100: dried yeast, linseed, cocoa, herbal tea.'},
+  {t:'Catch certificates and processing statements',ref:'BUILT FROM THE LINE SHEET',real:2,rows:[['Lines with a catch certificate','178, for example NO-851-221210-377792'],['Lines with a processing statement','143, for example GDY_PS_2780_2024'],['Fish lines under GBHC401','180, of which 175 have a catch certificate'],['Smoked halibut lines without one','5 (Faroe Islands origin, chapter 0305)','hal']]},
+  {t:'Catch certificate documents',ref:'NOT SUPPLIED',real:3,rows:[['Document','Catch certificates and processing statements','cc'],['Status',NSF,'cc']]}
+ ],
+ checks:[
+  {a:'Origin Guard',p:'Non-EU origin and preference code',s:'ok',d:'All 152 lines of non-EU origin carry preference 100. None claims preference 300.',r:'Line sheet, UK-EU TCA origin rules',k:['ne']},
+  {a:'Origin Guard',p:'EU origin lines with preference 100',s:'rev',d:'52 lines of EU origin carry preference 100, meaning no preference, while 3,942 EU lines carry 300. The goods may be non-EU origin packed in Poland. Your team should confirm origin for these lines.',r:'Line sheet',k:['eu100']},
+  {a:'Catch Certificate Guard',p:'Catch certificates on fish lines',s:'rev',d:'175 of the 180 fish lines under GBHC401 carry a catch certificate. Five lines of smoked halibut from the Faroe Islands do not.',r:'Catch certificate summary, GB catch certificate rules',k:['hal']},
+  {a:'Catch Certificate Guard',p:'Catch certificate contents',s:'nc',d:'Only the certificate numbers appear in the declaration data. The certificates were not supplied, so species, vessel and quantity could not be checked.',r:'Catch certificates',k:['cc']}
+ ],
+ twin:{h:'Origin and catch records linked',li:['Preference code and catch certificate numbers recorded per line.','Gaps listed for the importer before arrival.'],ev:'TWIN-DEMO-0205 · event: origin.recorded',tag:'prop'}},
+/* 6 */
+{n:'Transport and delivery',loc:'Poland to Great Britain',
+ intro:'One vehicle carries all 71 invoices. VeriPura checks what the invoices say about the CMR, the delivery place and the delivery dates.',
+ docs:[
+  {t:'CMR and delivery references',ref:'READ FROM THE 71 INVOICES',real:2,rows:[['CMR','Dated 2026-02-10, the same on all 71 invoices','cmr'],['Vehicle','Kadmex, WGM3889J / WM0244Y','veh'],['Incoterms','DAP Glasgow on all 71','inc'],['Receiver','MASPO LTD, Sheffield S9 1TH','rcv'],['Invoice date','10.02.2026 on all 71'],['Transaction dates','12.02.2026 on 37 invoices, 13.02.2026 on 34','dd']]},
+  {t:'CMR consignment note',ref:'NOT SUPPLIED',real:3,rows:[['Document','CMR dated 10 Feb 2026','cmr2'],['Status',NSF,'cmr2']]},
+  {t:'Temperature records',ref:'NOT SUPPLIED',real:3,rows:[['Document','Temperature records for the journey','tmp'],['Status',NSF,'tmp']]}
+ ],
+ checks:[
+  {a:'Transport Guard',p:'CMR and vehicle across the load',s:'ok',d:'The CMR date, the vehicle and the trailer are the same on all 71 documents.',r:'CMR and delivery references',k:['cmr','veh']},
+  {a:'Transport Guard',p:'Delivery place against receiver',s:'rev',d:'The Incoterms say DAP Glasgow on every invoice, but the receiver is MASPO LTD in Sheffield. The documents do not say where the goods are delivered. The place of destination on each CHED should match.',r:'Invoices, CHED box I.7',k:['inc','rcv']},
+  {a:'Transport Guard',p:'Delivery dates on one CMR',s:'rev',d:'One CMR is dated 10 February. Delivery dates are 12 February on 37 invoices and 13 February on 34. Two dates on one truck could mean two drops or an entry error.',r:'Invoices',k:['dd']},
+  {a:'Transport Guard',p:'CMR document',s:'nc',d:'The CMR was not supplied, so weights, parties and seals could not be compared with the invoices.',r:'CMR',k:['cmr2']},
+  {a:'Cold Chain Agent',p:'Temperature records',s:'nc',d:'The load holds meat, dairy, fish and ambient goods. The sheet gives no storage temperature per line and no records were supplied.',r:'Temperature records',k:['tmp']}
+ ],
+ twin:{h:'Departure and delivery recorded',li:['One vehicle, one CMR and 71 invoices linked to one record.','Delivery dates per invoice could feed the delivery record. Proposed.'],ev:'TWIN-DEMO-0206 · event: shipment.departed',tag:'prop'}}
+];
+var ROLES_M=[['all','All documents (VeriPura team view)','Sees every document and finding.','All'],
+['imp','Importer, Maspo Ltd','Sees the documents it is party to, the customs and border documents, and its own obligations.','Importer'],
+['exp','Exporter, Maspo Sp. z o.o.','Sees the invoices, certificates, origin and shipping documents it issued or holds.','Exporter'],
+['agt','Customs agent','Sees the customs, border and shipping documents it needs to declare and clear the goods.','Agent'],
+['bcp','Port health and border post','Sees the health, certificate and catch documents needed for official checks. Commercial documents are not shared.','Port health'],
+['car','Haulier, Kadmex','Sees the transport documents only.','Haulier'],
+['ins','Insurer','Sees the invoices and transport documents needed to assess cargo risk.','Insurer']];
+var DV={
+'Commercial invoices (sample of 71)':['imp','exp','agt','ins'],
+'Declaration line sheet':['imp','agt'],
+'Commercial invoices, totals':['imp','exp','agt','ins'],
+'Certificate and CHED map':['imp','exp','agt','bcp'],
+'Export Health Certificates (8)':['imp','exp','agt','bcp'],
+'CHED-P documents (9)':['imp','exp','agt','bcp'],
+'Low-risk CHED lines':['imp','agt','bcp'],
+'Lines without a CHED':['imp','exp','agt'],
+'Origin and preference summary':['imp','exp','agt'],
+'Catch certificates and processing statements':['imp','exp','agt','bcp'],
+'Catch certificate documents':['imp','exp','agt','bcp'],
+'CMR and delivery references':['imp','exp','agt','car','ins'],
+'CMR consignment note':['imp','exp','agt','car','ins'],
+'Temperature records':['imp','exp','car','ins','bcp']
+};
+var CLS_M=[[/invoice/i,'Commercial invoices (sample of 71)'],[/\bsheet\b/i,'Declaration line sheet'],[/\bEHCs?\b/,'Export Health Certificates (8)'],[/\bCHEDs?\b/,'CHED-P documents (9)'],[/catch certificate/i,'Catch certificate documents'],[/\bCMR\b/,'CMR consignment note']];
+return {id:'maspo',name:'Poland groupage to UK, Maspo (real)',h2:'Mixed food groupage, Poland to Great Britain',
+ lede:'Follow one groupage truck from Lublin with 71 invoices and 4,146 declaration lines of meat, dairy, fish, eggs and ambient food. It splits into eight medium-risk CHEDs with certificates, one low-risk CHED and 843 lines outside SPS controls. You see the checks VeriPura runs and the findings your team reviews. Certificates and CHEDs were not supplied, so some checks are listed as Not checked.',
+ meta:[['Product','Mixed groupage: meat, dairy, fish, eggs and ambient food'],['Lines','4,146 on 71 invoices (2602-EX/01/00719 to 00789)'],['Quantity','16,728.189 kg net · 18,268.917 kg gross'],['Value','GBP 62,595.92'],['Seller','Maspo Sp. z o.o., Lublin'],['Customer','Maspo Ltd, Sheffield'],['Terms','DAP Glasgow'],['Certificates and CHEDs','8 EHCs with 8 medium-risk CHEDs, 1 low-risk CHED'],['Vehicle','Kadmex WGM3889J / WM0244Y, CMR dated 10 Feb 2026']],
+ banner:'<span class="tg prop">Real consignment</span><span>Documents marked Provided or From documents come from a real Poland to UK groupage load, shared by one of the companies involved. Bank details are left out. Not supplied items are not part of this set. VeriPura shows findings. Your team makes the decision.</span>',
+ docCap:'Documents marked Provided are real. Those marked From documents are built from the invoices and the spreadsheet. Select a finding to see where it comes from.',
+ trailNote:'Findings come from the supplied invoices and spreadsheet of one real consignment.',
+ layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Registry checks for Poland, such as TRACES NT, are not part of this demonstration.</p>',
+ phases:PH,roles:ROLES_M,docvis:DV,cls:CLS_M,ovd:[],ovmap:{},ovres:{},C:{}};
 })();
 
 /*PACKS*/
