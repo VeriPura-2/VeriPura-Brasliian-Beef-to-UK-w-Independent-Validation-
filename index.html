@@ -80,7 +80,7 @@ h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:10px}
 .tab{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;font-size:13px;min-height:36px}
 .tab.on{border-color:var(--gold);color:var(--gold);font-weight:600}
 .paper{background:var(--paper);color:var(--paper-ink);border:1px solid var(--paper-line);border-radius:6px;padding:22px 24px;box-shadow:0 1px 0 rgba(0,0,0,.04),6px 6px 0 rgba(15,36,68,.10);position:relative}
-.paper .stamp{position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8a8574;border:1px dashed #b9b4a2;padding:3px 7px;border-radius:3px}
+.paper .stamp.s1{color:#1d6b3a;border-color:#1d6b3a}.paper .stamp.s3{color:#9a6b00;border-color:#d9a93f}.paper .stamp{position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8a8574;border:1px dashed #b9b4a2;padding:3px 7px;border-radius:3px}
 .paper h4{font-family:var(--serif);font-weight:400;font-size:21px;margin-bottom:2px;padding-right:130px}
 .paper .ref{font-family:var(--mono);font-size:11.5px;color:#6b6858;margin-bottom:14px;letter-spacing:.04em}
 .paper .row{display:grid;grid-template-columns:42% 1fr;gap:10px;border-top:1px solid #E6E2D5;padding:6px 6px;font-size:13.5px;border-radius:3px;transition:background .3s}
@@ -190,12 +190,12 @@ button.stat:hover{border-color:var(--blue)}
 <div class="wrap">
   <div class="top">
     <h1 id="topTitle">Demonstration</h1>
-    <span class="label">VeriPura Core™ · illustrative</span>
+    <span class="label">VeriPura Core™</span>
     <span class="sp"></span>
     <span class="pill"><i></i>Visibility layer: proposed</span>
     <button class="theme" id="themeBtn" aria-label="Toggle light and dark theme"><span id="themeIco">☀</span></button>
   </div>
-  <div class="banner"><span class="tg prop">Illustrative example</span><span>All companies, documents and figures are fictional. VeriPura shows findings. Your team makes the decision.</span></div>
+  <div class="banner"><span class="tg prop">Real consignment</span><span>Documents marked Provided are real documents from a Brazil to UK beef consignment, shared by one of the companies involved. Illustrative and Not supplied items are not from this shipment. VeriPura shows findings. Your team makes the decision.</span></div>
   <main id="view" tabindex="-1"></main>
 </div>
 <div class="player" role="group" aria-label="Walkthrough controls">
@@ -208,164 +208,174 @@ button.stat:hover{border-color:var(--blue)}
 <div class="dov" id="dov"></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="dhead"><div><div class="label" id="drawerSub"></div><h2 id="drawerTitle"></h2></div><button class="btn" id="drawerClose">Close</button></div><div id="drawerBody"></div></div>
 <script>
-var C={po:'PO-2026-0418'};
+var C={bl:'MEDUR3178106'};
 var LBL={ok:'Matched',rev:'Review',mis:'Mismatch',nc:'Not checked'};
+var NS='Not supplied with this consignment';
 var P=[
 {n:'Pre-contract and establishment eligibility',loc:'Brazil',
  intro:'Before an order is placed, the establishment is checked against the live UK list and current alerts.',
  docs:[
-  {t:'Defra approved establishments list',ref:'EXTRACT · BOVINE MEAT, FROZEN',rows:[['Establishment','Frigorífico Serra Verde Ltda.'],['SIF number','9012','sif'],['Country','Brazil'],['Product category','Bovine meat, frozen'],['Listing status','Approved, active','sif']],note:'Fictional establishment for demonstration.'},
-  {t:'MAPA SIGSIF export eligibility',ref:'CONFIRMATION · SIF 9012',rows:[['Registered establishment','SIF 9012'],['Eligible market','United Kingdom','sig'],['Eligibility status','Eligible','sig'],['Valid until','31 Mar 2027','sig']]},
-  {t:'HACCP documentation',ref:'NOT SUPPLIED',rows:[['Document','HACCP plan and audit summary','hac'],['Status','Not supplied at this stage','hac']]}
+  {t:'Establishment record',ref:'READ FROM EHC, CHED AND B/L',real:2,rows:[['Establishment','MINERVA S.A., Barretos, São Paulo'],['SIF number','745 (shown as 0003540SIF745 on the B/L)','sif'],['Establishment type','Processing plant (CHED box I.15)'],['Product category','Cooked frozen beef, meat product']],note:'Values read from the supplied documents.'},
+  {t:'MAPA SIGSIF export eligibility',ref:'ILLUSTRATIVE LOOKUP · SIF 745',real:0,rows:[['Registered establishment','SIF 745'],['Eligible market','United Kingdom','sig'],['Eligibility status','Eligible','sig']],note:'Illustrative lookup. The live registry was not queried for this demonstration.'},
+  {t:'HACCP documentation',ref:'NOT SUPPLIED',real:3,rows:[['Document','HACCP plan and audit summary','hac'],['Status',NS,'hac']]}
  ],
  checks:[
-  {a:'Establishment Guard',p:'SIF number on UK list',s:'ok',d:'SIF 9012 is listed and active for frozen bovine meat.',r:'Defra approved establishments list',k:['sif']},
-  {a:'Alert Watch',p:'APHA topical issues',s:'ok',d:'No current suspension or restriction found for Brazilian bovine meat.',r:'APHA topical issues'},
-  {a:'Alert Watch',p:'RASFF notifications',s:'ok',d:'No open alert linked to this establishment.',r:'RASFF'},
-  {a:'Certificate Guard',p:'MAPA export eligibility',s:'ok',d:'Eligible for the United Kingdom until 31 Mar 2027.',r:'MAPA SIGSIF',k:['sig']},
+  {a:'Establishment Guard',p:'SIF number on the documents',s:'ok',d:'SIF 745 appears on the EHC, the CHED and the B/L. The live Defra list lookup is illustrative here.',r:'EHC, CHED, B/L',k:['sif']},
+  {a:'Alert Watch',p:'APHA topical issues',s:'ok',d:'Illustrative result. No suspension or restriction shown for this demonstration.',r:'APHA topical issues'},
+  {a:'Alert Watch',p:'RASFF notifications',s:'ok',d:'Illustrative result. No open alert shown for this demonstration.',r:'RASFF'},
+  {a:'Certificate Guard',p:'MAPA export eligibility',s:'ok',d:'Illustrative result. Eligible for the United Kingdom.',r:'MAPA SIGSIF',k:['sig']},
   {a:'Certificate Guard',p:'HACCP documentation',s:'nc',d:'The document was not supplied, so this check could not run.',r:'Establishment dossier',k:['hac']}
  ],
  twin:{h:'Transaction record created',li:['Establishment eligibility status made available to importer, insurer and buyer.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0001 · event: eligibility.recorded',tag:'prop'}},
 {n:'Commercial agreement and purchase order',loc:'Brazil / UK',
- intro:'The contract is ingested at intake. The product specification is mapped to the rules that apply.',
+ intro:'The contract is ingested at intake. The product is mapped to the rules that apply.',
  docs:[
-  {t:'Purchase order '+C.po,ref:'NORTHGATE MEATS LTD → FRIGORÍFICO SERRA VERDE LTDA.',rows:[['Product','Frozen boneless beef cuts'],['HS code','0202 30','hs'],['Age category','(blank)','age'],['Hormone-free requirement','Required','hf'],['Quantity','24,000 kg net · 1,000 cartons','qty'],['Incoterm','CIF Tilbury'],['Order value','USD 148,800']]},
-  {t:'Product specification sheet',ref:'SPEC-SV-0202-30 · REV 3',rows:[['Maximum animal age','30 months or younger','spec'],['Hormone treatment','None (non-hormonal-treated cattle)','hf'],['Storage temperature','-18 °C or colder'],['Presentation','Boneless, vacuum packed']]}
+  {t:'Purchase order',ref:'NOT SUPPLIED',real:3,rows:[['Document','Purchase order or sales contract','po'],['Status',NS,'po']]},
+  {t:'Product identity across documents',ref:'READ FROM 6 SUPPLIED DOCUMENTS',real:2,rows:[['EHC product code (SH)','16.02','hs'],['CHED commodity','160250 · bovine, meat products','hs'],['B/L','HS 1602.50 · NCM 16025000','hs'],['CDS commodity code','16025095 90','hs'],['EHC treatment category','C','trt'],['EHC certificate model','Meat products (MP-PROD), GBHC352 v1.2','trt']],tbl:{h:['Document','Parties'],r:[['CDS','Seller MINERVA S.A. · Buyer SAPPHIRE FOODS LTD · CFR Chippenham','terms'],['B/L','Shipper MINERVA S.A. · Consignee SAPPHIRE FOODS LTD','terms'],['Certificate of origin','Exporter MINERVA S.A. · Importer SAPPHIRE FOODS LTD','terms']]}}
  ],
  checks:[
-  {a:'Intake Agent',p:'Purchase order fields',s:'ok',d:'Parties, product, quantity and Incoterm extracted and filed.',r:'Purchase order',k:['qty']},
-  {a:'Rule Mapper',p:'HS code to requirements',s:'ok',d:'Code 0202 30 maps to the frozen bovine boneless meat requirements.',r:'UK Global Tariff',k:['hs']},
-  {a:'Rule Mapper',p:'Age category',s:'rev',d:'The purchase order age field is blank. The spec sheet says 30 months or younger, so the SRM/VC removal rule is not triggered. Confirm with the exporter.',r:'Purchase order vs spec sheet',k:['age','spec']},
-  {a:'Rule Mapper',p:'Hormone-free flag',s:'ok',d:'The flag adds a SISBOV segregation check at production.',r:'Purchase order',k:['hf']}
+  {a:'Intake Agent',p:'Purchase order fields',s:'nc',d:'No purchase order or contract was supplied, so parties and quantity could not be checked against an order.',r:'Document set',k:['po']},
+  {a:'Intake Agent',p:'Parties and delivery terms',s:'ok',d:'Exporter and importer are the same on the CDS, B/L and certificate of origin. Delivery terms are CFR Chippenham.',r:'CDS, B/L, certificate of origin',k:['terms']},
+  {a:'Rule Mapper',p:'Commodity code to requirements',s:'ok',d:'The code 1602.50 is consistent on the EHC, CHED, B/L and CDS. It maps to the prepared or preserved meat requirements, not the fresh or frozen raw meat rules.',r:'UK Global Tariff',k:['hs']},
+  {a:'Rule Mapper',p:'Certificate model and treatment',s:'ok',d:'The certificate used is the meat products model, with treatment category C stated, which fits a cooked product.',r:'EHC GBHC352 v1.2',k:['trt']}
  ],
  twin:{h:'Parties and commercial terms logged',li:['Importer and exporter identities linked to the transaction.','Product type, volume and route logged as structured metadata.'],ev:'TWIN-DEMO-0001 · event: terms.linked',tag:'prop'}},
 {n:'Production and slaughter',loc:'Brazil, SIF establishment',
- intro:'Traceability, age, residue results and farm screening are read from the production records.',
+ intro:'Traceability, residue results and establishment details are read from the production records. No farm-level records came with this consignment.',
  docs:[
-  {t:'SISBOV traceability record',ref:'LOT-0819-A · SLAUGHTER 19 AUG 2026',rows:[['Lot','LOT-0819-A'],['Farms in lot','14','farms'],['Oldest animal at slaughter','22 months','age'],['Hormone-free segregation','Declared','farms']],tbl:{h:['Farm','CAR status','Deforestation screen'],r:[['F-05','Active','Clear'],['F-06','Active','Clear'],['F-07','Active','Overlap flagged','farm'],['F-08','Active','Clear']]},note:'Excerpt. Four of 14 farms shown.'},
-  {t:'Residue test results',ref:'PNCRC/PNPR · LOT-0819-A',rows:[['Laboratory','Illustrative accredited lab']],tbl:{h:['Substance','Result','Against MRL'],r:[['Estradiol-17β','Not detected','Within','res'],['Zeranol','Not detected','Within','res'],['Trenbolone','Not detected','Within','res'],['Melengestrol','Not detected','Within','res']]}},
-  {t:'Inspection and removal record',ref:'MAPA OV · SIF 9012',rows:[['Ante-mortem inspection','Done'],['Post-mortem inspection','Done'],['SRM/VC removal declaration','Not required (under 30 months)'],['MAPA OV signature','Present','ov']]}
+  {t:'SISBOV traceability record',ref:'NOT SUPPLIED',real:3,rows:[['Document','Animal and farm traceability record','farms'],['Status',NS,'farms']]},
+  {t:'Residue test results',ref:'NOT SUPPLIED',real:3,rows:[['Document','Residue monitoring results','res'],['Status',NS,'res']]},
+  {t:'Establishments and official attestation',ref:'EHC PART I, BOX I.28',real:2,rows:[['Species','Bos taurus'],['Nature of product','Meat-based product'],['Packaging','Cardboard box'],['Slaughterhouse approval number','421','est'],['Processing plant approval number','745','est'],['Cold store approval number','745','est'],['Packages','704'],['Official veterinarian signature and stamp','Present on every page, 29 Apr 2026','ov'],['Online authenticity code','Printed on every page','ov']]}
  ],
  checks:[
-  {a:'Trace Agent',p:'Farm of origin',s:'ok',d:'All 14 farms in the lot are traced and linked to the lot.',r:'SISBOV',k:['farms']},
-  {a:'Age Guard',p:'Animal age',s:'ok',d:'Oldest animal is 22 months. The SRM/VC removal pathway is not triggered.',r:'EHC age rules',k:['age']},
-  {a:'Residue Guard',p:'Hormone residues vs MRL',s:'ok',d:'Four substances not detected. All within thresholds.',r:'PNCRC/PNPR',k:['res']},
-  {a:'Deforestation Screen',p:'Farm F-07 location',s:'rev',d:'The farm polygon overlaps an area flagged in MapBiomas/PRODES. Review the farm supply records.',r:'MapBiomas, PRODES',k:['farm']},
-  {a:'Inspection Guard',p:'MAPA OV attestation',s:'ok',d:'Signature present on the inspection record.',r:'MAPA',k:['ov']},
-  {a:'Partner Check',p:'SISBOV animal IDs vs registry',s:'ok',d:'The animal ID range matches the batch on the commercial invoice. 14 of 14 farms returned by the registry.',r:'MAPA / SISBOV via certification body'},
-  {a:'Partner Check',p:'CAR entries',s:'ok',d:'14 of 14 farms have an active entry in SICAR.',r:'SICAR via certification body'}
+  {a:'Trace Agent',p:'Farm of origin',s:'nc',d:'No farm or animal records were supplied. A partner can retrieve these from SISBOV.',r:'SISBOV',k:['farms']},
+  {a:'Residue Guard',p:'Residue results',s:'nc',d:'No residue results were supplied, so this check could not run.',r:'PNCRC/PNPR',k:['res']},
+  {a:'Establishment Guard',p:'Plant chain on the EHC',s:'ok',d:'Slaughterhouse 421, processing plant 745 and cold store 745 are listed. Plant 745 matches the CHED establishment of origin.',r:'EHC Part I, CHED box I.15',k:['est']},
+  {a:'Inspection Guard',p:'Official attestation',s:'ok',d:'Signature, stamp and date are present on every page of the EHC.',r:'MAPA',k:['ov']},
+  {a:'Partner Check',p:'SISBOV animal IDs vs registry',s:'nc',d:'The query needs the animal ID range, which was not supplied.',r:'MAPA / SISBOV via certification body'},
+  {a:'Partner Check',p:'CAR entries',s:'nc',d:'The query needs the farm identifiers, which were not supplied.',r:'SICAR via certification body'}
  ],
- twin:{h:'Trace path recorded',li:['Farm-of-origin data linked to the transaction record.','MAPA OV attestation logged as a signed event, checkable by downstream parties.'],ev:'TWIN-DEMO-0001 · event: trace.recorded',tag:'prop'}},
+ twin:{h:'Trace path recorded',li:['Establishment chain linked to the transaction record.','Official attestation logged as a signed event, checkable by downstream parties.'],ev:'TWIN-DEMO-0001 · event: trace.recorded',tag:'prop'}},
 {n:'Export Health Certificate issuance',loc:'Brazil, DIPOA certification centre',
- intro:'Part I fields and the twelve Part II attestations are read and compared with the transaction profile.',
+ intro:'Part I fields and the Part II requirements are read from the scanned certificate and compared with the other documents.',
  docs:[
-  {t:'Export Health Certificate 7060EHC, Part I',ref:'EHC-DEMO-2026-00931 · SCANNED COPY',rows:[['Consignor','Frigorífico Serra Verde Ltda. · SIF 9012','sif'],['Consignee','Northgate Meats Ltd'],['Lot','LOT-0819-A'],['HS code','0202 30'],['Net weight','24,000.0 kg','w'],['Cartons','1,000'],['Container / seal','DEMU 4821907 / BR-7731905'],['CHED-P reference (Box I.2)','CHEDP.GB.2026.0412358'],['Model version','Current']]},
-  {t:'Export Health Certificate 7060EHC, Part II',ref:'ATTESTATIONS 1 TO 12',rows:[],tbl:{h:['#','Attestation','Status'],r:[['1','Origin and FMD status','Present'],['2','BSE status','Present'],['3','Ante and post-mortem inspection','Present'],['4','SRM/VC removal','Present'],['5','Hormone-free production','Present'],['6','Residue compliance','Partial: lot reference missing','att'],['7','Microbiological criteria','Present'],['8','Slaughter establishment approval','Present'],['9','Cutting plant approval','Present'],['10','Storage temperature','Present'],['11','Packaging and labelling','Present'],['12','Transport conditions','Present']]},note:'MAPA OV wet signature and DIPOA stamp: not verifiable from a scan.'}
+  {t:'Export Health Certificate, Part I',ref:'I0-00230400/CC-STS/26 · SCANNED COPY',real:1,rows:[['Certificate reference','I0-00230400/CC-STS/26','eref'],['Consignor','MINERVA S.A. · SIF 745','sif'],['Consignee','SAPPHIRE FOODS LTD, Chippenham, UK'],['Product code (SH)','16.02'],['Description','Cooked seasoned frozen beef: coxão mole, coxão duro'],['Net weight','18,247.460 kg','w'],['Gross weight','18,937.380 kg','gw'],['Packages','704 cartons','ct'],['Temperature','Frozen (-18 °C)'],['Container / seal','CRLU 128.826-9 / 0003540SIF745','seal'],['Vessel','MSC LEILA · NA615R'],['Border post of entry','London, GBLGP1'],['Date of departure','30/04/2026'],['Model version','GBHC352 v1.2','model']],note:'Scan of the original. Issued 29 Apr 2026.'},
+  {t:'Export Health Certificate, Part II',ref:'REQUIREMENTS · PAGES 2 TO 8',real:1,rows:[],tbl:{h:['Requirement','Status'],r:[['Animal health: species, treatment, origin','Present: BOV, treatment C, origin BR-2'],['Establishment (HACCP)','Present'],['Marking','Present'],['Microbiological criteria','Present'],['Residue monitoring plans','Present'],['Storage and transport','Present'],['Raw materials','Present'],['Labelling','Present'],['BSE conditions','Struck-through alternatives shown','bse']]},note:'Scan of the original. Signed and stamped by the official veterinarian on page 8.'}
  ],
  checks:[
-  {a:'EHC Reader',p:'Part I fields',s:'ok',d:'SIF number, lot, HS code and consignee extracted and matched to the profile.',r:'EHC 7060',k:['sif']},
-  {a:'Attestation Guard',p:'Part II attestations',s:'rev',d:'11 of 12 attestations present. Attestation 6 (residue compliance) is partial: the lot reference is missing.',r:'EHC 7060',k:['att']},
-  {a:'Version Guard',p:'EHC model version',s:'ok',d:'Matches the current model on the APHA published list.',r:'APHA'},
-  {a:'Weight Guard',p:'Net weight vs purchase order',s:'ok',d:'24,000.0 kg matches the purchase order quantity.',r:'Purchase order',k:['w']},
-  {a:'Signature Guard',p:'Wet signature and official stamp',s:'nc',d:'These cannot be verified from a scanned copy, so this check could not run.',r:'EHC 7060'},
-  {a:'Registry Guard',p:'EHC against the MAPA / SIGSIF registry',s:'ok',d:'The certificate is found in the registry. Issue date, SIF number and lot match the uploaded copy.',r:'MAPA / SIGSIF via certification body'}
+  {a:'EHC Reader',p:'Part I fields',s:'ok',d:'Consignor, consignee, SIF 745, product code, weights, packages and container read and matched to the other documents.',r:'EHC Part I',k:['sif']},
+  {a:'Attestation Guard',p:'Part II requirements',s:'ok',d:'The animal health, establishment, marking, microbiological, residue, storage, raw material and labelling statements are present.',r:'EHC Part II'},
+  {a:'Attestation Guard',p:'BSE section',s:'rev',d:'The BSE section shows several struck-through alternatives. Confirm the applicable option on the original.',r:'EHC Part II',k:['bse']},
+  {a:'Version Guard',p:'EHC model version',s:'ok',d:'Model GBHC352 v1.2 is printed on all eight pages.',r:'EHC',k:['model']},
+  {a:'Weight Guard',p:'Net weight vs packing list',s:'ok',d:'18,247.460 kg matches the packing list total.',r:'Packing list',k:['w']},
+  {a:'Signature Guard',p:'Wet signature and official stamp',s:'nc',d:'Signature and stamp are visible on the scan, but whether they are genuine cannot be verified from a scan, so this check could not run.',r:'EHC'},
+  {a:'Registry Guard',p:'EHC against the MAPA / SIGSIF registry',s:'ok',d:'Illustrative result. The certificate carries an online authenticity code, which the registry check uses.',r:'MAPA / SIGSIF via certification body'}
  ],
- twin:{h:'EHC issuance recorded',li:['EHC reference, lot and SIF number committed to the transaction record as a signed attestation.','Hash of the verified EHC anchored on IOTA Rebased as a Verifiable Credential.'],ev:'TWIN-DEMO-0001 · hash 9f2c…a71e (illustrative)',tag:'prop'}},
+ twin:{h:'EHC issuance recorded',li:['EHC reference, establishment and weights committed to the transaction record as a signed attestation.','Hash of the verified EHC anchored on IOTA Rebased as a Verifiable Credential.'],ev:'TWIN-DEMO-0001 · hash 9f2c…a71e (illustrative)',tag:'prop'}},
 {n:'Brazilian export clearance',loc:'Brazil, SISCOMEX',
- intro:'The export declaration and tax invoice are checked against the contract and the certificate.',
+ intro:'The export declaration is checked against the contract and the certificate. The certificate of origin is read here.',
  docs:[
-  {t:'DU-E export declaration',ref:'SISCOMEX · DU-E-DEMO-26BR0123456',rows:[['NCM code','0202.30.00','ncm'],['Destination','United Kingdom'],['Declared value','USD 148,800','val'],['Status','Registered, cleared for export','st']]},
-  {t:'Nota Fiscal Eletrônica (NF-e)',ref:'NF-e DEMO 000.123.456',rows:[['NCM code','0202.30.00','ncm'],['Net weight','24,000.0 kg','nw'],['Value (USD equivalent)','148,800','val']]}
+  {t:'DU-E export declaration',ref:'NOT SUPPLIED',real:3,rows:[['Document','DU-E (Siscomex)','du'],['Status',NS,'du']]},
+  {t:'Certificate of origin',ref:'ISSUED SANTOS · 29/04/2026',real:1,rows:[['Exporter','MINERVA S.A. · CNPJ 67.620.377/0109-34'],['Importer','SAPPHIRE FOODS LTD · VAT GB 153 481 513','imp'],['Vessel','MSC LEILA'],['Shipment / destination','Santos, Brazil / London, United Kingdom'],['Container','CRLU1288269','ctr'],['Total net weight','18,247.460 kg','nw'],['Total gross weight','18,937.380 kg'],['Cartons','704'],['Origin statement','Goods are of Brazilian origin','org']],tbl:{h:['Cartons','Description','Net (kg)'],r:[['260','Frozen cooked seasoned beef silverside','6,714.350'],['444','Frozen cooked seasoned beef topside','11,533.110']]},note:'Original and copy supplied on the same file.'}
  ],
  checks:[
-  {a:'Export Doc Guard',p:'NCM vs contract HS code',s:'ok',d:'0202.30.00 is consistent with HS 0202 30 on the purchase order.',r:'Purchase order, DU-E, NF-e',k:['ncm']},
-  {a:'Export Doc Guard',p:'DU-E status',s:'ok',d:'The DU-E is registered and cleared for export.',r:'SISCOMEX',k:['st']},
-  {a:'Export Doc Guard',p:'Value',s:'ok',d:'DU-E and NF-e values match the purchase order.',r:'Purchase order',k:['val']},
-  {a:'Weight Guard',p:'NF-e weight vs EHC',s:'ok',d:'24,000.0 kg matches the EHC net weight.',r:'EHC Part I',k:['nw']},
-  {a:'Registry Guard',p:'DU-E against Siscomex',s:'ok',d:'The declaration is found in Siscomex. NCM code, value and destination match.',r:'Siscomex via certification body',k:['st']}
+  {a:'Export Doc Guard',p:'DU-E declaration',s:'nc',d:'The DU-E was not supplied, so NCM, value and status could not be checked.',r:'SISCOMEX',k:['du']},
+  {a:'Origin Guard',p:'Country of origin',s:'ok',d:'Brazil on the certificate of origin, the EHC, the CHED and the CDS.',r:'Certificate of origin, EHC, CHED, CDS',k:['org']},
+  {a:'Weight Guard',p:'Certificate of origin vs EHC',s:'ok',d:'18,247.460 kg net. The two cuts (6,714.350 and 11,533.110 kg) add up to the total.',r:'EHC Part I',k:['nw']},
+  {a:'Party Guard',p:'Importer identity',s:'ok',d:'The VAT number on the certificate matches the EORI GB153481513000 on the customs declaration.',r:'CDS',k:['imp']},
+  {a:'Container Guard',p:'Container number',s:'ok',d:'CRLU1288269 passes the ISO 6346 check digit and matches the B/L, packing list, CHED and CDS.',r:'ISO 6346',k:['ctr']},
+  {a:'Registry Guard',p:'DU-E against Siscomex',s:'nc',d:'The query needs the DU-E number, which was not supplied.',r:'Siscomex via certification body'}
  ],
- twin:{h:'Export clearance recorded',li:['Brazilian export clearance status added to the transaction record.','Consignment confirmed in transit.'],ev:'TWIN-DEMO-0001 · event: export.cleared',tag:'prop'}},
+ twin:{h:'Export documentation recorded',li:['Certificate of origin status added to the transaction record.','Consignment confirmed in transit once loaded.'],ev:'TWIN-DEMO-0001 · event: export.recorded',tag:'prop'}},
 {n:'Shipping and commercial documentation',loc:'Brazil / ocean',
- intro:'The packing list, invoice, bill of lading and reefer data are reconciled against the certificate.',
+ intro:'The packing list and bill of lading are reconciled against the certificate. The invoice and reefer log were not supplied.',
  docs:[
-  {t:'Packing list',ref:'PL-DEMO-2026-0731',rows:[['Lot','LOT-0819-A'],['Cartons','1,000','ct'],['Net weight','24,360.0 kg','pw'],['Container / seal','DEMU 4821907 / BR-7731905']]},
-  {t:'Commercial invoice',ref:'INV-DEMO-2026-0731',rows:[['Net weight','24,000.0 kg'],['Cartons','1,000'],['Invoice value','USD 148,800','iv']]},
-  {t:'Bill of Lading',ref:'BL-DEMO-0098123',rows:[['Vessel','MV Demo Atlantic'],['Port of loading','Santos'],['Port of discharge','Tilbury'],['Container','DEMU 4821907'],['Seal number','BR-7731905','seal']]},
-  {t:'Reefer data logger summary',ref:'LOGGER-DEMO · SETPOINT -18 °C',rows:[['Maximum reading','-14.2 °C','tmp'],['Exceedance','3 h 40 min on day 9','tmp']],tbl:{h:['Day','Reading (°C)'],r:[['1','-19.2'],['5','-19.0'],['9','-14.2','tmp'],['13','-18.6'],['17','-18.9']]},note:'Five of the logged days shown.'}
+  {t:'Packing list',ref:'MFF/202-1 · BARRETOS 29/04/2026',real:1,rows:[['Container','CRLU1288269 · 40 reefer HC','ctr'],['Total net weight','18,247.460 kg','pw'],['Total gross weight','18,937.380 kg','gw'],['Total cartons','704','ct']],tbl:{h:['Cartons','Description','Net (kg)','Gross (kg)'],r:[['260','Cooked seasoned beef silverside','6,714.350','6,969.150'],['444','Cooked seasoned beef topside','11,533.110','11,968.230']]},note:'Two identical files were supplied.'},
+  {t:'Bill of lading',ref:'MSC · '+C.bl,real:1,rows:[['Shipper','MINERVA S.A.'],['Consignee and notify','SAPPHIRE FOODS LTD, Chippenham'],['Vessel / voyage','MSC LEILA · NA615R'],['Port of loading','Santos'],['Port of discharge','London'],['Shipped on board','30 Apr 2026'],['Issued','04 May 2026, Santos'],['Container','CRLU1288269 · 40 ft HC reefer','ctr'],['Seals','FJ25368005 and 0003540SIF745','seal'],['Cartons','704','ct'],['Net / gross weight','18,247.460 kg / 18,937.380 kg','gw'],['Commodity','HS 1602.50 · NCM 16025000'],['Temperature','-18 °C','tset']],note:'Declared value and place of receipt are masked on the supplied copy.'},
+  {t:'Commercial invoice',ref:'NOT SUPPLIED',real:3,rows:[['Document','Commercial invoice','inv'],['Status',NS,'inv']]},
+  {t:'Reefer data logger summary',ref:'NOT SUPPLIED',real:3,rows:[['Document','Temperature log for the voyage','tmp'],['Status',NS,'tmp']]}
  ],
  checks:[
-  {a:'Cross-Doc Guard',p:'Packing list vs EHC net weight',s:'mis',d:'Packing list shows 24,360.0 kg. The EHC shows 24,000.0 kg. Difference: 360.0 kg.',r:'EHC Part I vs packing list',k:['pw']},
-  {a:'Cross-Doc Guard',p:'Carton count',s:'ok',d:'1,000 cartons on the packing list and the EHC.',r:'EHC Part I',k:['ct']},
-  {a:'Cross-Doc Guard',p:'Invoice value vs purchase order',s:'ok',d:'USD 148,800 matches the purchase order.',r:'Purchase order',k:['iv']},
-  {a:'Seal Guard',p:'Seal number',s:'ok',d:'BR-7731905 matches the EHC. Recorded for the identity check at the border.',r:'EHC Part I, B/L',k:['seal']},
-  {a:'Cold Chain Agent',p:'Reefer log vs -18 °C regime',s:'mis',d:'Maximum reading -14.2 °C for 3 h 40 min on day 9. This exceeds the frozen regime.',r:'Frozen storage requirement',k:['tmp']}
+  {a:'Cross-Doc Guard',p:'Packing list vs EHC net weight',s:'ok',d:'18,247.460 kg on both. Net and gross weights also match the B/L and the customs declaration.',r:'EHC Part I vs packing list',k:['pw','gw']},
+  {a:'Cross-Doc Guard',p:'Carton count',s:'ok',d:'704 cartons on the packing list, EHC, B/L, CHED and CDS.',r:'EHC Part I',k:['ct']},
+  {a:'Cross-Doc Guard',p:'Invoice vs packing list',s:'nc',d:'The invoice was not supplied, so value and quantity could not be compared.',r:'Document set',k:['inv']},
+  {a:'Seal Guard',p:'Seals on the B/L vs the EHC',s:'rev',d:'The B/L lists two seals, FJ25368005 and the SIF seal 0003540SIF745. The EHC lists only the SIF seal. Confirm both are intact at the identity check.',r:'B/L vs EHC Part I',k:['seal']},
+  {a:'Cold Chain Agent',p:'Set temperature',s:'ok',d:'The B/L shows -18 °C, which matches the frozen regime on the EHC.',r:'B/L, EHC',k:['tset']},
+  {a:'Cold Chain Agent',p:'Reefer log vs -18 °C regime',s:'nc',d:'No temperature log was supplied, so the voyage readings could not be checked.',r:'Frozen storage requirement',k:['tmp']}
  ],
- twin:{h:'Cold chain status shared',li:['Permissioned stakeholders see the cold chain status during transit.','Seal number and B/L reference linked to the record. Temperature exceedance shown to insurer and buyer.'],ev:'TWIN-DEMO-0001 · event: coldchain.exceedance',tag:'prop'}},
+ twin:{h:'Shipping status shared',li:['Permissioned stakeholders see the B/L, container and seal references during transit.','Open seal finding shown to importer and insurer.'],ev:'TWIN-DEMO-0001 · event: shipment.linked',tag:'prop'}},
 {n:'UK pre-arrival notification and import licensing',loc:'UK, IPAFFS / RPA',
- intro:'The CHED-P reference and timing are checked, and licence needs are confirmed.',
+ intro:'The CHED-P is read, checked against the certificate and the arrival notice, and licence needs are noted.',
  docs:[
-  {t:'IPAFFS pre-notification (CHED-P)',ref:'PRE-NOTIFICATION · TILBURY BCP',rows:[['CHED-P reference','CHEDP.GB.2026.0412385','ched'],['Submitted','14 Sep 2026 · 4 working days before arrival','sub'],['Expected arrival','18 Sep 2026'],['Commodity','0202 30'],['Border Control Post','Tilbury']]},
-  {t:'EHC Part I, Box I.2 (excerpt)',ref:'EHC-DEMO-2026-00931',rows:[['CHED-P reference','CHEDP.GB.2026.0412358','ehc']]},
-  {t:'TRQ import licence',ref:'RURAL PAYMENTS AGENCY',rows:[['Quota 05.4453','Not claimed','trq'],['Licence needed','No','trq']]}
+  {t:'CHED-P, Part I',ref:'CHEDP.GB.2026.7681938 · BCP LONDON GATEWAY',real:1,rows:[['CHED reference','CHEDP.GB.2026.7681938','ched'],['Border Control Post','London Gateway · GBLGP1'],['Operator','Jordan Youngs, George Baker (Shipping) Ltd, Felixstowe'],['Consignee / place of destination','SAPPHIRE FOODS LTD, Chippenham'],['Accompanying document','Veterinary health certificate 10-00230400/CC-STS/26, issued 29.04.2026','cdoc'],['Transport','Vessel · MEDUR3178106 · MSC LEILA'],['Container / seal','CRLU1288269 / FJ25368005 (official seal ticked)','seal'],['Establishment of origin','MINERVA S.A. · SIF 745 · Processing plant'],['Commodity','160250 · bovine · 704 cartons','cm'],['Net / gross weight','18,247.46 kg / 18,937.38 kg','cm'],['Prior notification box','22 May 2026 · 00:01 BST','sub'],['Declaration signed','15 May 2026 · 12:36 BST']],note:'Part II (controls) is on pages 3 and 4.'},
+  {t:'EHC, reference box',ref:'EHC PART II HEADER',real:1,rows:[['Certificate reference','I0-00230400/CC-STS/26','ehc'],['Issued','29 Apr 2026']],note:'Reference as printed in the page header of the scanned EHC.'},
+  {t:'TRQ import licence',ref:'NOT SUPPLIED',real:3,rows:[['Document','Import licence information','trq'],['Status',NS,'trq']]}
  ],
  checks:[
-  {a:'CHED Guard',p:'CHED-P reference vs EHC Box I.2',s:'mis',d:'The last digits are transposed: ...0412385 on the pre-notification, ...0412358 on the EHC.',r:'IPAFFS vs EHC Part I',k:['ched','ehc']},
-  {a:'Timing Guard',p:'Pre-notification timing',s:'ok',d:'Submitted at least one working day before arrival.',r:'IPAFFS',k:['sub']},
-  {a:'Licence Guard',p:'TRQ licence',s:'ok',d:'Quota not claimed, so no licence is needed.',r:'Rural Payments Agency',k:['trq']}
+  {a:'CHED Guard',p:'CHED against the customs declaration',s:'ok',d:'Reference 7681938 on the CHED matches the CHD entry GBCHD2026.7681938 on the CDS.',r:'IPAFFS vs CDS',k:['ched']},
+  {a:'CHED Guard',p:'Certificate reference vs EHC',s:'rev',d:'The EHC prints I0-00230400/CC-STS/26 (a letter I). The CHED prints 10-00230400/CC-STS/26 (digit one). This may be a typeface effect. Confirm on the originals.',r:'IPAFFS vs EHC',k:['cdoc','ehc']},
+  {a:'CHED Guard',p:'Consignment details vs EHC',s:'ok',d:'Packages, weights, container and plant 745 match the EHC.',r:'EHC Part I',k:['cm']},
+  {a:'Seal Guard',p:'Seal on the CHED',s:'rev',d:'The CHED lists FJ25368005 only. The EHC lists 0003540SIF745 only, and the B/L lists both. No one document shows both seals.',r:'CHED vs EHC vs B/L',k:['seal']},
+  {a:'Timing Guard',p:'Prior notification vs vessel arrival',s:'rev',d:'The CHED prior notification box shows 22 May 2026 00:01. The MSC arrival notice gives a vessel ETA of 21 May 2026 22:00. Confirm what this box represents.',r:'CHED vs MSC arrival notice',k:['sub']},
+  {a:'Licence Guard',p:'TRQ licence',s:'nc',d:'No licence information was supplied, so whether a quota applies was not checked.',r:'Rural Payments Agency',k:['trq']}
  ],
- twin:{h:'Pre-arrival status visible to agencies',li:['Port health and APHA see a consignment expected, with pre-checks completed.','One open mismatch on the CHED reference is shown with the record.'],ev:'TWIN-DEMO-0001 · event: prenotification.seen',tag:'prop'}},
+ twin:{h:'Pre-arrival status visible to agencies',li:['Port health and APHA see a consignment expected, with pre-checks completed.','Open findings on the reference, the seals and the notification time are shown with the record.'],ev:'TWIN-DEMO-0001 · event: prenotification.seen',tag:'prop'}},
 {n:'UK customs declaration',loc:'UK, HMRC CDS',
- intro:'The declaration is cross-referenced against the documents already verified.',
+ intro:'The declaration is cross-referenced against the documents already read.',
  docs:[
-  {t:'Customs import declaration (CDS)',ref:'CDS-DEMO-26-0001',rows:[['Commodity code','0202 30 90','cc'],['Importer EORI','GB000123456000'],['CHED-P reference (CHD)','CHEDP.GB.2026.0412385','ched'],['Declared net mass','24,000.0 kg','dw'],['Customs value','GBP 117,500'],['Tariff treatment','Third country duty (MFN)','tar']]}
+  {t:'Customs import declaration (CDS)',ref:'MRN 26GB5JM1YXC0JNUAR7 · LODGED 20/05/2026 17:43',real:1,rows:[['Importer','SAPPHIRE FOODS LTD · EORI GB153481513000','eori'],['Declarant','GEORGE BAKER (SHIPPING) LTD'],['Exporter / seller','MINERVA S.A.'],['Commodity code','16025095 90','cc'],['Origin','BR'],['Goods description','ADDR BEEF CUTS','desc'],['Packages','704','ct'],['Gross mass','18,937.38 kg','gw'],['Net mass','18,247.46 kg','dw'],['Container','CRLU1288269'],['Delivery terms','CFR · Chippenham'],['CHED reference (N853)','GBCHD2026.7681938','ched'],['Customs duty rate (A00)','16.00','tar'],['Invoice total','Not shown on this copy','val']],note:'Duty and VAT amounts are not readable on this copy.'}
  ],
  checks:[
-  {a:'Tariff Guard',p:'Commodity code',s:'ok',d:'0202 30 90 validated against the UK Global Tariff.',r:'UK Global Tariff',k:['cc']},
-  {a:'Weight Guard',p:'Declared mass vs packing list',s:'mis',d:'Declared 24,000.0 kg. The packing list shows 24,360.0 kg. Resolve before clearance.',r:'Packing list vs CDS',k:['dw']},
-  {a:'CHED Guard',p:'CHED reference present',s:'rev',d:'The reference matches the pre-notification but not the EHC (see phase 07).',r:'CDS vs EHC Part I',k:['ched']},
-  {a:'Tariff Guard',p:'Tariff treatment',s:'ok',d:'Third country duty applies. No quota claimed.',r:'UK Global Tariff',k:['tar']}
+  {a:'Tariff Guard',p:'Commodity code and duty',s:'ok',d:'Illustrative result. Code 16025095 90 with a 16.00 duty rate is consistent with the EHC and CHED code 1602.50.',r:'UK Global Tariff',k:['cc','tar']},
+  {a:'Weight Guard',p:'Declared mass vs packing list',s:'ok',d:'Net 18,247.46 kg and gross 18,937.38 kg match the packing list.',r:'Packing list vs CDS',k:['dw','gw']},
+  {a:'CHED Guard',p:'CHED reference present',s:'ok',d:'The reference matches the CHED. The certificate reference finding is open in phase 07.',r:'CDS vs CHED',k:['ched']},
+  {a:'Party Guard',p:'Importer EORI',s:'ok',d:'The EORI matches the VAT number on the certificate of origin.',r:'Certificate of origin',k:['eori']},
+  {a:'Description Guard',p:'Goods description',s:'rev',d:'The CDS describes the goods as ADDR BEEF CUTS. The B/L and certificate of origin describe cooked seasoned beef silverside and topside. Confirm the description is acceptable for the declaration.',r:'CDS vs B/L and certificate of origin',k:['desc']},
+  {a:'Value Guard',p:'Customs value',s:'nc',d:'The invoice total is not shown on this copy and the invoice was not supplied, so value could not be checked.',r:'CDS',k:['val']}
  ],
- twin:{h:'Customs status linked',li:['Declaration status and duty outcome logged for importer and buyer records.'],ev:'TWIN-DEMO-0001 · event: customs.declared',tag:'prop'}},
-{n:'Border Control Post arrival checks',loc:'UK, Tilbury BCP',
+ twin:{h:'Customs status linked',li:['Declaration reference and status logged for importer and buyer records.'],ev:'TWIN-DEMO-0001 · event: customs.declared',tag:'prop'}},
+{n:'Border Control Post arrival checks',loc:'UK, London Gateway BCP',
  intro:'A pre-verified findings signal reaches the border post before the consignment does.',
  docs:[
-  {t:'BCP check record',ref:'TILBURY · ARRIVAL 18 SEP 2026',rows:[['Documentary check','100% · selected'],['Identity check','Risk-based · selected'],['Seal read on arrival','BR-7731905','seal'],['Physical check','Sampling pending','phys'],['APHA OV documentary outcome','Awaiting IPAFFS','oc']]},
-  {t:'Laboratory sampling request',ref:'HORMONE RESIDUE · MICROBIOLOGY',rows:[['Hormone residue sample','Awaiting result','lab'],['Microbiological sample','Awaiting result','lab']]}
+  {t:'MSC arrival notice',ref:'MSC LEILA · NA615R · ISSUED 19/05/2026 16:53',real:1,rows:[['Estimated arrival','21 May 2026 · 22:00'],['Port of discharge','London Gateway Port'],['Terminal','DP World London Gateway','bcp'],['B/L','MEDUR3178106'],['Container','CRLU1288269 · 40HR','arr'],['Contents','Other prepared or preserved meat, meat offal, blood'],['Weight','18,937.38 kg','aw'],['Notify','SAPPHIRE FOODS LTD, Chippenham','arr']]},
+  {t:'CHED-P, Part II controls',ref:'CHEDP.GB.2026.7681938 · PAGE 3',real:1,rows:[['Documentary check','Not recorded','oc'],['Identity check','Not recorded','oc'],['Physical check','Not recorded','phys'],['Laboratory tests','Not recorded','lab'],['Acceptable for internal market','Human consumption (ticked)','ii12'],['BCP','London Gateway · GBLGP1','bcp'],['Certifying officer name and signature','Blank','oc']],note:'Part II as supplied.'}
  ],
  checks:[
-  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open mismatches from phases 06, 07 and 08, so the border team can plan its checks.',r:'Consignment findings'},
-  {a:'Seal Guard',p:'Seal on arrival',s:'ok',d:'BR-7731905 matches the B/L and the EHC.',r:'B/L, EHC Part I',k:['seal']},
-  {a:'Outcome Reader',p:'APHA OV documentary outcome',s:'nc',d:'Not yet available from IPAFFS, so this check could not run.',r:'IPAFFS',k:['oc']},
-  {a:'Lab Result Guard',p:'Physical and lab results',s:'nc',d:'Results are pending. Nothing to compare with thresholds yet.',r:'BCP sampling',k:['phys','lab']}
+  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open findings on seals, the certificate reference, the prior notification time and the goods description, so the border team can plan its checks.',r:'Consignment findings'},
+  {a:'Arrival Guard',p:'Vessel, B/L and container',s:'ok',d:'MSC Leila, B/L MEDUR3178106 and container CRLU1288269 match on the arrival notice, CHED and CDS.',r:'Arrival notice, CHED, CDS',k:['arr']},
+  {a:'Port Guard',p:'Discharge terminal vs border post',s:'ok',d:'London Gateway is the terminal on the arrival notice and the BCP on the CHED and the EHC.',r:'Arrival notice, CHED, EHC',k:['bcp']},
+  {a:'Weight Guard',p:'Arrival notice weight',s:'ok',d:'18,937.38 kg matches the gross weight on the B/L and CDS.',r:'B/L, CDS',k:['aw']},
+  {a:'Status Guard',p:'Internal market box',s:'rev',d:'The box acceptable for internal market is ticked, while no check outcome, officer name or signature is recorded. Confirm whether this is a pre-populated default.',r:'CHED Part II',k:['ii12']},
+  {a:'Outcome Reader',p:'BCP check outcomes',s:'nc',d:'Documentary and identity check outcomes are not recorded on this copy, so this check could not run.',r:'IPAFFS',k:['oc']},
+  {a:'Lab Result Guard',p:'Physical and lab results',s:'nc',d:'No physical or laboratory results are recorded. Nothing to compare with thresholds yet.',r:'BCP sampling',k:['phys','lab']}
  ],
  twin:{h:'Border outcomes recorded',li:['Timestamped check outcomes linked to the CHED-P reference.','Audit log visible to permissioned parties: importer, insurer, buyer.'],ev:'TWIN-DEMO-0001 · event: bcp.recorded',tag:'prop'}},
 {n:'Post-BCP movement and ongoing compliance',loc:'UK, first destination',
  intro:'Follow-up obligations are tracked and the evidence bundle is indexed.',
  docs:[
-  {t:'Post-BCP obligations',ref:'FIRST DESTINATION · NORTHGATE MEATS LTD',rows:[['CHED-P Part II','Awaiting APHA completion','p2'],['72-hour OV notification','Not required (no VC-bearing cuts)','ov72'],['Record retention','12 months from arrival','ret']]},
-  {t:'Evidence index',ref:'DOCUMENT REFERENCE INDEX',rows:[['Documents indexed','Contract, EHC, RE, NF-e, packing list, invoice, B/L, reefer log, CHED-P, CDS, BCP record','idx']]}
+  {t:'CHED-P, Part III follow-up',ref:'CHEDP.GB.2026.7681938 · PAGE 4',real:1,rows:[['Arrival of consignment','Not recorded','p3'],['Compliance of the consignment','Not recorded','p3'],['Official inspector name and signature','Blank','p3'],['Re-dispatch details','None recorded']],note:'Part III as supplied.'},
+  {t:'Evidence index',ref:'DOCUMENT REFERENCE INDEX',real:2,rows:[['Indexed (7)','B/L, MSC arrival notice, EHC, CHED-P, certificate of origin, packing list, CDS','idx'],['Not in the set (5)','Purchase order, commercial invoice, DU-E, reefer log, farm records','gap']]}
  ],
  checks:[
-  {a:'Completion Guard',p:'CHED-P Part II',s:'nc',d:'APHA clearance is not yet recorded, so this check could not run.',r:'IPAFFS',k:['p2']},
-  {a:'Notification Guard',p:'72-hour OV notification',s:'ok',d:'No VC-bearing cuts, so the notification is not required.',r:'Post-BCP rules',k:['ov72']},
-  {a:'Evidence Agent',p:'Evidence bundle',s:'ok',d:'All documents indexed with references for audit.',r:'Evidence index',k:['idx']},
-  {a:'Retention Agent',p:'Retention period',s:'ok',d:'Document set held for the 12-month period.',r:'Retention rule',k:['ret']}
+  {a:'Completion Guard',p:'CHED-P Part III',s:'nc',d:'Follow-up is not recorded on this copy, so this check could not run.',r:'IPAFFS',k:['p3']},
+  {a:'Evidence Agent',p:'Evidence bundle',s:'ok',d:'Seven documents are indexed with references for audit.',r:'Evidence index',k:['idx']},
+  {a:'Completeness Guard',p:'Records not in the set',s:'rev',d:'Five record types were not supplied: purchase order, invoice, DU-E, reefer log and farm records. Independent validation can retrieve some of them.',r:'Evidence index',k:['gap']}
  ],
  twin:{h:'Findings and hashes committed',li:['Findings and verified document hashes committed on IOTA Rebased as a Verifiable Credential.','Sponsored transactions: no token needed by importer or exporter.'],ev:'TWIN-DEMO-0001 · hash 4be1…c90d (illustrative)',tag:'prop'}},
 {n:'Environmental and social compliance',loc:'UK, ongoing',
- intro:'Farm locations and statutory duties are screened for forward-looking due diligence.',
+ intro:'Farm locations and statutory duties are screened for forward-looking due diligence. No farm list came with this consignment.',
  docs:[
-  {t:'Deforestation screening summary',ref:'LOT-0819-A · MAPBIOMAS / PRODES',rows:[['Farms screened','14'],['Clear','13'],['Flagged','1 (F-07)','geo'],['CAR registry','14 of 14 active','car'],['IBAMA embargo list','F-07 listed','ib']]},
-  {t:'Importer obligations',ref:'NORTHGATE MEATS LTD',rows:[['Modern Slavery Act statement','Not supplied','ms'],['Environment Act 2021, Schedule 17','Secondary legislation pending','ea']]}
+  {t:'Deforestation screening summary',ref:'NOT SUPPLIED',real:3,rows:[['Document','Farm list for the lot','geo'],['Status',NS,'geo'],['CAR registry','Requires farm identifiers','car'],['IBAMA embargo list','Requires farm identifiers','ib']]},
+  {t:'Importer obligations',ref:'SAPPHIRE FOODS LTD',real:3,rows:[['Modern Slavery Act statement','Not supplied','ms'],['Environment Act 2021, Schedule 17','Secondary legislation pending','ea']]}
  ],
  checks:[
-  {a:'Geo Screen',p:'Farm polygons vs PRODES',s:'rev',d:'1 of 14 farms flagged (F-07). Same farm as the production-phase flag.',r:'MapBiomas, PRODES',k:['geo']},
-  {a:'Registry Guard',p:'CAR status',s:'ok',d:'All 14 farms have an active Rural Environmental Registry entry.',r:'CAR',k:['car']},
+  {a:'Geo Screen',p:'Farm polygons vs PRODES',s:'nc',d:'No farm list was supplied, so polygons could not be screened.',r:'MapBiomas, PRODES',k:['geo']},
+  {a:'Registry Guard',p:'CAR status',s:'nc',d:'The query needs the farm identifiers, which were not supplied.',r:'CAR',k:['car']},
   {a:'Statute Watch',p:'Environment Act 2021, Schedule 17',s:'nc',d:'Secondary legislation is pending. The rule is not yet in force, so there is nothing to check.',r:'Environment Act 2021',k:['ea']},
-  {a:'Statute Watch',p:'Modern Slavery Act statement',s:'rev',d:'The importer is in scope. No statement was supplied.',r:'Modern Slavery Act 2015',k:['ms']},
-  {a:'Partner Check',p:'IBAMA embargo list',s:'rev',d:'Farm F-07 appears on the embargo list (illustrative entry). The other 13 farms do not. Confirm with the exporter.',r:'IBAMA via certification body',k:['ib']}
+  {a:'Statute Watch',p:'Modern Slavery Act statement',s:'nc',d:'No statement was supplied, so this check could not run.',r:'Modern Slavery Act 2015',k:['ms']},
+  {a:'Partner Check',p:'IBAMA embargo list',s:'nc',d:'The query needs the farm identifiers, which were not supplied.',r:'IBAMA via certification body',k:['ib']}
  ],
- twin:{h:'Environmental status visible to buyers',li:['Risk screen and CAR status shown to buyers and institutional clients.','Alignment with the EU Digital Product Passport structure for food commodities.'],ev:'TWIN-DEMO-0001 · event: environmental.recorded',tag:'prop'}}
+ twin:{h:'Environmental status visible to buyers',li:['Risk screen and CAR status shown to buyers and institutional clients once farm records are linked.','Alignment with the EU Digital Product Passport structure for food commodities.'],ev:'TWIN-DEMO-0001 · event: environmental.recorded',tag:'prop'}}
 ];
 
 var OVD=[
@@ -406,12 +416,12 @@ var OVMAP={
 10:['CAR geolocation','IBAMA embargoes','Land use']
 };
 var OVRES={
-'SISBOV':{s:'ok',d:'The animal ID range matches the batch on the commercial invoice. 14 of 14 farms returned.'},
-'CAR (Rural Environmental Registry)':{s:'ok',d:'14 of 14 farm entries are active in SICAR.'},
-'EHC registry cross-check':{s:'ok',d:'The certificate is found in the registry. Issue date, SIF number and lot match the uploaded copy.'},
-'DU-E registry cross-check':{s:'ok',d:'The declaration is found in Siscomex. NCM code, value and destination match.'},
-'CAR geolocation':{s:'rev',d:'14 farm polygons returned and screened. The polygon for F-07 overlaps a flagged area.'},
-'IBAMA embargoes':{s:'rev',d:'F-07 appears on the embargo list (illustrative entry). The other 13 farms do not.'}
+'SISBOV':{s:'nc',d:'Needs the animal ID range, which was not in the document set. The partner would request it.'},
+'CAR (Rural Environmental Registry)':{s:'nc',d:'Needs the farm identifiers, which were not in the document set.'},
+'EHC registry cross-check':{s:'ok',d:'Illustrative result. The EHC carries an online authenticity code, which this check uses.'},
+'DU-E registry cross-check':{s:'nc',d:'Needs the DU-E number, which was not in the document set.'},
+'CAR geolocation':{s:'nc',d:'Needs the farm identifiers, which were not in the document set.'},
+'IBAMA embargoes':{s:'nc',d:'Needs the farm identifiers, which were not in the document set.'}
 };
 function ovItems(i){return (OVMAP[i]||[]).map(function(n){return OVD.filter(function(x){return x[1]===n})[0]})}
 var ST={cur:-1,pos:0,playing:false,speed:'slow',timer:null,stopAt:0,tab:{},ovOpen:{}};
@@ -449,10 +459,10 @@ function ovHTML(i,ran){
   groups.forEach(function(g){
     var key=i+'|'+g.c,na=g.items.filter(function(x){return x[3]==='api'}).length,pp=g.items.filter(function(x){return x[3]==='paper'}).length,nn=g.items.filter(function(x){return x[3]==='na'}).length;
     var parts=[];if(na)parts.push(na+' independently checked');if(pp)parts.push(pp+' on file');if(nn)parts.push(nn+' not applicable');
-    var worstS=null;if(ran)g.items.forEach(function(x){var r=OVRES[x[1]];if(x[3]==='api'&&r){if(r.s==='rev')worstS='rev';else if(!worstS)worstS='ok'}});
+    var worstS=null;if(ran)g.items.forEach(function(x){var r=OVRES[x[1]];if(x[3]==='api'&&r){var rk={rev:3,nc:2,ok:1};if(!worstS||rk[r.s]>rk[worstS])worstS=r.s}});
     h+='<details class="ovg" data-key="'+esc(key)+'"'+(ST.ovOpen[key]?' open':'')+'><summary><span class="chev">›</span><span class="gn">'+esc(g.c)+'</span><span class="gc">'+g.items.length+' record'+(g.items.length===1?'':'s')+'</span><span class="gs">'+parts.join(' · ')+'</span>'+(worstS?'<span class="tg '+worstS+'">'+LBL[worstS]+'</span>':'')+'</summary>'+g.items.map(row).join('')+'</details>';
   });
-  return h+'<div class="cap">Illustrative example. Registry results shown here are fictional.</div></div>';
+  return h+'<div class="cap">Registry results are illustrative. VeriPura has not queried the registries for this consignment.</div></div>';
 }
 function ovWire(){
   document.querySelectorAll('#ov details.ovg').forEach(function(d){d.addEventListener('toggle',function(){ST.ovOpen[d.dataset.key]=d.open;sync()})});
@@ -467,7 +477,7 @@ function ovReport(){
 }
 /* ---------- documents and findings ---------- */
 function paper(doc){
-  var h='<div class="paper"><span class="stamp">ILLUSTRATIVE</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
+  var h='<div class="paper"><span class="stamp s'+(doc.real||0)+'">'+['ILLUSTRATIVE','PROVIDED','FROM DOCUMENTS','NOT SUPPLIED'][doc.real||0]+'</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
   doc.rows.forEach(function(r){h+='<div class="row"'+(r[2]?' data-k="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></div>'});
   if(doc.tbl){h+='<table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
     doc.tbl.r.forEach(function(r){var k=r[doc.tbl.h.length];h+='<tr'+(k?' data-k="'+k+'"':'')+'>'+r.slice(0,doc.tbl.h.length).map(function(x){return '<td>'+esc(x)+'</td>'}).join('')+'</tr>'});h+='</tbody></table>'}
@@ -499,7 +509,7 @@ function view(){
   if(i===11)return report(v);
   var p=P[i],tab=ST.tab[i]||0;
   var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF 11 · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn"></button></div>';
-  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Illustrative documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d)+'</div>'}).join('')+'</div><div class="cap">Illustrative example. A fictional consignment. Select a finding to see where it comes from.</div></section>';
+  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d)+'</div>'}).join('')+'</div><div class="cap">Documents marked Provided are real. Select a finding to see where it comes from.</div></section>';
   h+='<section aria-label="Findings"><div class="sec-title"><span class="label">VeriPura findings</span></div><div id="finds"></div><div id="twin"></div></section></div>';
   h+='<div id="ov"></div>';
   h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
@@ -607,15 +617,15 @@ function openCat(s){
 function openLib(){
   var nd=0,body='';
   P.forEach(function(p,i){nd+=p.docs.length;body+='<details class="dg"><summary><span class="chev">›</span><span class="gn">Phase '+pad(i+1)+' · '+esc(p.n)+'</span><span class="gc">'+p.docs.length+' document'+(p.docs.length===1?'':'s')+'</span></summary><div class="dgb">'+p.docs.map(function(d){return paper(d)}).join('')+'</div></details>'});
-  openDrawer('All documents',nd+' illustrative documents across 11 phases',body);
+  openDrawer('All documents',nd+' documents across 11 phases',body);
 }
 /* ---------- overview and report ---------- */
 function overview(v){
   $('#topTitle').textContent='Demonstration';
   var nd=P.reduce(function(a,p){return a+p.docs.length},0),nc=P.reduce(function(a,p){return a+p.checks.length},0),dn=P.filter(function(p,i){return done(i)}).length;
-  v.innerHTML='<h2>Brazilian beef to the United Kingdom</h2><p class="lede">Follow one fictional consignment through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.</p>'
+  v.innerHTML='<h2>Brazilian beef to the United Kingdom</h2><p class="lede">Follow one consignment of cooked frozen beef from Brazil to the UK through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.</p>'
   +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>11</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
-  +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Frozen boneless beef cuts, HS 0202 30</dd><dt>Quantity</dt><dd>24,000 kg · 1,000 cartons</dd><dt>Exporter</dt><dd>Frigorífico Serra Verde Ltda. (fictional), SIF 9012</dd><dt>Importer</dt><dd>Northgate Meats Ltd (fictional)</dd><dt>Route</dt><dd>Santos to Tilbury, container DEMU 4821907</dd><dt>Purchase order</dt><dd>'+C.po+'</dd></dl></div>'
+  +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Cooked seasoned frozen beef (silverside and topside), HS 1602.50</dd><dt>Quantity</dt><dd>18,247.460 kg net · 704 cartons</dd><dt>Exporter</dt><dd>MINERVA S.A., SIF 745</dd><dt>Importer</dt><dd>Sapphire Foods Ltd</dd><dt>Route</dt><dd>Santos to London Gateway, MSC Leila, container CRLU1288269</dd><dt>Bill of lading</dt><dd>'+C.bl+'</dl></div>'
   +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
   +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div><span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p></div></div></div>';
   $('#start').onclick=function(){go(0)};$('#playall').onclick=function(){play()};
@@ -633,7 +643,7 @@ function report(v){
   +'<div class="stats"><button class="stat ok" data-cat="ok"><span class="label">Matched</span><b>'+t.ok+'</b><span class="hint">View documents</span></button><button class="stat rev" data-cat="rev"><span class="label">Review</span><b>'+t.rev+'</b><span class="hint">View documents</span></button><button class="stat mis" data-cat="mis"><span class="label">Mismatch</span><b>'+t.mis+'</b><span class="hint">View documents</span></button><button class="stat nc" data-cat="nc"><span class="label">Not checked</span><b>'+t.nc+'</b><span class="hint">View documents</span></button></div>'
   +(n?'<div class="card"><h3>What to review and fix</h3><table class="t"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')
   +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Mismatch, Review and Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
-  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Illustrative example. A fictional consignment of frozen beef.</div></div>':'')
+  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Findings come from the supplied documents of one real consignment. Items marked illustrative are not.</div></div>':'')
   +'<div class="pager"><button class="btn" id="back">Back to phase 11</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
   document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
   document.querySelectorAll('[data-cat]').forEach(function(b){b.onclick=function(){openCat(b.dataset.cat)}});
