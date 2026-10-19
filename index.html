@@ -1784,12 +1784,14 @@ function intake(v){
   $('#topTitle').textContent='Start from a document';
   var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0],d=startDoc(cur);
   var h='<h2>Start from a document</h2><p class="lede">Choose the document you hold for a shipment. VeriPura reads it, generates the requirements for the route, then validates the documents before the goods ship and shares the relevant ones with the other parties.</p>';
-  h+='<div class="label">Demonstration samples</div><div class="pickl">'+Object.keys(PK).map(function(k){var sd=startDoc(k);return '<button class="pick'+(k===cur?' on':'')+'" data-p="'+k+'"><span class="rd"></span><span><span class="nm">'+esc(sd.t)+'</span><br><span class="sub">'+esc(PK[k].name)+'</span></span></button>'}).join('')+'</div>';
-  h+='<div class="cap" style="margin-bottom:14px">These are built-in samples for the demonstration. VeriPura is not reading a file you upload here.</div>';
+  var cands=[];PK[cur].phases.forEach(function(p,pi){p.docs.forEach(function(x){if(x.real!==3&&!isDerived(x)&&/purchase order|pro forma|valuation|commercial invoice|packing list|sales contract/i.test(x.t)&&!cands.some(function(c){return c.t===x.t}))cands.push({t:x.t,ph:pi,ref:x.ref})})});
+  if(!cands.length)cands.push({t:d.t,ph:0,ref:d.ref});
+  h+='<div class="label">Documents you could hold for this consignment</div><div class="pickl">'+cands.map(function(c){return '<button class="pick'+(c.t===d.t?' on':'')+'" data-t="'+esc(c.t)+'"><span class="rd"></span><span><span class="nm">'+esc(c.t)+'</span><br><span class="sub">'+esc(PK[cur].name)+'</span></span></button>'}).join('')+'</div>';
+  h+='<div class="cap" style="margin-bottom:14px">Built-in samples for the demonstration. Choose the consignment in the sidebar. VeriPura is not reading a file you upload here.</div>';
   h+='<div class="label" style="margin-top:6px">Selected document</div>'+paper(d);
   h+='<div style="margin:18px 0"><button class="btn gold" id="genReq">Generate requirements</button></div><div id="reqOut"></div>';
   v.innerHTML=h;
-  document.querySelectorAll('.pick').forEach(function(b){b.onclick=function(){REQ=false;loadPack(b.dataset.p,-2);setTimeout(function(){var pp=document.querySelector('#view .paper');if(pp)pp.scrollIntoView({behavior:'smooth',block:'start'})},60)}});
+  document.querySelectorAll('.pick').forEach(function(b){b.onclick=function(){START[cur]=b.dataset.t;FARR={};FARR[b.dataset.t]=1;REQ=false;foodRebuild();view();setTimeout(function(){var pp=document.querySelector('#view .paper');if(pp)pp.scrollIntoView({behavior:'smooth',block:'start'})},60)}});
   $('#genReq').onclick=function(){
     var o=$('#reqOut');o.innerHTML='<div class="running"><i class="spin"></i>Reading the document and generating the requirements</div>';
     setTimeout(function(){REQ=true;reqHTML(cur)},900);
