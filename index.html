@@ -618,7 +618,7 @@ function ovReport(){
 }
 /* ---------- documents and findings ---------- */
 function paper(doc){
-  var h='<div class="paper"><span class="stamp s'+(doc.real||0)+'">'+['ILLUSTRATIVE','PROVIDED','FROM DOCUMENTS','NOT SUPPLIED'][doc.real||0]+'</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
+  var h='<div class="paper"><span class="stamp s'+(doc.real||0)+'">'+(doc.pend?'NOT YET RECEIVED':['ILLUSTRATIVE','PROVIDED','FROM DOCUMENTS','NOT SUPPLIED'][doc.real||0])+'</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
   doc.rows.forEach(function(r){h+='<div class="row"'+(r[2]?' data-k="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></div>'});
   if(doc.tbl){h+='<div style="overflow-x:auto"><table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
     doc.tbl.r.forEach(function(r){var k=r[doc.tbl.h.length];h+='<tr'+(k?' data-k="'+k+'"':'')+'>'+r.slice(0,doc.tbl.h.length).map(function(x){return '<td>'+esc(x)+'</td>'}).join('')+'</tr>'});h+='</tbody></table></div>'}
@@ -851,7 +851,19 @@ function buildP(role){
     });
     var q={};for(var f in p)q[f]=p[f];q.docs=docs;q.checks=checks;if(docs.length<p.docs.length)q.intro='Only the documents and findings shared with this role are shown for this phase.';return q;
   });
+  if(SC===1)gateFood();
 }
+var FARR={};
+function foodKeys(){var arr=Object.keys(FARR).length>1,m={},t={};PALL.forEach(function(p){p.docs.forEach(function(d){var ks=docKeys(d);if(d.real!==3)ks.forEach(function(k){t[k]=(t[k]||0)+1});if(FARR[d.t]||(arr&&isDerived(d)&&d.real!==3))ks.forEach(function(k){m[k]=(m[k]||0)+1})})});return {m:m,t:t,arr:arr}}
+function gateFood(){
+  var K=foodKeys();
+  P=P.map(function(p){var q={};for(var f in p)q[f]=p[f];
+    q.docs=p.docs.map(function(d){if(d.real===3||FARR[d.t]||(K.arr&&isDerived(d)))return d;return {t:d.t,ref:'NOT YET RECEIVED',real:3,pend:1,rows:[['Document',d.t],['Status','Not yet received']]}});
+    q.checks=p.checks.map(function(c){var ok=(c.k||[]).every(function(k){return (K.m[k]||0)>=Math.min(K.t[k]||0,2)});if(ok)return c;var n={};for(var f in c)n[f]=c[f];n.s='nc';n.d='Waiting for the documents needed to cross-check this item.';return n});
+    return q});
+}
+function foodRebuild(){pause();buildP(ROLE);NP=P.length;build();ST.pos=0;ST.tab={};ST.ovOpen={};calc();nav()}
+
 function roleName(){return ROLES.filter(function(x){return x[0]===ROLE})[0]}
 function updRoleBar(){
   var R=roleName(),nd=P.reduce(function(a,p){return a+p.docs.length},0),na=PALL.reduce(function(a,p){return a+p.docs.length},0);
@@ -1479,6 +1491,7 @@ return {id:'berries',name:'Morocco berries, air (illustrative)',h2:'Fresh berrie
 function loadPack(id,startCur){
   pause();var k=PK[id];CUR=k;
   PALL=k.phases;ROLES=k.roles;DOCVIS=k.docvis;CLS=k.cls;OVD=k.ovd||[];OVMAP=k.ovmap||{};OVRES=k.ovres||{};C=k.C||{};
+  FARR={};var sd0=startDoc(id);if(sd0)FARR[sd0.t]=1;
   ROLE='all';buildP('all');NP=P.length;build();
   ST.pos=0;ST.cur=(startCur===undefined?-1:startCur);ST.tab={};ST.ovOpen={};
   rs.innerHTML=ROLES.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');rs.value='all';
@@ -1792,11 +1805,13 @@ function reqHTML(cur){
   var nc=PALL.reduce(function(a,p){return a+p.checks.length},0),nd=PALL.reduce(function(a,p){return a+p.docs.length},0);
   o.innerHTML='<div class="card"><h3>Requirements for this shipment</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">'+nd+' documents across '+PALL.length+' phases, with '+nc+' checks. The list comes from the rules for this route and the documents in the sample. Your team makes the decision on every finding.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th>#</th><th>Phase</th><th>Documents needed</th><th>Shared with</th><th>Checks</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="goVal">Validate before shipment</button><button class="btn" id="goMtx">Show who sees what</button></div></div>';
   var st=startDoc(cur),out=[];
-  PALL.forEach(function(p,i){p.docs.forEach(function(d){if(isDerived(d)||d.real===3&&false)return;if(st&&d.t===st.t)return;out.push({i:i,d:d})})});
-  var orows=out.map(function(x,n){return '<tr><td>'+esc(x.d.t)+'</td><td>'+esc(supplierOf(x.d))+'</td><td class="mono">'+pad(x.i+1)+'</td><td>Waiting</td><td><button class="btn" data-fc="'+n+'">Draft message</button></td></tr><tr class="fcm" id="fcm'+n+'" style="display:none"><td colspan="5"><b>Document needed: '+esc(x.d.t)+'</b><br>Please send the '+esc(x.d.t)+' for '+esc(PK[cur].name)+'. It is needed for phase '+pad(x.i+1)+', '+esc(PALL[x.i].n)+'. Reply to this message or add it to the shared folder.<div class="cap" style="margin-top:6px">To: '+esc(supplierOf(x.d))+'. Sample text for the demonstration.</div></td></tr>'}).join('');
-  o.innerHTML+='<div class="card" style="margin-top:16px"><h3>Outstanding documents</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">VeriPura Food alerts your team about outstanding documents and can send a message to the party that supplies each one. The supplier shown is a typical one for the document type.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th>Document</th><th>Typical supplier</th><th>Phase</th><th>Status</th><th></th></tr></thead><tbody>'+orows+'</tbody></table></div></div>';
+  PALL.forEach(function(p,i){p.docs.forEach(function(d){if(isDerived(d))return;if(st&&d.t===st.t)return;out.push({i:i,d:d})})});
+  var orows=out.map(function(x,n){var got=!!FARR[x.d.t],avail=x.d.real!==3;return '<tr><td>'+(avail&&!got?'<input type="checkbox" data-fa="'+n+'" aria-label="Received '+esc(x.d.t)+'">':'')+'</td><td>'+esc(x.d.t)+'</td><td>'+esc(supplierOf(x.d))+'</td><td class="mono">'+pad(x.i+1)+'</td><td>'+(got?'Received':'Waiting')+'</td><td>'+(got?'':'<button class="btn" data-fc="'+n+'">Draft message</button>')+'</td></tr><tr class="fcm" id="fcm'+n+'" style="display:none"><td colspan="6"><b>Document needed: '+esc(x.d.t)+'</b><br>Please send the '+esc(x.d.t)+' for '+esc(PK[cur].name)+'. It is needed for phase '+pad(x.i+1)+', '+esc(PALL[x.i].n)+'. Reply to this message or add it to the shared folder.<div class="cap" style="margin-top:6px">To: '+esc(supplierOf(x.d))+'. Sample text for the demonstration.</div></td></tr>'}).join('');
+  o.innerHTML+='<div class="card" style="margin-top:16px"><h3>Outstanding documents</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Only the document you started with is held. VeriPura Food alerts your team about the others and can send a message to the party that supplies each one. Tick documents as they arrive. The phases then show them, and the checks that need them can run. The supplier shown is a typical one for the document type.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Phase</th><th>Status</th><th></th></tr></thead><tbody>'+orows+'</tbody></table></div><div style="margin-top:12px"><button class="btn" id="faAll">Tick all available</button> <button class="btn gold" id="faGo">Mark ticked as received</button></div></div>';
   $('#goVal').onclick=function(){go(0)};$('#goMtx').onclick=openMatrix;
   o.querySelectorAll('[data-fc]').forEach(function(b){b.onclick=function(){var r=$('#fcm'+b.dataset.fc);r.style.display=r.style.display==='none'?'table-row':'none'}});
+  $('#faAll').onclick=function(){o.querySelectorAll('input[data-fa]').forEach(function(c){c.checked=true})};
+  $('#faGo').onclick=function(){var n=0;o.querySelectorAll('input[data-fa]').forEach(function(c){if(c.checked){FARR[out[+c.dataset.fa].d.t]=1;n++}});if(!n)return;foodRebuild();reqHTML(cur)};
 }
 function packCounts(id){var c={ok:0,rev:0,mis:0,nc:0};PK[id].phases.forEach(function(p){p.checks.forEach(function(x){c[x.s]++})});return c}
 function cnHTML(c){return '<span class="cn"><span class="ok">'+c.ok+' matched</span><span class="rev">'+c.rev+' review</span>'+(c.mis?'<span class="mis">'+c.mis+' mismatch</span>':'')+'<span class="nc">'+c.nc+' not checked</span></span>'}
