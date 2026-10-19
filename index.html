@@ -149,6 +149,7 @@ button.stat:hover{border-color:var(--blue)}
 .pmid #pInfo{font-size:12px;letter-spacing:.06em;color:var(--ink2);display:block;margin-bottom:6px}
 .pbar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
+#packSel{font:inherit;font-size:13.5px;width:calc(100% - 28px);margin:2px 14px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 8px;min-height:40px}
 .rolesel{display:flex;align-items:center;gap:8px}.rolesel select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;min-height:40px;max-width:320px}.mtx td,.mtx th{text-align:center}.mtx td:first-child,.mtx th:first-child{text-align:left}.mtx .y{color:var(--ok,#2e9e5b);font-weight:600}.mtx .n{color:var(--mut)}.mtx .ph td{background:var(--card2);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-align:left;color:var(--mut)}
 .pspd{display:flex;align-items:center;gap:8px}
 .pspd select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 10px;min-height:44px}
@@ -182,11 +183,12 @@ button.stat:hover{border-color:var(--blue)}
     <span class="word">Veri<b>Pura</b><sup>™</sup></span><span class="tag-demo">DEMO</span>
   </div>
   <div class="side-sec label">Consignment</div>
+  <select id="packSel" aria-label="Choose a consignment"></select>
   <button class="nav-i" data-go="-1"><span class="n">00</span><span class="t">Overview</span></button>
   <div class="side-sec label">Workflow</div>
   <div id="phaseNav"></div>
   <div class="side-sec label">Results</div>
-  <button class="nav-i" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
+  <button class="nav-i" id="resBtn" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
 </aside>
 <div class="wrap">
   <div class="top">
@@ -197,7 +199,7 @@ button.stat:hover{border-color:var(--blue)}
     <span class="pill"><i></i>Visibility layer: proposed</span>
     <button class="theme" id="themeBtn" aria-label="Toggle light and dark theme"><span id="themeIco">☀</span></button>
   </div>
-  <div class="banner"><span class="tg prop">Real consignment</span><span>Documents marked Provided are real documents from a Brazil to UK beef consignment, shared by one of the companies involved. Illustrative and Not supplied items are not from this shipment. VeriPura shows findings. Your team makes the decision.</span></div>
+  <div class="banner" id="packBar"></div>
   <div class="banner" id="roleBar"></div>
   <main id="view" tabindex="-1"></main>
 </div>
@@ -211,7 +213,7 @@ button.stat:hover{border-color:var(--blue)}
 <div class="dov" id="dov"></div>
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="dhead"><div><div class="label" id="drawerSub"></div><h2 id="drawerTitle"></h2></div><button class="btn" id="drawerClose">Close</button></div><div id="drawerBody"></div></div>
 <script>
-var C={bl:'MEDUR3178106'};
+var C={bl:'MEDUR3178106'};var NP=11,CUR=null,PK={};
 var LBL={ok:'Matched',rev:'Review',mis:'Mismatch',nc:'Not checked'};
 var NS='Not supplied with this consignment';
 var P=[
@@ -478,7 +480,7 @@ function ovReport(){
   var tot={api:0,paper:0,na:0},rows='';
   Object.keys(OVMAP).forEach(function(k){ovItems(+k).forEach(function(x){tot[x[3]]++;if(x[3]==='api'){var r=OVRES[x[1]],ran=ranChecks(+k);rows+='<tr class="lnk" data-j="'+k+'"><td class="mono">'+pad(+k+1)+'</td><td><b>'+esc(x[1])+'</b><div style="color:var(--ink2)">'+esc(ran?r.d:'Runs when the phase checks run.')+'</div></td><td>'+(ran?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>')+'</td></tr>'}})});
   if(!tot.api&&!tot.paper&&!tot.na)return '';
-  return '<div class="card" style="margin-top:16px"><h3>Independent validation through Brazilian partners.</h3><p style="color:var(--ink2);margin-bottom:12px">Across the 11 phases, '+tot.api+' record types are checked independently against Brazilian registries and '+tot.paper+' more are supplied by the partners and held on file. '+tot.na+' is not applicable.</p><table class="t"><thead><tr><th>Phase</th><th>Independent check</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+  return '<div class="card" style="margin-top:16px"><h3>Independent validation through Brazilian partners.</h3><p style="color:var(--ink2);margin-bottom:12px">Across the '+NP+' phases, '+tot.api+' record types are checked independently against Brazilian registries and '+tot.paper+' more are supplied by the partners and held on file. '+tot.na+' is not applicable.</p><table class="t"><thead><tr><th>Phase</th><th>Independent check</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 /* ---------- documents and findings ---------- */
 function paper(doc){
@@ -500,24 +502,25 @@ function twinHTML(t){return '<div class="twin"><div class="sec-title"><span clas
 function sum(i){var c=P[i].checks,m=c.filter(function(x){return x.s==='mis'}).length,r=c.filter(function(x){return x.s==='rev'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Review: '+m+' mismatch'+(m===1?'':'es')+', '+r+' flag'+(r===1?'':'s')+', '+n+' not checked.'}
 /* ---------- navigation ---------- */
 function nav(){
+  var rb=$('#resBtn');rb.dataset.go=NP;rb.querySelector('.n').textContent=pad(NP+1);
   $('#phaseNav').innerHTML=P.map(function(p,i){
     var d=SH[i]>0?worst(i):'';
     return '<button class="nav-i" data-go="'+i+'"><span class="n">'+pad(i+1)+'</span><span class="t">'+p.n+'</span><span class="dot '+d+'" title="'+(d?LBL[d]:'Not run')+'"></span></button>';
   }).join('');
   document.querySelectorAll('aside .nav-i').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur);b.onclick=function(){go(+b.dataset.go)}});
 }
-function go(i){if(i<-1||i>11)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
+function go(i){if(i<-1||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
 /* ---------- phase view ---------- */
 function view(){
   var v=$('#view'),i=ST.cur;
   if(i===-1)return overview(v);
-  if(i===11)return report(v);
+  if(i===NP)return report(v);
   var p=P[i],tab=ST.tab[i]||0;
-  var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF 11 · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn"></button></div>';
-  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d)+'</div>'}).join('')+'</div><div class="cap">Documents marked Provided are real. Select a finding to see where it comes from.</div></section>';
+  var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF '+NP+' · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn"></button></div>';
+  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d)+'</div>'}).join('')+'</div><div class="cap">'+esc(CUR.docCap)+'</div></section>';
   h+='<section aria-label="Findings"><div class="sec-title"><span class="label">VeriPura findings</span></div><div id="finds"></div><div id="twin"></div></section></div>';
   h+='<div id="ov"></div>';
-  h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
+  h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="next">'+(i===NP-1?'Findings report':'Next phase')+'</button></div>';
   v.innerHTML=h;
   if(!p.docs.length)$('#docs').innerHTML='<div class="empty">No documents in this phase are shared with this role.</div>';
   $('#topTitle').textContent='Phase '+pad(i+1)+' · '+p.loc;
@@ -553,7 +556,7 @@ function focusFind(i,x,auto){
 /* ---------- player ---------- */
 function applyPos(np){
   np=Math.max(0,Math.min(STEPS.length,np));var prev=ST.pos;ST.pos=np;calc();
-  var s=np>0?STEPS[np-1]:null,target=np===0?-1:(s.t==='report'?11:s.i),fwd=np>prev;
+  var s=np>0?STEPS[np-1]:null,target=np===0?-1:(s.t==='report'?NP:s.i),fwd=np>prev;
   if(ST.cur!==target||np===0||s.t==='enter'||s.t==='report'){go(target)}
   else{nav();paintPhase(ST.cur,(s.t==='check'&&fwd)?s.x:null);if(s.t==='check'&&fwd)focusFind(ST.cur,s.x,true)}
   updPlayer();
@@ -574,7 +577,7 @@ function play(stopAt){
   if(ST.pos>=STEPS.length)applyPos(0);
   ST.stopAt=stopAt==null?STEPS.length:stopAt;ST.playing=true;updPlayer();schedule(500);
 }
-function pause(){ST.playing=false;clearTimeout(ST.timer);updPlayer();if(ST.cur>=0&&ST.cur<11)paintPhase(ST.cur,null)}
+function pause(){ST.playing=false;clearTimeout(ST.timer);updPlayer();if(ST.cur>=0&&ST.cur<NP)paintPhase(ST.cur,null)}
 function stepBack(){pause();applyPos(ST.pos-1)}
 function stepFwd(){pause();applyPos(ST.pos+1)}
 function runPhase(i){
@@ -587,7 +590,7 @@ function updPlayer(){
   b.textContent=ST.playing?'Pause':'Play';b.setAttribute('aria-label',ST.playing?'Pause walkthrough':'Play walkthrough');
   $('#pBack').disabled=ST.pos===0;$('#pFwd').disabled=ST.pos>=STEPS.length;
   var s=ST.pos>0?STEPS[ST.pos-1]:null,txt='Not started';
-  if(s){if(s.t==='report')txt='Findings report';else{var pre='Phase '+pad(s.i+1)+' of 11 · ';txt=pre+(s.t==='enter'?'documents':s.t==='twin'?'visibility layer':'check '+(s.x+1)+' of '+P[s.i].checks.length)}}
+  if(s){if(s.t==='report')txt='Findings report';else{var pre='Phase '+pad(s.i+1)+' of '+NP+' · ';txt=pre+(s.t==='enter'?'documents':s.t==='twin'?'visibility layer':'check '+(s.x+1)+' of '+P[s.i].checks.length)}}
   $('#pInfo').textContent=txt;
   $('#pFill').style.width=(ST.pos/STEPS.length*100)+'%';
   $('#pSpeed').value=ST.speed;
@@ -623,18 +626,18 @@ function openCat(s){
 function openLib(){
   var nd=0,body='';
   P.forEach(function(p,i){nd+=p.docs.length;body+='<details class="dg"><summary><span class="chev">›</span><span class="gn">Phase '+pad(i+1)+' · '+esc(p.n)+'</span><span class="gc">'+p.docs.length+' document'+(p.docs.length===1?'':'s')+'</span></summary><div class="dgb">'+p.docs.map(function(d){return paper(d)}).join('')+'</div></details>'});
-  openDrawer('All documents',nd+' documents across 11 phases',body);
+  openDrawer('All documents',nd+' documents across '+NP+' phases',body);
 }
 /* ---------- overview and report ---------- */
 function overview(v){
   $('#topTitle').textContent='Demonstration';
   var nd=P.reduce(function(a,p){return a+p.docs.length},0),nc=P.reduce(function(a,p){return a+p.checks.length},0),dn=P.filter(function(p,i){return done(i)}).length;
-  v.innerHTML='<h2>Brazilian beef to the United Kingdom</h2><p class="lede">Follow one consignment of cooked frozen beef from Brazil to the UK through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.</p>'
-  +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>11</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
-  +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Cooked seasoned frozen beef (silverside and topside), HS 1602.50</dd><dt>Quantity</dt><dd>18,247.460 kg net · 704 cartons</dd><dt>Exporter</dt><dd>MINERVA S.A., SIF 745</dd><dt>Importer</dt><dd>Sapphire Foods Ltd</dd><dt>Route</dt><dd>Santos to London Gateway, MSC Leila, container CRLU1288269</dd><dt>Bill of lading</dt><dd>'+C.bl+'</dl></div>'
+  v.innerHTML='<h2>'+esc(CUR.h2)+'</h2><p class="lede">'+esc(CUR.lede)+'</p>'
+  +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>'+NP+'</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
+  +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv">'+CUR.meta.map(function(m){return '<dt>'+esc(m[0])+'</dt><dd>'+esc(m[1])+'</dd>'}).join('')+'</dl></div>'
   +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
   +'<div class="card" style="margin-top:16px"><h3>Need to know, by role</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Not every party sees every document. Use View as at the top to see the demo as the importer, exporter, customs agent, port health, carrier or insurer. A finding is shown to a role only if that role can see every document the finding draws on.</p><button class="btn" id="mtx">Show who sees what</button><p class="cap" style="margin-top:10px">Working hypothesis for discussion. The roles and what each sees are a proposed model, not fixed ownership.</p></div>'
-  +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div><span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p></div></div></div>';
+  +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div>'+CUR.layer3+'</div></div></div>';
   $('#start').onclick=function(){go(0)};$('#mtx').onclick=openMatrix;$('#playall').onclick=function(){play()};
   document.querySelectorAll('.stat[data-act]').forEach(function(b){b.onclick=function(){var a=b.dataset.act;if(a==='phase')go(0);else if(a==='docs')openLib();else go(11)}});
 }
@@ -646,15 +649,15 @@ function report(v){
   rows=act.map(function(x){return '<tr class="lnk" data-j="'+x.i+'"><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td><td class="mono">'+pad(x.i+1)+'</td><td><b>'+esc(x.c.p)+'</b><div style="color:var(--ink2)">'+esc(x.c.d)+'</div></td></tr>'}).join('');
   var trail=all.map(function(x){return '<tr><td class="mono">'+pad(x.i+1)+'</td><td>'+esc(x.c.a)+'</td><td>'+esc(x.c.p)+'</td><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td></tr>'}).join('');
   var n=all.length;
-  v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases complete: '+dn+' of 11.'):'No checks have run yet. Play the walkthrough or run the checks in a phase to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
+  v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases complete: '+dn+' of '+NP+'.'):'No checks have run yet. Play the walkthrough or run the checks in a phase to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
   +'<div class="stats"><button class="stat ok" data-cat="ok"><span class="label">Matched</span><b>'+t.ok+'</b><span class="hint">View documents</span></button><button class="stat rev" data-cat="rev"><span class="label">Review</span><b>'+t.rev+'</b><span class="hint">View documents</span></button><button class="stat mis" data-cat="mis"><span class="label">Mismatch</span><b>'+t.mis+'</b><span class="hint">View documents</span></button><button class="stat nc" data-cat="nc"><span class="label">Not checked</span><b>'+t.nc+'</b><span class="hint">View documents</span></button></div>'
   +(n?'<div class="card"><h3>What to review and fix</h3><table class="t"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')
   +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Mismatch, Review and Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
-  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Findings come from the supplied documents of one real consignment. Items marked illustrative are not.</div></div>':'')
-  +'<div class="pager"><button class="btn" id="back">Back to phase 11</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
+  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">'+esc(CUR.trailNote)+'</div></div>':'')
+  +'<div class="pager"><button class="btn" id="back">Back to phase '+pad(NP)+'</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
   document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
   document.querySelectorAll('[data-cat]').forEach(function(b){b.onclick=function(){openCat(b.dataset.cat)}});
-  $('#back').onclick=function(){go(10)};$('#print').onclick=function(){window.print()};$('#again').onclick=restart;
+  $('#back').onclick=function(){go(NP-1)};$('#print').onclick=function(){window.print()};$('#again').onclick=restart;
 }
 
 /* ---------- roles: need to know ---------- */
@@ -726,7 +729,7 @@ function setRole(r){
 function openMatrix(){
   var h='<p class="cap" style="margin-bottom:10px">Working hypothesis for discussion. A finding is shown to a role only if that role can see every document the finding draws on. The VeriPura team view sees everything.</p><table class="t mtx"><thead><tr><th>Document</th>'+ROLES.slice(1).map(function(x){return '<th>'+x[3]+'</th>'}).join('')+'</tr></thead><tbody>';
   PALL.forEach(function(p,i){
-    h+='<tr class="ph"><td colspan="7">PHASE '+pad(i+1)+' · '+esc(p.n.toUpperCase())+'</td></tr>';
+    h+='<tr class="ph"><td colspan="'+ROLES.length+'">PHASE '+pad(i+1)+' · '+esc(p.n.toUpperCase())+'</td></tr>';
     p.docs.forEach(function(d){h+='<tr><td>'+esc(d.t)+'</td>'+ROLES.slice(1).map(function(x){var y=seesTitle(x[0],d.t);return '<td class="'+(y?'y':'n')+'" title="'+(y?'Can see':'Cannot see')+'">'+(y?'Yes':'-')+'</td>'}).join('')+'</tr>'});
   });
   openDrawer('Who sees what','Need to know by role, for discussion',h+'</tbody></table>');
@@ -747,9 +750,222 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='ArrowLeft'){e.preventDefault();stepBack()}
   else if(e.key===' '){e.preventDefault();ST.playing?pause():play()}
 });
-var rs=$('#roleSel');rs.innerHTML=ROLES.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');
+PK.beef={id:'beef',name:'Brazil beef to UK (real)',h2:'Brazilian beef to the United Kingdom',
+ lede:'Follow one consignment of cooked frozen beef from Brazil to the UK through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.',
+ meta:[['Product','Cooked seasoned frozen beef (silverside and topside), HS 1602.50'],['Quantity','18,247.460 kg net · 704 cartons'],['Exporter','MINERVA S.A., SIF 745'],['Importer','Sapphire Foods Ltd'],['Route','Santos to London Gateway, MSC Leila, container CRLU1288269'],['Bill of lading',C.bl]],
+ banner:'<span class="tg prop">Real consignment</span><span>Documents marked Provided are real documents from a Brazil to UK beef consignment, shared by one of the companies involved. Illustrative and Not supplied items are not from this shipment. VeriPura shows findings. Your team makes the decision.</span>',
+ docCap:'Documents marked Provided are real. Select a finding to see where it comes from.',
+ trailNote:'Findings come from the supplied documents of one real consignment. Items marked illustrative are not.',
+ layer3:'<span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p>',
+ phases:PALL,roles:ROLES,docvis:DOCVIS,cls:CLS,ovd:OVD,ovmap:OVMAP,ovres:OVRES,C:C};
+PK.forza=(function(){
+var NSF='Not supplied with this consignment';
+var PH=[
+/* 1 */
+{n:'Establishment and eligibility',loc:'Poland',
+ intro:'Before the goods move, the plants named on the certificate are compared with the establishment on the CHED and with the GB approved list.',
+ docs:[
+  {t:'Establishment record',ref:'READ FROM EHC AND CHED',real:2,rows:[['Producing plant','"ROLPEK 2" sp. z o.o., ul. Olszowa 50, Strzegom','est'],['Approval number on the EHC','02194009 (boxes I.11 and I.13)','est'],['Establishment on the CHED','Not Found on the List, type Not Specified (box I.15)','est'],['Slaughterhouses named on the EHC','14 plants: Poland 6, Denmark 3, Spain 3, Germany 1, Netherlands 1','slh1'],['Product category','Prepared meat products, CN 1602 (pork, beef, chicken)']],note:'Values read from the supplied documents.'},
+  {t:'GB approved establishments list',ref:'NOT SUPPLIED',real:3,rows:[['Document','GB list of approved establishments for meat products','list'],['Status',NSF,'list']]}
+ ],
+ checks:[
+  {a:'Establishment Guard',p:'Plant approval number on the EHC and the CHED',s:'rev',d:'The EHC names plant 02194009, ROLPEK 2, in Strzegom. The CHED box I.15 shows Not Found on the List, type Not Specified, for all three commodity lines. The two documents do not agree on whether the plant is a known establishment.',r:'EHC boxes I.11 and I.13; CHED box I.15',k:['est']},
+  {a:'Establishment Guard',p:'Plant against the GB approved establishments list',s:'nc',d:'The GB list was not supplied, so the plant could not be checked against it.',r:'GB list of approved establishments',k:['list']},
+  {a:'Establishment Guard',p:'Slaughterhouses named on the EHC',s:'nc',d:'The EHC names 14 slaughterhouses in five countries. Checking each against the list needs the list, which was not supplied.',r:'EHC box I.28',k:['slh1']},
+  {a:'Alert Watch',p:'Animal disease and food alerts',s:'nc',d:'Live alert feeds were not queried for this demonstration.',r:'APHA, RASFF'}
+ ],
+ twin:{h:'Transaction record created',li:['Plant and establishment details made available to importer, port health and insurer.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0101 · event: establishment.recorded',tag:'prop'}},
+/* 2 */
+{n:'Production and despatch records',loc:'Poland',
+ intro:'The delivery note, the despatch record sheet and the valuation worksheet describe what was loaded. VeriPura reconciles them with each other and with the certificate.',
+ docs:[
+  {t:'Delivery note (packing list)',ref:'RPII262906-200 · 29/06/2026',real:1,rows:[['Shipper','ZMP Rolpek, Olszowa 50, Strzegom'],['Ship to','Oakland Knottingley, K161 Unit 3, Kellington Road, Konect 62'],['Header names','Forza Foods Ltd and Sapphire Foods','hdr'],['CMR number','290601'],['Pallet labels (LPNs) shipped','28'],['Units shipped','4,542','wt'],['Nominal weight','20,063.4 kgs','wt'],['Expiry Date column','25/06/2026 and 26/06/2026','exp']],tbl:{h:['Line','Item code','Pallets'],r:[['Mixed Leakers (RM9999)','12345678','7','mix'],['Roast chicken thighs (RM5816)','16023219','2','unit'],['Ham logs, ribs and riblets (pork)','16024110','9'],['Beef topside and silverside','16025095','10']]},note:'The Units column reads KG on several lines.'},
+  {t:'Despatch record sheet',ref:'RPII262906-200 · 5 pages',real:1,rows:[['Pallets listed','28 LPNs, 3262506451 to 3262606971','lpn'],['Cook dates','25 and 26 June 2026','cook'],['Records created','26 to 27 June 2026','cook'],['Product temperature','0.4 to 1.8 °C where recorded'],['Logger named','V77M1043'],['Beef, topside (RM1533)','895 pieces · 4,963.6 kg','beef'],['Beef, silverside (RM1583)','558 pieces · 2,728.9 kg','beef'],['Roast chicken thighs (RM5816)','675 pieces · 1,656.2 kg','unit'],['Mixed Leakers (RM9999)','347 pieces · 3,585.9 kg','mix'],['Grand total','4,542 pieces · 20,063.4 kg','wt']]},
+  {t:'Valuation worksheet (pro forma)',ref:'RPII262906-200 · 29/06/2026',real:1,rows:[['Chicken total','1,842.4 kg · £5,416.05','chk'],['Pork total','10,119.7 kg · £36,404.30','pork'],['Beef total','8,101.3 kg · £89,533.61','beef2'],['Beef on mixed pallet 3262506965','topside 295.5 kg, silverside 84.3 kg, Texas steak 29 kg','beef2'],['Chicken on mixed pallets','pizza chicken 28.1 kg, thighs 40 kg, rotis style 118.1 kg','chk'],['Worksheet total','20,063.4 kg · £131,353.96','wt'],['Mixed pallets','965 to 971 carry several SKUs each (marked *)','sp'],['Haulage','€4,318.00 per load'],['Delivery terms','FCA Strzegom']]}
+ ],
+ checks:[
+  {a:'Product Guard',p:'Total net weight across documents',s:'ok',d:'The delivery note, the despatch record sheet and the worksheet all total 20,063.4 kg. The EHC and the CHED declare the same net weight.',r:'Delivery note, despatch record, worksheet, EHC box I.25, CHED box I.34',k:['wt']},
+  {a:'Product Guard',p:'Beef weight against the despatch record',s:'ok',d:'Topside 4,963.6 kg and silverside 2,728.9 kg on the despatch record, plus 408.8 kg of beef on the mixed pallet (worksheet), give 8,101.3 kg. That is the beef weight on the EHC and the CHED.',r:'Despatch record, worksheet',k:['beef','beef2']},
+  {a:'Product Guard',p:'Chicken weight against the despatch record',s:'ok',d:'Roast thighs 1,656.2 kg plus 186.2 kg on the mixed pallets give 1,842.4 kg, the chicken weight on the EHC and the CHED.',r:'Despatch record, worksheet',k:['unit','chk']},
+  {a:'Product Guard',p:'One species per mixed pallet',s:'ok',d:'Each of the seven mixed pallets holds one species only, according to the worksheet SKUs. That fits a certificate that lists one species per commodity line.',r:'Worksheet, EHC part II (single species)',k:['sp']},
+  {a:'Product Guard',p:'Units column on the delivery note',s:'rev',d:'The Units column reads KG, but the values are piece counts. Roast thighs on pallet 3262606452 show 341, which is the 341 pieces on the despatch record. The weight of that pallet is 832.8 kg.',r:'Delivery note, despatch record',k:['unit']},
+  {a:'Product Guard',p:'Item code on the Mixed Leakers lines',s:'rev',d:'Seven pallets, 347 pieces, carry item code 12345678. That is not a commodity code. The worksheet splits these pallets across several SKUs.',r:'Delivery note, worksheet',k:['mix']},
+  {a:'Product Guard',p:'Expiry dates on the delivery note',s:'rev',d:'The Expiry Date column shows 25 and 26 June 2026, which are the cook dates on the despatch record. Both are before the despatch date of 29 June 2026. The column may hold production dates.',r:'Delivery note, despatch record',k:['exp','cook']},
+  {a:'Party Guard',p:'Company names on the delivery note header',s:'rev',d:'The header names Forza Foods Ltd and Sapphire Foods. The CHED and the CDS name Forza Foods Ltd. Your team should confirm which company is the importer of record.',r:'Delivery note, CHED box I.6, CDS box 8',k:['hdr']}
+ ],
+ twin:{h:'Despatch record linked to the consignment',li:['Pallet numbers, cook dates and weights recorded against one consignment.','Available to importer and port health on request.'],ev:'TWIN-DEMO-0102 · event: production.recorded',tag:'prop'}},
+/* 3 */
+{n:'Export health certificate',loc:'Poland',
+ intro:'The Polish veterinary service certifies the products on a TRACES NT certificate. VeriPura reads it and compares it with the other documents.',
+ docs:[
+  {t:'Export Health Certificate, Part I',ref:'EXPORT.EU.PL.2026.0041450 · GBHC352 v1.2',real:1,rows:[['Consignor','"ROLPEK 2" sp. z o.o., Strzegom','cons'],['Consignee','FORZA FOODS LTD, Unit 2000 Devilliers Way, Normanton','cnee'],['Local reference','RPII262906-200','ref'],['Place of destination','Oakland Knottingley, K161 Unit 3, Kellington Road'],['Departure','29 June 2026 08:10 (Europe/Warsaw)','dep'],['Vehicle and trailer','WGM6423M and WZ849AF'],['Seal','B0974088','seal'],['Entry point','Sevington IBF (GBSEV25)'],['Transport conditions','Chilled'],['Transit','France, Germany, Belgium, Netherlands'],['Totals','38 pallets · 20,063.4 kg net · 22,120 kg gross','tot']],tbl:{h:['Commodity','Species','Packages','Net weight'],r:[['Meat products, pork (1602)','Sus scrofa','22 pallets','10,119.7 kg','l1'],['Meat products, beef (1602)','Bos taurus','11 pallets','8,101.3 kg','l2'],['Meat products, chicken (1602)','Gallus gallus','5 pallets','1,842.4 kg','l3']]}},
+  {t:'Export Health Certificate, Part II',ref:'GBHC352 · 33 pages',real:1,rows:[['Species, treatment and origin','Bovine A PL-0 · Pork D PL-3, DE-1, DK-0, ES-1 · Poultry A PL-5, NL-1','reg'],['Single species declaration','Ticked (single species per line)'],['BSE','Option 1: negligible risk, ticked','bse'],['Trichinella (pork)','Digestion method, negative, ticked'],['Certifying officer','WOJCIECH KRYJAK, PIW Świdnica','sign'],['Signed','29 June 2026 07:20:10 +02','sign']],note:'Region codes are shown as printed on the certificate.'}
+ ],
+ checks:[
+  {a:'Certificate Guard',p:'Certificate model',s:'ok',d:'The certificate is GBHC352 (MP-PROD) version 1.2, the model for meat products, which fits commodity code 1602.',r:'GBHC352 MP-PROD',k:['ref']},
+  {a:'Certificate Guard',p:'Totals across the three commodity lines',s:'ok',d:'22, 11 and 5 pallets add up to 38. The net weights 10,119.7, 8,101.3 and 1,842.4 kg add up to 20,063.4 kg, the total on the certificate.',r:'EHC boxes I.23 to I.25, I.28',k:['tot','l1','l2','l3']},
+  {a:'Certificate Guard',p:'Consignee on the EHC and the CHED',s:'ok',d:'Both name Forza Foods Ltd at Unit 2000 Devilliers Way, Normanton, with the same place of destination.',r:'EHC box I.5, CHED box I.6',k:['cnee']},
+  {a:'Certificate Guard',p:'Seal number across documents',s:'ok',d:'Seal B0974088 appears on the EHC, the CHED and the CMR.',r:'EHC box I.19, CHED box I.17, CMR',k:['seal']},
+  {a:'Certificate Guard',p:'Certificate signed before departure',s:'ok',d:'Signed 29 June 2026 at 07:20 (+02), before departure at 08:10 on the same day.',r:'EHC box I.14, certifying officer date',k:['dep','sign']},
+  {a:'Certificate Guard',p:'BSE attestation',s:'ok',d:'Option 1 (negligible BSE risk) is ticked and options 2 and 3 are not. The bovine line shows origin PL.',r:'EHC PH/D003',k:['bse']},
+  {a:'Alert Watch',p:'Region codes in the species table',s:'nc',d:'The codes PL-3, DE-1, DK-0, ES-1, PL-5, NL-1 need checking against the current GB regionalisation tables, which were not supplied.',r:'GBHC352 species table',k:['reg']}
+ ],
+ twin:{h:'Certificate recorded',li:['Certificate reference and hash made available to importer and port health.','A changed certificate would create a new event.'],ev:'TWIN-DEMO-0103 · event: certificate.recorded',tag:'prop'}},
+/* 4 */
+{n:'Polish export declaration',loc:'Poland to France',
+ intro:'The export declaration and the French logistics envelope cover the goods until they leave the EU.',
+ docs:[
+  {t:'Export accompanying document (EAD)',ref:'MRN 26PL412020001FROB4',real:1,rows:[['Exporter','Forza Foods Limited, Hanging Wood Way, Cleckheaton (ID PL39000000004358Z)','exp'],['Declarant','ELJOT sp. z o.o., Rzepin'],['Accepted','29 June 2026'],['Office of export / exit','PL412020 / FR620001'],['Invoice total','131,353.96 GBP','val'],['Delivery terms','FCA Strzegom'],['Gross mass','22,120 kg','wt'],['Transport document','N730 · 290601 of 29/06/26'],['Routing','PL, DE, NL, BE, FR, GB']],tbl:{h:['Item','Description','CN','Net kg','Packages','Origin'],r:[['1','Processed offal of chicken','16023219','1,842.4','0','EU','d1'],['2','Processed pork, hams and cuts','16024110','10,119.7','38','EU','d2'],['3','Beef preparations','16025095','8,101.3','0','EU','d3']]},note:'Descriptions translated from the Polish text.'},
+  {t:'Obligatory logistics envelope (ELO)',ref:'B202606291038002230L',real:1,rows:[['Crossing direction','Export'],['Lorry type','Plein'],['SPS goods','Non','sps'],['Number of declarations','1'],['SDS (export MRN)','26PL412020001FROB4','mrn'],['Downloaded','29/06/2026 10:38']]}
+ ],
+ checks:[
+  {a:'Customs Guard',p:'Export MRN on the logistics envelope',s:'ok',d:'The envelope lists the SDS 26PL412020001FROB4, the MRN of the export declaration.',r:'ELO, export declaration',k:['mrn']},
+  {a:'Customs Guard',p:'Gross mass and invoice value, export against import',s:'ok',d:'Gross mass 22,120 kg and invoice total 131,353.96 GBP match the CDS and the valuation worksheet.',r:'Export declaration, CDS box 22 and 35, worksheet',k:['val','wt']},
+  {a:'Customs Guard',p:'SPS goods flag on the logistics envelope',s:'rev',d:'The envelope says SPS goods Non. The load is meat products with a health certificate. The declarant should confirm what this flag is meant to show.',r:'ELO, EHC',k:['sps']},
+  {a:'Customs Guard',p:'Description of item 1',s:'rev',d:'Item 1 reads processed chicken offal. The delivery note and worksheet list roast chicken thighs, pizza chicken and rotis style chicken. The CDS says chicken and products.',r:'Export declaration, delivery note, CDS',k:['d1']},
+  {a:'Customs Guard',p:'Packages and gross mass by item',s:'rev',d:'All 38 packages and the full gross mass sit on item 2. The CDS puts the 38 packages on item 1. The totals agree.',r:'Export declaration, CDS boxes 31 and 35',k:['d1','d2','d3']},
+  {a:'Customs Guard',p:'Exporter named on the export declaration',s:'rev',d:'The exporter is Forza Foods Limited in Cleckheaton. The EHC and the CHED name ROLPEK 2 as consignor. Your team should confirm who is the exporter of record.',r:'Export declaration, EHC box I.1, CHED box I.1',k:['exp']}
+ ],
+ twin:{h:'Export event recorded',li:['Export MRN and exit office linked to the consignment.','Exit through Calais can be added when the declaration is closed. Proposed.'],ev:'TWIN-DEMO-0104 · event: export.declared',tag:'prop'}},
+/* 5 */
+{n:'Road transport and cold chain',loc:'Poland to France',
+ intro:'The CMR is the transport contract. VeriPura compares it with the certificate and the declarations, and looks for the temperature record.',
+ docs:[
+  {t:'CMR consignment note',ref:'CMR 290601 · 29-06-26',real:1,rows:[['Sender','"ROLPEK 2" sp. z o.o., Strzegom'],['Consignee','Oakland Knottingley, K161 Unit 3, Kellington Road, Konect 62','cnee'],['Taking over','Strzegom PL, 29-06-26'],['Carrier','Dostawca Trans Sp. J., Świebodzice'],['Vehicle and trailer','WGM6423M and WZ849AF','veh'],['Nature of the goods','PORK HAM - FRESH PRODUCT','desc'],['Net weight','20063.4 kg','wt'],['Gross weight','22120 kg','wt'],['Loading temperature','+0.4 to +1.8 °C','temp'],['Temperature on lorry','-1 °C','temp'],['Sender instructions','Forza + Sapphire ref 262906/200 · logger V77M1043 · loading time 06:10','logger'],['Seal number','B0974088','seal'],['Special agreements','38 Dolavs','pk'],['Goods received (box 24)','Blank','rec']],note:'Handwritten fields transcribed from the scanned CMR.'},
+  {t:'Temperature logger download',ref:'LOGGER V77M1043',real:3,rows:[['Document','Logger download for the journey','log'],['Status',NSF,'log']]}
+ ],
+ checks:[
+  {a:'Transport Guard',p:'Vehicle and trailer across documents',s:'ok',d:'WGM6423M and WZ849AF appear on the CMR, the EHC, the CHED, the export declaration, the S&S declaration, the GMR and the CDS.',r:'CMR and all customs and health documents',k:['veh']},
+  {a:'Transport Guard',p:'Seal number',s:'ok',d:'The CMR shows seal B0974088, the seal on the EHC and the CHED.',r:'CMR, EHC box I.19, CHED box I.17',k:['seal']},
+  {a:'Product Guard',p:'Goods description on the CMR',s:'mis',d:'The CMR says pork ham, fresh product. The EHC and the CHED describe prepared pork, beef and chicken products under CN 1602. The CMR description covers only pork and calls it fresh.',r:'CMR box 9, EHC box I.28, CHED box I.31',k:['desc']},
+  {a:'Transport Guard',p:'Weights and pallet count',s:'ok',d:'20,063.4 kg net, 22,120 kg gross and 38 Dolavs match the EHC and the CHED (38 pallets).',r:'CMR, EHC boxes I.23 to I.25',k:['wt','pk']},
+  {a:'Cold Chain Agent',p:'Loading temperature against transport conditions',s:'ok',d:'The CMR records +0.4 to +1.8 °C at loading and -1 °C on the lorry. The EHC and the CHED declare chilled transport.',r:'CMR, EHC box I.18, CHED box I.16',k:['temp']},
+  {a:'Cold Chain Agent',p:'Logger download',s:'nc',d:'The CMR names logger V77M1043. No download was supplied, so the journey temperature could not be checked.',r:'CMR box 13',k:['log','logger']},
+  {a:'Transport Guard',p:'Consignee on the CMR',s:'ok',d:'Oakland Knottingley, Kellington Road, is the place of destination on the EHC and the CHED.',r:'CMR, EHC box I.12, CHED box I.7',k:['cnee']}
+ ],
+ twin:{h:'Departure recorded',li:['Vehicle, seal and logger recorded against the consignment at loading.','Position and arrival time could be fed from the SIGNAL transport system. Proposed, from the TWIN call.'],ev:'TWIN-DEMO-0105 · event: shipment.departed',tag:'prop'}},
+/* 6 */
+{n:'UK pre-notification and movement',loc:'Great Britain',
+ intro:'Before the lorry reaches the border, the importer pre-notifies the goods on a CHED, the agent lodges the safety and security declaration and a goods movement reference is created.',
+ docs:[
+  {t:'CHED-P, Part I',ref:'CHEDP.GB.2026.7882208',real:1,rows:[['Consignor','"Rolpek 2" sp. z o.o., Strzegom','cons'],['Consignee','Forza Foods Ltd, Unit 2000 Devilliers Way, Normanton'],['Place of destination','Oakland Knottingley, Kellington Road, Knottingley'],['Operator responsible','Emre Alacayir, Mobius Logistics Ltd'],['Border control post','Sevington BCP (GBSEV25)'],['Accompanying document','Health certificate EXPORT.EU.PL.2026.0041450, issued 29.06.2026','ehc'],['Prior notification','30.06.2026 17:00 BST','pn'],['Transport','Road vehicle · 290601 · WGM6423M / WZ849AF','veh'],['Establishment of origin','Not Found on the List','est'],['Transport conditions','Chilled'],['Declaration signed','29 June 2026 08:53:55 BST, Emre Alacayir','sig']],tbl:{h:['Commodity','Species','Net weight','Packages'],r:[['160241','Suidae','10,119.7','22 Pallet','t1'],['160232','Aves','1,842.4','5 Pallet','t2'],['160250','Bos spp.','8,101.3','11 Pallet','t3']]},note:'Totals: 38 pallets, 20,063.4 kg net, 22,120 kg gross.'},
+  {t:'Safety and security declaration (S&S GB)',ref:'MRN 26GB06I748VFJON007',real:1,rows:[['Trader reference','262906/200'],['Consignor','FORZA FOODS LTD, Olszowa 50, Strzegom PL','cons'],['Consignee','FORZA NORMANTON, Devilliers Way'],['Carrier','DOSTAWCA TRANS SP. J.'],['Person lodging','MOBIUS LOGISTICS (GB483671657000)'],['Place of loading / unloading','FRCALAIS / GBDOVER','route'],['Customs office of first arrival','GB000040'],['Arrival','30/06/2026 12:00','eta'],['Gross mass','22,120 kg · 3 items · 38 packages'],['Accepted','29/06/2026 08:57','acc']]},
+  {t:'Goods movement reference (GMR)',ref:'GMRA011LEAJE · 29/06/2026 09:17',real:1,rows:[['Planned route','Calais to Dover','route'],['Vehicle','WGM6423M','veh'],['Trailer','WZ849AF','veh'],['Inland border facility','Attend Sevington unless exempt']]}
+ ],
+ checks:[
+  {a:'Pre-notification Guard',p:'EHC reference on the CHED',s:'ok',d:'CHED box I.9 gives EXPORT.EU.PL.2026.0041450, issued 29.06.2026. That is the reference and the signing date on the EHC.',r:'CHED box I.9, EHC box I.2',k:['ehc']},
+  {a:'Pre-notification Guard',p:'Notice before arrival',s:'ok',d:'The CHED Part I was signed on Monday 29 June at 08:53 and arrival is planned for Tuesday 30 June, at least one working day ahead.',r:'CHED box I.10 and I.35, BTOM pre-notification',k:['pn','sig']},
+  {a:'Pre-notification Guard',p:'Totals on the CHED',s:'ok',d:'22, 5 and 11 pallets add up to 38. The net weights add up to 20,063.4 kg.',r:'CHED boxes I.31 to I.34',k:['t1','t2','t3']},
+  {a:'Pre-notification Guard',p:'Arrival time on the CHED and the S&S declaration',s:'rev',d:'The CHED gives 30 June 17:00 BST. The S&S declaration gives arrival at the first office on 30 June at 12:00. The two are five hours apart.',r:'CHED box I.10, S&S declaration',k:['pn','eta']},
+  {a:'Pre-notification Guard',p:'Consignor on the CHED and the S&S declaration',s:'rev',d:'The CHED names ROLPEK 2. The S&S declaration names Forza Foods Ltd at the Rolpek address in Strzegom. The export declaration names Forza Foods Limited in Cleckheaton and the CDS names Forza Foods Ltd in Normanton.',r:'CHED box I.1, S&S declaration, export declaration, CDS',k:['cons']},
+  {a:'Movement Guard',p:'GMR vehicle and route',s:'ok',d:'The GMR shows WGM6423M and trailer WZ849AF, as on the CHED. Calais to Dover matches the S&S places of loading and unloading.',r:'GMR, CHED box I.13, S&S declaration',k:['veh','route']},
+  {a:'Establishment Guard',p:'Establishment of origin on the CHED',s:'rev',d:'Box I.15 reads Not Found on the List for the plant. Part II of the same CHED records the documentary check as satisfactory following official intervention.',r:'CHED boxes I.15 and II.3',k:['est']}
+ ],
+ twin:{h:'Pre-notification recorded',li:['CHED reference, S&S MRN and GMR linked to one consignment record.','Port health, agent and carrier see the same references.'],ev:'TWIN-DEMO-0106 · event: prenotification.recorded',tag:'prop'}},
+/* 7 */
+{n:'Customs import declaration',loc:'Great Britain',
+ intro:'The agent declares the goods on CDS and references the CHED. VeriPura compares the declaration with the CHED and the certificate.',
+ docs:[
+  {t:'Customs import declaration (CDS)',ref:'MRN 26GB748TLUWEA74AR3',real:1,rows:[['Declaration','IM D, accepted 29 June 2026 (07:56 UTC)'],['Importer','FORZA FOODS LTD, Asda House, Great Wilson Street, Leeds (GB362012792073)','imp'],['Exporter','FORZA FOODS LTD, Unit 1 Foxbridge Way, Normanton','exp'],['Declarant','MOBIUS LOGISTICS (GB483671657000), indirect representation'],['Dispatch / destination','PL / GB'],['Delivery terms','FCA Strzegom'],['Invoice total','131,353.96 GBP'],['Additions','AP EUR 4,318.00 and AK GBP 244.32'],['Border transport mode','6 (inland mode 3)','mode'],['Documents on each item','N853 GBCHD2026.7882208 · 9WKS worksheet · U117 RPII262906-200 · Y929 organic excluded','ched'],['Preference','300 on all items, duty and VAT at 0.00','pref']],tbl:{h:['Item','CN','Description','Net kg','Packages','Item price GBP','Stat. value GBP'],r:[['1','16023219','CHICKEN AND PRODUCTS','1,842.400','38','5,416.05','5,580.27','i1'],['2','16024110','PORK AND GAMMON, PRODUCTS','10,119.700','0','36,404.30','37,508.13','i2'],['3','16025095','BEEF AND PRODUCTS','8,101.300','0','89,533.61','92,248.40','i3']]}},
+  {t:'Origin declaration (UK-EU Trade and Cooperation Agreement)',ref:'NOT SUPPLIED',real:3,rows:[['Document','Statement on origin for preference code 300','org'],['Status',NSF,'org']]}
+ ],
+ checks:[
+  {a:'Customs Guard',p:'CHED reference in the declaration',s:'ok',d:'Document code N853 gives GBCHD2026.7882208, which is CHEDP.GB.2026.7882208.',r:'CDS box 44, CHED box I.2',k:['ched']},
+  {a:'Customs Guard',p:'Commodity codes and net mass against the CHED',s:'ok',d:'Codes 160232, 160241 and 160250 and net masses of 1,842.4, 10,119.7 and 8,101.3 kg match the three CHED lines.',r:'CDS boxes 33 and 38, CHED box I.31',k:['i1','i2','i3']},
+  {a:'Customs Guard',p:'Item prices against the invoice total',s:'ok',d:'The item prices add up to 131,353.96 GBP, the invoice total on the CDS, the worksheet and the export declaration.',r:'CDS boxes 22 and 42, worksheet',k:['i1','i2','i3']},
+  {a:'Customs Guard',p:'Statistical values',s:'ok',d:'The three statistical values add up to 135,336.80 GBP. That is the invoice total plus EUR 4,318.00 at the estimate of 1.155 EUR to the pound, plus GBP 244.32, within rounding.',r:'CDS boxes 45 and 46',k:['i1','i2','i3']},
+  {a:'Customs Guard',p:'Preference code and origin proof',s:'nc',d:'Preference 300 is claimed on all items with duty at 0.00. No statement on origin was supplied. The EHC shows pork from Denmark, Germany and Spain and poultry from the Netherlands, so the origin rules decide whether Polish origin applies.',r:'CDS box 36, EHC species table, UK-EU TCA origin rules',k:['pref','org']},
+  {a:'Customs Guard',p:'Packages by item',s:'rev',d:'The CDS puts all 38 packages on item 1 and 0 on items 2 and 3. The total is right. The export declaration puts them on item 2.',r:'CDS box 31, export declaration',k:['i1','i2','i3']},
+  {a:'Customs Guard',p:'Exporter and importer on the CDS',s:'rev',d:'The same company, Forza Foods Ltd, is both exporter (Normanton) and importer (Leeds). The goods were consigned from Poland by ROLPEK 2 and the CHED names the consignee at Devilliers Way, Normanton.',r:'CDS boxes 2 and 8, CHED boxes I.1 and I.6',k:['imp','exp']},
+  {a:'Customs Guard',p:'Border transport mode',s:'rev',d:'The CDS shows border transport mode 6. The S&S declaration shows 10. The two forms may use different code lists. The declarant should confirm.',r:'CDS box 25, S&S declaration',k:['mode']}
+ ],
+ twin:{h:'Declaration linked',li:['CDS MRN, CHED and GMR linked to one record.','Release status shared with the haulier and the consignee.'],ev:'TWIN-DEMO-0107 · event: declaration.linked',tag:'prop'}},
+/* 8 */
+{n:'Border control, Sevington',loc:'Sevington',
+ intro:'The border control post records its checks and decision on Part II of the CHED. VeriPura reads what was recorded and flags gaps.',
+ docs:[
+  {t:'CHED-P, Part II controls',ref:'CHEDP.GB.2026.7882208 · BCP ref 879756',real:1,rows:[['Documentary check','Satisfactory following official intervention','doc'],['Identity check','No','idc'],['Physical check','No','idc'],['Laboratory tests','No','idc'],['Acceptable for internal market','Human consumption','dec'],['Border control post','Sevington BCP (GBSEV25)'],['Certifying officer','Ruth Lopez','when'],['Signed','29 June 2026 09:48:08 BST','when'],['Customs document reference (II.23)','Blank','cdr'],['Status on the copy','VALID']]},
+  {t:'CHED-P, Part III follow-up',ref:'CHEDP.GB.2026.7882208',real:1,rows:[['Arrival of consignment','Not recorded','p3'],['Compliance of the consignment','Not recorded','p3'],['Official inspector','Not recorded','p3']],note:'Blank in the supplied copy.'}
+ ],
+ checks:[
+  {a:'Border Guard',p:'Decision recorded in Part II',s:'ok',d:'The document gives the decision acceptable for the internal market, human consumption, with the post, the officer and a signature date.',r:'CHED boxes II.12, II.20, II.21',k:['dec']},
+  {a:'Border Guard',p:'Documentary check outcome',s:'rev',d:'The documentary check is recorded as satisfactory following official intervention. The document does not say what was changed. Your team may want the intervention note.',r:'CHED box II.3',k:['doc']},
+  {a:'Border Guard',p:'Timing of the decision',s:'rev',d:'Part II was signed on 29 June at 09:48 BST, about 54 minutes after Part I was signed and before the planned arrival on 30 June. The decision rests on a documentary check only.',r:'CHED boxes I.35, II.21',k:['when']},
+  {a:'Border Guard',p:'Identity, physical and laboratory checks',s:'nc',d:'All three are recorded as No. Whether that fits the risk category and the post’s sampling cannot be checked, because the documents do not give the category.',r:'CHED boxes II.4 to II.6',k:['idc']},
+  {a:'Customs Guard',p:'Customs document reference in Part II',s:'rev',d:'Box II.23 is blank, although the CDS was accepted on 29 June (MRN 26GB748TLUWEA74AR3).',r:'CHED box II.23, CDS',k:['cdr']},
+  {a:'Border Guard',p:'Follow-up in Part III',s:'nc',d:'The supplied copy has no arrival or compliance record in Part III.',r:'CHED Part III',k:['p3']}
+ ],
+ twin:{h:'Control decision recorded',li:['Decision and BCP reference 879756 recorded against the consignment.','Importer, agent and carrier see the outcome. Proposed.'],ev:'TWIN-DEMO-0108 · event: border.decision',tag:'prop'}},
+/* 9 */
+{n:'Delivery, traceability and recall readiness',loc:'Great Britain',
+ intro:'After release the goods go to the consignee. VeriPura checks that the records would support a delivery confirmation and a recall.',
+ docs:[
+  {t:'Delivery and recall index',ref:'BUILT FROM THE SUPPLIED DOCUMENTS',real:2,rows:[['Pallet labels (LPNs)','28, from 3262506451 to 3262606971 on the delivery note and the despatch record','lpn'],['Cook dates','25 and 26 June 2026'],['Batch numbers','Per Dolav on the despatch record, for example T11250603F and B2250603TB','bat'],['Slaughterhouses on the EHC','14, not linked to pallets in the supplied records','slh'],['Place of delivery','Oakland Knottingley, Kellington Road, Knottingley'],['Goods received on the CMR (box 24)','Blank','rec']],note:'Index built from the documents in this consignment.'},
+  {t:'Delivery proof',ref:'NOT SUPPLIED',real:3,rows:[['Document','Signed delivery note or CMR box 24','pod'],['Status',NSF,'pod']]}
+ ],
+ checks:[
+  {a:'Traceability Agent',p:'Pallet labels across documents',s:'ok',d:'All 28 pallet labels on the delivery note appear on the despatch record sheet, and its total of 4,542 pieces and 20,063.4 kg matches the delivery note.',r:'Delivery note, despatch record',k:['lpn']},
+  {a:'Traceability Agent',p:'Batch and cook date per pallet',s:'ok',d:'Each Dolav on the despatch record has a batch number and a cook date of 25 or 26 June 2026.',r:'Despatch record',k:['bat']},
+  {a:'Recall Readiness',p:'Link from pallet to slaughterhouse',s:'rev',d:'The EHC names 14 slaughterhouses but nothing supplied links a pallet or batch to one of them. A recall would need that link.',r:'EHC box I.28, despatch record',k:['slh','bat']},
+  {a:'Traceability Agent',p:'Delivery confirmation',s:'nc',d:'Box 24 on the CMR is blank and no signed delivery note was supplied, so delivery could not be confirmed.',r:'CMR box 24',k:['rec','pod']}
+ ],
+ twin:{h:'Trace record to pallet level',li:['28 pallets linked to batch, cook date and consignment.','A recall query could start from a pallet number and return the consignment and its documents. Proposed model.'],ev:'TWIN-DEMO-0109 · event: delivery.pending',tag:'prop'}}
+];
+var ROLES_F=[['all','All documents (VeriPura team view)','Sees every document and finding.','All'],
+['imp','Importer, Forza Foods Ltd','Sees the documents it is party to, the customs and border documents, and its own obligations.','Importer'],
+['exp','Producer and consignor, Rolpek 2','Sees the production, certificate, export and shipping documents it issued or holds.','Producer'],
+['agt','Customs agent, Mobius Logistics Ltd','Sees the customs, border and shipping documents it needs to declare and clear the goods.','Agent'],
+['bcp','Sevington BCP and port health','Sees the health, certificate, cold chain and border documents needed for official checks. Commercial documents are not shared.','Port health'],
+['car','Haulier, Dostawca Trans','Sees the transport and movement documents only.','Haulier'],
+['ins','Insurer','Sees the shipping, value and cold chain documents needed to assess cargo risk.','Insurer']];
+var DV={
+'Establishment record':['imp','exp','bcp','ins'],
+'GB approved establishments list':['imp','exp','agt','bcp'],
+'Delivery note (packing list)':['imp','exp','agt','car','ins'],
+'Despatch record sheet':['imp','exp','bcp'],
+'Valuation worksheet (pro forma)':['imp','agt'],
+'Export Health Certificate, Part I':['imp','exp','agt','bcp'],
+'Export Health Certificate, Part II':['imp','exp','bcp'],
+'Export accompanying document (EAD)':['imp','exp','agt','car'],
+'Obligatory logistics envelope (ELO)':['agt','car'],
+'CMR consignment note':['imp','exp','agt','car','ins'],
+'Temperature logger download':['imp','exp','car','ins','bcp'],
+'CHED-P, Part I':['imp','exp','agt','bcp'],
+'Safety and security declaration (S&S GB)':['imp','agt','car'],
+'Goods movement reference (GMR)':['imp','agt','car'],
+'Customs import declaration (CDS)':['imp','agt'],
+'Origin declaration (UK-EU Trade and Cooperation Agreement)':['imp','exp','agt'],
+'CHED-P, Part II controls':['imp','agt','bcp'],
+'CHED-P, Part III follow-up':['imp','agt','bcp'],
+'Delivery and recall index':['imp','bcp','ins'],
+'Delivery proof':['imp','exp','car','ins']
+};
+var CLS_F=[[/delivery note|packing list/i,'Delivery note (packing list)'],[/despatch record/i,'Despatch record sheet'],[/worksheet/i,'Valuation worksheet (pro forma)'],[/\bEHC\b|health certificate/i,'Export Health Certificate, Part I'],[/\bBSE\b/,'Export Health Certificate, Part II'],[/export declaration|\bEAD\b/i,'Export accompanying document (EAD)'],[/logistics envelope|\bELO\b/i,'Obligatory logistics envelope (ELO)'],[/\bCMR\b/,'CMR consignment note'],[/logger/i,'Temperature logger download'],[/\bCHED\b/,'CHED-P, Part I'],[/S&S|safety and security/i,'Safety and security declaration (S&S GB)'],[/\bGMR\b/,'Goods movement reference (GMR)'],[/\bCDS\b/,'Customs import declaration (CDS)'],[/statement on origin|origin proof/i,'Origin declaration (UK-EU Trade and Cooperation Agreement)']];
+return {id:'forza',name:'Poland meat to UK, Forza (real)',h2:'Cooked meat products, Poland to the United Kingdom',
+ lede:'Follow one road consignment of cooked pork, beef and chicken products from a plant in Strzegom to a Forza Foods site in Knottingley, through nine phases. You see the real documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what could be recorded for other stakeholders.',
+ meta:[['Product','Cooked pork, beef and chicken products, CN 1602.41, 1602.50 and 1602.32'],['Quantity','20,063.4 kg net · 22,120 kg gross · 38 pallets'],['Consignor','"Rolpek 2" sp. z o.o., Strzegom (plant 02194009)'],['Importer','Forza Foods Ltd'],['Route','Strzegom to Knottingley by road, Calais to Dover, Sevington BCP'],['Certificate','EXPORT.EU.PL.2026.0041450 (GBHC352)'],['CHED','CHEDP.GB.2026.7882208'],['CMR','290601']],
+ banner:'<span class="tg prop">Real consignment</span><span>Documents marked Provided are real documents from a Poland to UK meat products consignment, shared by one of the companies involved. Not supplied items are not part of this set. VeriPura shows findings. Your team makes the decision.</span>',
+ docCap:'Documents marked Provided are real. Select a finding to see where it comes from.',
+ trailNote:'Findings come from the supplied documents of one real consignment.',
+ layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Registry checks for Poland, such as TRACES NT and the GB approved establishments list, are not part of this demonstration.</p>',
+ phases:PH,roles:ROLES_F,docvis:DV,cls:CLS_F,ovd:[],ovmap:{},ovres:{},C:{}};
+})();
+
+/*PACKS*/
+function loadPack(id){
+  pause();var k=PK[id];CUR=k;
+  PALL=k.phases;ROLES=k.roles;DOCVIS=k.docvis;CLS=k.cls;OVD=k.ovd||[];OVMAP=k.ovmap||{};OVRES=k.ovres||{};C=k.C||{};
+  ROLE='all';buildP('all');NP=P.length;build();
+  ST.pos=0;ST.cur=-1;ST.tab={};ST.ovOpen={};
+  rs.innerHTML=ROLES.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');rs.value='all';
+  $('#packBar').innerHTML=k.banner;$('#packSel').value=id;
+  updRoleBar();calc();nav();view();updPlayer();window.scrollTo({top:0});
+}
+var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
-updRoleBar();calc();nav();view();updPlayer();
+$('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
+$('#packSel').onchange=function(){loadPack(this.value)};
+loadPack('beef');
 </script>
 </body>
 </html>
