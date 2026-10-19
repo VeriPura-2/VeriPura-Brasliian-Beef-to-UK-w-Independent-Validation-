@@ -313,7 +313,7 @@ var P=[
  ],
  checks:[
   {a:'CHED Guard',p:'CHED against the customs declaration',s:'ok',d:'Reference 7681938 on the CHED matches the CHD entry GBCHD2026.7681938 on the CDS.',r:'IPAFFS vs CDS',k:['ched']},
-  {a:'CHED Guard',p:'Certificate reference vs EHC',s:'rev',d:'The EHC prints I0-00230400/CC-STS/26 (a letter I). The CHED prints 10-00230400/CC-STS/26 (digit one). This may be a typeface effect. Confirm on the originals.',r:'IPAFFS vs EHC',k:['cdoc','ehc']},
+  {a:'CHED Guard',p:'Certificate reference vs EHC',s:'mis',d:'The EHC prints I0-00230400/CC-STS/26, starting with the letter I. The CHED prints 10-00230400/CC-STS/26, starting with the digit 1. The first character differs between the two documents.',r:'IPAFFS vs EHC',k:['cdoc','ehc']},
   {a:'CHED Guard',p:'Consignment details vs EHC',s:'ok',d:'Packages, weights, container and plant 745 match the EHC.',r:'EHC Part I',k:['cm']},
   {a:'Seal Guard',p:'Seal on the CHED',s:'rev',d:'The CHED lists FJ25368005 only. The EHC lists 0003540SIF745 only, and the B/L lists both. No one document shows both seals.',r:'CHED vs EHC vs B/L',k:['seal']},
   {a:'Timing Guard',p:'Prior notification vs vessel arrival',s:'rev',d:'The CHED prior notification box shows 22 May 2026 00:01. The MSC arrival notice gives a vessel ETA of 21 May 2026 22:00. Confirm what this box represents.',r:'CHED vs MSC arrival notice',k:['sub']},
@@ -341,7 +341,7 @@ var P=[
   {t:'CHED-P, Part II controls',ref:'CHEDP.GB.2026.7681938 · PAGE 3',real:1,rows:[['Documentary check','Not recorded','oc'],['Identity check','Not recorded','oc'],['Physical check','Not recorded','phys'],['Laboratory tests','Not recorded','lab'],['Acceptable for internal market','Human consumption (ticked)','ii12'],['BCP','London Gateway · GBLGP1','bcp'],['Certifying officer name and signature','Blank','oc']],note:'Part II as supplied.'}
  ],
  checks:[
-  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open findings on seals, the certificate reference, the prior notification time and the goods description, so the border team can plan its checks.',r:'Consignment findings'},
+  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open findings on seals, the certificate reference mismatch, the prior notification time and the goods description, so the border team can plan its checks.',r:'Consignment findings'},
   {a:'Arrival Guard',p:'Vessel, B/L and container',s:'ok',d:'MSC Leila, B/L MEDUR3178106 and container CRLU1288269 match on the arrival notice, CHED and CDS.',r:'Arrival notice, CHED, CDS',k:['arr']},
   {a:'Port Guard',p:'Discharge terminal vs border post',s:'ok',d:'London Gateway is the terminal on the arrival notice and the BCP on the CHED and the EHC.',r:'Arrival notice, CHED, EHC',k:['bcp']},
   {a:'Weight Guard',p:'Arrival notice weight',s:'ok',d:'18,937.38 kg matches the gross weight on the B/L and CDS.',r:'B/L, CDS',k:['aw']},
