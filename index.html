@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeriPura Core demonstration: Brazil to UK beef</title>
+<style>
+:root{
+  --bg:#F2F5FA;--side:#E6ECF5;--card:#FFFFFF;--card2:#F6F8FC;--line:#D3DBE8;--ink:#0F2444;--ink2:#2B4066;--mut:#5B6C88;
+  --gold:#B8861B;--gold-bg:#D9A93F;--gold-ink:#0F2444;--blue:#2E55C9;--tint:#E7ECF8;
+  --ok:#2B8A3E;--ok-bg:#E6F4EA;--rev:#A8660F;--rev-bg:#FBF0DD;--mis:#A8352A;--mis-bg:#F8E4E1;--nc:#44546B;--nc-bg:#E9EDF3;
+  --paper:#FBFAF6;--paper-ink:#1C2433;--paper-line:#D9D5C8;
+  --serif:'DM Serif Display','Playfair Display',Georgia,'Times New Roman',serif;
+  --sans:'DM Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --mono:'DM Mono',ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+}
+:root[data-theme="dark"]{
+  --bg:#0F2444;--side:#0C1D3A;--card:#1A3260;--card2:#152B54;--line:#2D4574;--ink:#E9EFF8;--ink2:#CBD6E6;--mut:#9FB0CC;
+  --gold:#E2B64E;--gold-bg:#D9A93F;--gold-ink:#0F2444;--blue:#8AA8FF;--tint:#1E3A70;
+  --ok:#69DB7C;--ok-bg:#173B22;--rev:#F2B566;--rev-bg:#3A2A12;--mis:#F29488;--mis-bg:#3C1B18;--nc:#B2BFD2;--nc-bg:#22375C;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);font-size:15px;line-height:1.5;display:flex;min-height:100vh}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.mono{font-family:var(--mono)}
+.label{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+/* sidebar */
+aside{width:272px;flex-shrink:0;background:var(--side);border-right:1px solid var(--line);position:sticky;top:0;height:100vh;overflow:auto;padding:18px 14px 24px}
+.brand{display:flex;align-items:center;gap:8px;margin:0 6px 18px}
+.brand .word{font-family:var(--serif);font-size:26px;line-height:1;color:var(--ink)}
+.brand .word b{color:var(--gold);font-weight:400}
+.brand sup{font-family:var(--sans);font-size:10px;color:var(--mut)}
+.tag-demo{font-family:var(--mono);font-size:10px;letter-spacing:.1em;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:2px 6px;background:transparent}
+.nav-i{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;color:var(--ink2);min-height:40px}
+.nav-i:hover{background:var(--tint)}
+.nav-i.on{background:var(--tint);color:var(--ink);font-weight:600}
+.nav-i .n{font-family:var(--mono);font-size:11px;color:var(--mut);width:22px;flex-shrink:0}
+.nav-i .t{flex:1;font-size:13.5px;line-height:1.3}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line);flex-shrink:0;border:1.5px solid var(--mut)}
+.dot.ok{background:var(--ok);border-color:var(--ok)}.dot.rev{background:var(--rev);border-color:var(--rev)}.dot.mis{background:var(--mis);border-color:var(--mis)}.dot.nc{background:var(--nc);border-color:var(--nc)}
+.side-sec{margin:18px 8px 6px}
+/* main */
+.wrap{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:14px;padding:14px 32px;border-bottom:1px solid var(--line);background:var(--bg);position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.top h1{font-family:var(--serif);font-weight:400;font-size:22px;letter-spacing:.01em}
+.top .sp{flex:1}
+.pill{font-family:var(--mono);font-size:11px;letter-spacing:.06em;border:1px solid var(--line);border-radius:6px;padding:6px 10px;background:var(--card);color:var(--ink2);display:inline-flex;align-items:center;gap:8px}
+.pill i{width:7px;height:7px;border-radius:50%;background:var(--blue);display:inline-block}
+.theme{border:1px solid var(--line);background:var(--card);border-radius:999px;width:56px;height:30px;position:relative}
+.theme span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--gold-bg);transition:left .2s;display:grid;place-items:center;font-size:12px;color:var(--gold-ink)}
+:root[data-theme="dark"] .theme span{left:29px}
+.banner{margin:0 32px;margin-top:18px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+main{padding:22px 32px 60px;max-width:1240px;width:100%}
+h2{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.15;margin-bottom:6px}
+h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:10px}
+.lede{color:var(--ink2);font-size:16px;max-width:70ch;margin-bottom:18px}
+.btn{border-radius:8px;border:1.5px solid var(--line);background:var(--card);padding:10px 16px;font-weight:600;font-size:14px;letter-spacing:.02em;min-height:44px}
+.btn:hover{border-color:var(--blue)}
+.btn.gold{background:var(--gold-bg);border-color:var(--gold-bg);color:var(--gold-ink);text-transform:uppercase;letter-spacing:.06em;font-size:13px}
+.btn.gold:hover{filter:brightness(1.06)}
+.btn[disabled]{opacity:.5;cursor:default}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:16px 0 22px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.stat b{display:block;font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.1;margin-top:6px}
+.stat.ok b{color:var(--ok)}.stat.rev b{color:var(--rev)}.stat.mis b{color:var(--mis)}.stat.nc b{color:var(--nc)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--mut)}
+.phase-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.phase-head .num{font-family:var(--mono);color:var(--gold);font-size:14px;letter-spacing:.1em}
+.phase-head .sp{flex:1}
+.cols{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:18px;align-items:start}
+.sec-title{display:flex;align-items:center;gap:10px;margin:0 0 10px}
+.sec-title .label{flex:1}
+/* paper documents */
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.tab{border:1px solid var(--line);background:var(--card);border-radius:8px;padding:7px 12px;font-size:13px;min-height:36px}
+.tab.on{border-color:var(--gold);color:var(--gold);font-weight:600}
+.paper{background:var(--paper);color:var(--paper-ink);border:1px solid var(--paper-line);border-radius:6px;padding:22px 24px;box-shadow:0 1px 0 rgba(0,0,0,.04),6px 6px 0 rgba(15,36,68,.10);position:relative}
+.paper .stamp{position:absolute;top:14px;right:16px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8a8574;border:1px dashed #b9b4a2;padding:3px 7px;border-radius:3px}
+.paper h4{font-family:var(--serif);font-weight:400;font-size:21px;margin-bottom:2px;padding-right:130px}
+.paper .ref{font-family:var(--mono);font-size:11.5px;color:#6b6858;margin-bottom:14px;letter-spacing:.04em}
+.paper .row{display:grid;grid-template-columns:42% 1fr;gap:10px;border-top:1px solid #E6E2D5;padding:6px 6px;font-size:13.5px;border-radius:3px;transition:background .3s}
+.paper .row:first-of-type{border-top:2px solid #1C2433}
+.paper .row span:first-child{color:#6b6858}
+.paper .row span:last-child{font-family:var(--mono);font-size:12.5px;word-break:break-word}
+.paper table{width:100%;border-collapse:collapse;margin-top:12px;font-size:12.5px}
+.paper th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#6b6858;text-align:left;padding:6px;border-bottom:2px solid #1C2433}
+.paper td{padding:5px 6px;border-bottom:1px solid #E6E2D5;font-family:var(--mono);font-size:12px;transition:background .3s}
+.paper .note{margin-top:12px;font-size:12px;color:#6b6858;font-style:italic}
+.f-ok{background:#DDF1E1!important}.f-rev{background:#FBE7BE!important}.f-mis{background:#F6CFC9!important}.f-nc{background:#E1E6EE!important}
+.f-mis{box-shadow:inset 3px 0 0 #A8352A}.f-rev{box-shadow:inset 3px 0 0 #A8660F}.f-ok{box-shadow:inset 3px 0 0 #2B8A3E}.f-nc{box-shadow:inset 3px 0 0 #44546B}
+.cap{font-size:12px;color:var(--mut);margin-top:8px}
+/* findings */
+.find{border:1px solid var(--line);border-left-width:4px;border-radius:10px;background:var(--card);padding:12px 14px;margin-bottom:10px;cursor:pointer;animation:in .35s ease both}
+.find:hover{border-color:var(--blue)}
+.find.ok{border-left-color:var(--ok)}.find.rev{border-left-color:var(--rev)}.find.mis{border-left-color:var(--mis)}.find.nc{border-left-color:var(--nc)}
+.find .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.find .p{font-weight:700;flex:1;min-width:140px}
+.find .a{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em}
+.find .d{margin-top:6px;font-size:14px;color:var(--ink2)}
+.find .r{margin-top:4px;font-family:var(--mono);font-size:11px;color:var(--mut)}
+.tg{font-family:var(--mono);font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:3px 8px;white-space:nowrap}
+.tg.ok{background:var(--ok-bg);color:var(--ok)}.tg.rev{background:var(--rev-bg);color:var(--rev)}.tg.mis{background:var(--mis-bg);color:var(--mis)}.tg.nc{background:var(--nc-bg);color:var(--nc)}
+.tg.dev{background:var(--rev-bg);color:var(--rev)}.tg.prop{background:var(--tint);color:var(--blue)}
+.running{display:flex;align-items:center;gap:10px;color:var(--mut);font-family:var(--mono);font-size:12px;padding:10px 2px}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp .8s linear infinite}
+.empty{border:1.5px dashed var(--line);border-radius:12px;padding:30px 20px;text-align:center;color:var(--mut)}
+.result-line{font-family:var(--mono);font-size:12.5px;margin:4px 0 14px;color:var(--ink2)}
+.twin{border:1.5px solid var(--line);border-radius:12px;background:var(--card2);padding:16px 18px;margin-top:18px;animation:in .4s ease both}
+.twin h4{font-family:var(--serif);font-weight:400;font-size:19px;margin-bottom:4px}
+.twin ul{list-style:none;margin:8px 0}
+.twin li{padding:6px 0;border-top:1px solid var(--line);font-size:14px;color:var(--ink2)}
+.twin .ev{font-family:var(--mono);font-size:11.5px;color:var(--mut);margin-top:8px;word-break:break-all}
+.pager{display:flex;gap:10px;margin-top:26px;flex-wrap:wrap}
+.pager .sp{flex:1}
+table.t{width:100%;border-collapse:collapse;font-size:13.5px}
+table.t th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);text-align:left;padding:8px 10px;border-bottom:1.5px solid var(--line)}
+table.t td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+table.t tr.lnk{cursor:pointer}table.t tr.lnk:hover td{background:var(--tint)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin:6px 0 4px;font-size:13px;color:var(--ink2)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.ov{margin-top:20px}
+.ovg{border-top:1px solid var(--line)}
+.ovg summary{display:flex;align-items:center;gap:12px;padding:10px 0;cursor:pointer;list-style:none;min-height:44px;flex-wrap:wrap}
+.ovg summary::-webkit-details-marker{display:none}
+.ovg .chev{font-size:18px;color:var(--mut);transition:transform .2s;width:14px}
+.ovg[open] .chev{transform:rotate(90deg)}
+.ovg .gn{font-family:var(--serif);font-size:18px}
+.ovg .gc{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+.ovg .gs{flex:1;font-size:13px;color:var(--ink2);min-width:140px}
+.ovg .ovr:first-of-type{border-top:1px solid var(--line-soft,var(--line))}
+.ovr{display:flex;gap:14px;justify-content:space-between;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+.ovr .nm{font-weight:700}
+.ovr .sub{font-size:13px;color:var(--mut);margin-top:2px}
+.ovr .res{font-size:14px;color:var(--ink2);margin-top:6px;animation:in .35s ease both}
+.ovr .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+@media (max-width:1100px){.cols{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:860px){.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
+@media print{aside,.top,.banner,.pager,.btn{display:none!important}body{background:#fff}main{max-width:none}}
+</style>
+</head>
+<body>
+<aside aria-label="Workflow">
+  <div class="brand">
+    <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#D9A93F" stroke-width="2.5"/><path d="M9 16.5l5 5 10-12" fill="none" stroke="#D9A93F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="word">Veri<b>Pura</b><sup>™</sup></span><span class="tag-demo">DEMO</span>
+  </div>
+  <div class="side-sec label">Consignment</div>
+  <button class="nav-i" data-go="-1"><span class="n">00</span><span class="t">Overview</span></button>
+  <div class="side-sec label">Workflow</div>
+  <div id="phaseNav"></div>
+  <div class="side-sec label">Results</div>
+  <button class="nav-i" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
+</aside>
+<div class="wrap">
+  <div class="top">
+    <h1 id="topTitle">Demonstration</h1>
+    <span class="label">VeriPura Core™ · illustrative</span>
+    <span class="sp"></span>
+    <span class="pill"><i></i>Visibility layer: proposed</span>
+    <button class="theme" id="themeBtn" aria-label="Toggle light and dark theme"><span id="themeIco">☀</span></button>
+  </div>
+  <div class="banner"><span class="tg prop">Illustrative example</span><span>All companies, documents and figures are fictional. VeriPura shows findings. Your team makes the decision.</span></div>
+  <main id="view" tabindex="-1"></main>
+</div>
+<script>
+var C={po:'PO-2026-0418'};
+var LBL={ok:'Matched',rev:'Review',mis:'Mismatch',nc:'Not checked'};
+var P=[
+{n:'Pre-contract and establishment eligibility',loc:'Brazil',
+ intro:'Before an order is placed, the establishment is checked against the live UK list and current alerts.',
+ docs:[
+  {t:'Defra approved establishments list',ref:'EXTRACT · BOVINE MEAT, FROZEN',rows:[['Establishment','Frigorífico Serra Verde Ltda.'],['SIF number','9012','sif'],['Country','Brazil'],['Product category','Bovine meat, frozen'],['Listing status','Approved, active','sif']],note:'Fictional establishment for demonstration.'},
+  {t:'MAPA SIGSIF export eligibility',ref:'CONFIRMATION · SIF 9012',rows:[['Registered establishment','SIF 9012'],['Eligible market','United Kingdom','sig'],['Eligibility status','Eligible','sig'],['Valid until','31 Mar 2027','sig']]},
+  {t:'HACCP documentation',ref:'NOT SUPPLIED',rows:[['Document','HACCP plan and audit summary','hac'],['Status','Not supplied at this stage','hac']]}
+ ],
+ checks:[
+  {a:'Establishment Guard',p:'SIF number on UK list',s:'ok',d:'SIF 9012 is listed and active for frozen bovine meat.',r:'Defra approved establishments list',k:['sif']},
+  {a:'Alert Watch',p:'APHA topical issues',s:'ok',d:'No current suspension or restriction found for Brazilian bovine meat.',r:'APHA topical issues'},
+  {a:'Alert Watch',p:'RASFF notifications',s:'ok',d:'No open alert linked to this establishment.',r:'RASFF'},
+  {a:'Certificate Guard',p:'MAPA export eligibility',s:'ok',d:'Eligible for the United Kingdom until 31 Mar 2027.',r:'MAPA SIGSIF',k:['sig']},
+  {a:'Certificate Guard',p:'HACCP documentation',s:'nc',d:'The document was not supplied, so this check could not run.',r:'Establishment dossier',k:['hac']}
+ ],
+ twin:{h:'Transaction record created',li:['Establishment eligibility status made available to importer, insurer and buyer.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0001 · event: eligibility.recorded',tag:'prop'}},
+{n:'Commercial agreement and purchase order',loc:'Brazil / UK',
+ intro:'The contract is ingested at intake. The product specification is mapped to the rules that apply.',
+ docs:[
+  {t:'Purchase order '+C.po,ref:'NORTHGATE MEATS LTD → FRIGORÍFICO SERRA VERDE LTDA.',rows:[['Product','Frozen boneless beef cuts'],['HS code','0202 30','hs'],['Age category','(blank)','age'],['Hormone-free requirement','Required','hf'],['Quantity','24,000 kg net · 1,000 cartons','qty'],['Incoterm','CIF Tilbury'],['Order value','USD 148,800']]},
+  {t:'Product specification sheet',ref:'SPEC-SV-0202-30 · REV 3',rows:[['Maximum animal age','30 months or younger','spec'],['Hormone treatment','None (non-hormonal-treated cattle)','hf'],['Storage temperature','-18 °C or colder'],['Presentation','Boneless, vacuum packed']]}
+ ],
+ checks:[
+  {a:'Intake Agent',p:'Purchase order fields',s:'ok',d:'Parties, product, quantity and Incoterm extracted and filed.',r:'Purchase order',k:['qty']},
+  {a:'Rule Mapper',p:'HS code to requirements',s:'ok',d:'Code 0202 30 maps to the frozen bovine boneless meat requirements.',r:'UK Global Tariff',k:['hs']},
+  {a:'Rule Mapper',p:'Age category',s:'rev',d:'The purchase order age field is blank. The spec sheet says 30 months or younger, so the SRM/VC removal rule is not triggered. Confirm with the exporter.',r:'Purchase order vs spec sheet',k:['age','spec']},
+  {a:'Rule Mapper',p:'Hormone-free flag',s:'ok',d:'The flag adds a SISBOV segregation check at production.',r:'Purchase order',k:['hf']}
+ ],
+ twin:{h:'Parties and commercial terms logged',li:['Importer and exporter identities linked to the transaction.','Product type, volume and route logged as structured metadata.'],ev:'TWIN-DEMO-0001 · event: terms.linked',tag:'prop'}},
+{n:'Production and slaughter',loc:'Brazil, SIF establishment',
+ intro:'Traceability, age, residue results and farm screening are read from the production records.',
+ docs:[
+  {t:'SISBOV traceability record',ref:'LOT-0819-A · SLAUGHTER 19 AUG 2026',rows:[['Lot','LOT-0819-A'],['Farms in lot','14','farms'],['Oldest animal at slaughter','22 months','age'],['Hormone-free segregation','Declared','farms']],tbl:{h:['Farm','CAR status','Deforestation screen'],r:[['F-05','Active','Clear'],['F-06','Active','Clear'],['F-07','Active','Overlap flagged','farm'],['F-08','Active','Clear']]},note:'Excerpt. Four of 14 farms shown.'},
+  {t:'Residue test results',ref:'PNCRC/PNPR · LOT-0819-A',rows:[['Laboratory','Illustrative accredited lab']],tbl:{h:['Substance','Result','Against MRL'],r:[['Estradiol-17β','Not detected','Within','res'],['Zeranol','Not detected','Within','res'],['Trenbolone','Not detected','Within','res'],['Melengestrol','Not detected','Within','res']]}},
+  {t:'Inspection and removal record',ref:'MAPA OV · SIF 9012',rows:[['Ante-mortem inspection','Done'],['Post-mortem inspection','Done'],['SRM/VC removal declaration','Not required (under 30 months)'],['MAPA OV signature','Present','ov']]}
+ ],
+ checks:[
+  {a:'Trace Agent',p:'Farm of origin',s:'ok',d:'All 14 farms in the lot are traced and linked to the lot.',r:'SISBOV',k:['farms']},
+  {a:'Age Guard',p:'Animal age',s:'ok',d:'Oldest animal is 22 months. The SRM/VC removal pathway is not triggered.',r:'EHC age rules',k:['age']},
+  {a:'Residue Guard',p:'Hormone residues vs MRL',s:'ok',d:'Four substances not detected. All within thresholds.',r:'PNCRC/PNPR',k:['res']},
+  {a:'Deforestation Screen',p:'Farm F-07 location',s:'rev',d:'The farm polygon overlaps an area flagged in MapBiomas/PRODES. Review the farm supply records.',r:'MapBiomas, PRODES',k:['farm']},
+  {a:'Inspection Guard',p:'MAPA OV attestation',s:'ok',d:'Signature present on the inspection record.',r:'MAPA',k:['ov']},
+  {a:'Partner Check',p:'SISBOV animal IDs vs registry',s:'ok',d:'The animal ID range matches the batch on the commercial invoice. 14 of 14 farms returned by the registry.',r:'MAPA / SISBOV via certification body'},
+  {a:'Partner Check',p:'CAR entries',s:'ok',d:'14 of 14 farms have an active entry in SICAR.',r:'SICAR via certification body'}
+ ],
+ twin:{h:'Trace path recorded',li:['Farm-of-origin data linked to the transaction record.','MAPA OV attestation logged as a signed event, checkable by downstream parties.'],ev:'TWIN-DEMO-0001 · event: trace.recorded',tag:'prop'}},
+{n:'Export Health Certificate issuance',loc:'Brazil, DIPOA certification centre',
+ intro:'Part I fields and the twelve Part II attestations are read and compared with the transaction profile.',
+ docs:[
+  {t:'Export Health Certificate 7060EHC, Part I',ref:'EHC-DEMO-2026-00931 · SCANNED COPY',rows:[['Consignor','Frigorífico Serra Verde Ltda. · SIF 9012','sif'],['Consignee','Northgate Meats Ltd'],['Lot','LOT-0819-A'],['HS code','0202 30'],['Net weight','24,000.0 kg','w'],['Cartons','1,000'],['Container / seal','DEMU 4821907 / BR-7731905'],['CHED-P reference (Box I.2)','CHEDP.GB.2026.0412358'],['Model version','Current']]},
+  {t:'Export Health Certificate 7060EHC, Part II',ref:'ATTESTATIONS 1 TO 12',rows:[],tbl:{h:['#','Attestation','Status'],r:[['1','Origin and FMD status','Present'],['2','BSE status','Present'],['3','Ante and post-mortem inspection','Present'],['4','SRM/VC removal','Present'],['5','Hormone-free production','Present'],['6','Residue compliance','Partial: lot reference missing','att'],['7','Microbiological criteria','Present'],['8','Slaughter establishment approval','Present'],['9','Cutting plant approval','Present'],['10','Storage temperature','Present'],['11','Packaging and labelling','Present'],['12','Transport conditions','Present']]},note:'MAPA OV wet signature and DIPOA stamp: not verifiable from a scan.'}
+ ],
+ checks:[
+  {a:'EHC Reader',p:'Part I fields',s:'ok',d:'SIF number, lot, HS code and consignee extracted and matched to the profile.',r:'EHC 7060',k:['sif']},
+  {a:'Attestation Guard',p:'Part II attestations',s:'rev',d:'11 of 12 attestations present. Attestation 6 (residue compliance) is partial: the lot reference is missing.',r:'EHC 7060',k:['att']},
+  {a:'Version Guard',p:'EHC model version',s:'ok',d:'Matches the current model on the APHA published list.',r:'APHA'},
+  {a:'Weight Guard',p:'Net weight vs purchase order',s:'ok',d:'24,000.0 kg matches the purchase order quantity.',r:'Purchase order',k:['w']},
+  {a:'Signature Guard',p:'Wet signature and official stamp',s:'nc',d:'These cannot be verified from a scanned copy, so this check could not run.',r:'EHC 7060'},
+  {a:'Registry Guard',p:'EHC against the MAPA / SIGSIF registry',s:'ok',d:'The certificate is found in the registry. Issue date, SIF number and lot match the uploaded copy.',r:'MAPA / SIGSIF via certification body'}
+ ],
+ twin:{h:'EHC issuance recorded',li:['EHC reference, lot and SIF number committed to the transaction record as a signed attestation.','Hash of the verified EHC anchored on IOTA Rebased as a Verifiable Credential.'],ev:'TWIN-DEMO-0001 · hash 9f2c…a71e (illustrative)',tag:'prop'}},
+{n:'Brazilian export clearance',loc:'Brazil, SISCOMEX',
+ intro:'The export declaration and tax invoice are checked against the contract and the certificate.',
+ docs:[
+  {t:'DU-E export declaration',ref:'SISCOMEX · DU-E-DEMO-26BR0123456',rows:[['NCM code','0202.30.00','ncm'],['Destination','United Kingdom'],['Declared value','USD 148,800','val'],['Status','Registered, cleared for export','st']]},
+  {t:'Nota Fiscal Eletrônica (NF-e)',ref:'NF-e DEMO 000.123.456',rows:[['NCM code','0202.30.00','ncm'],['Net weight','24,000.0 kg','nw'],['Value (USD equivalent)','148,800','val']]}
+ ],
+ checks:[
+  {a:'Export Doc Guard',p:'NCM vs contract HS code',s:'ok',d:'0202.30.00 is consistent with HS 0202 30 on the purchase order.',r:'Purchase order, DU-E, NF-e',k:['ncm']},
+  {a:'Export Doc Guard',p:'DU-E status',s:'ok',d:'The DU-E is registered and cleared for export.',r:'SISCOMEX',k:['st']},
+  {a:'Export Doc Guard',p:'Value',s:'ok',d:'DU-E and NF-e values match the purchase order.',r:'Purchase order',k:['val']},
+  {a:'Weight Guard',p:'NF-e weight vs EHC',s:'ok',d:'24,000.0 kg matches the EHC net weight.',r:'EHC Part I',k:['nw']},
+  {a:'Registry Guard',p:'DU-E against Siscomex',s:'ok',d:'The declaration is found in Siscomex. NCM code, value and destination match.',r:'Siscomex via certification body',k:['st']}
+ ],
+ twin:{h:'Export clearance recorded',li:['Brazilian export clearance status added to the transaction record.','Consignment confirmed in transit.'],ev:'TWIN-DEMO-0001 · event: export.cleared',tag:'prop'}},
+{n:'Shipping and commercial documentation',loc:'Brazil / ocean',
+ intro:'The packing list, invoice, bill of lading and reefer data are reconciled against the certificate.',
+ docs:[
+  {t:'Packing list',ref:'PL-DEMO-2026-0731',rows:[['Lot','LOT-0819-A'],['Cartons','1,000','ct'],['Net weight','24,360.0 kg','pw'],['Container / seal','DEMU 4821907 / BR-7731905']]},
+  {t:'Commercial invoice',ref:'INV-DEMO-2026-0731',rows:[['Net weight','24,000.0 kg'],['Cartons','1,000'],['Invoice value','USD 148,800','iv']]},
+  {t:'Bill of Lading',ref:'BL-DEMO-0098123',rows:[['Vessel','MV Demo Atlantic'],['Port of loading','Santos'],['Port of discharge','Tilbury'],['Container','DEMU 4821907'],['Seal number','BR-7731905','seal']]},
+  {t:'Reefer data logger summary',ref:'LOGGER-DEMO · SETPOINT -18 °C',rows:[['Maximum reading','-14.2 °C','tmp'],['Exceedance','3 h 40 min on day 9','tmp']],tbl:{h:['Day','Reading (°C)'],r:[['1','-19.2'],['5','-19.0'],['9','-14.2','tmp'],['13','-18.6'],['17','-18.9']]},note:'Five of the logged days shown.'}
+ ],
+ checks:[
+  {a:'Cross-Doc Guard',p:'Packing list vs EHC net weight',s:'mis',d:'Packing list shows 24,360.0 kg. The EHC shows 24,000.0 kg. Difference: 360.0 kg.',r:'EHC Part I vs packing list',k:['pw']},
+  {a:'Cross-Doc Guard',p:'Carton count',s:'ok',d:'1,000 cartons on the packing list and the EHC.',r:'EHC Part I',k:['ct']},
+  {a:'Cross-Doc Guard',p:'Invoice value vs purchase order',s:'ok',d:'USD 148,800 matches the purchase order.',r:'Purchase order',k:['iv']},
+  {a:'Seal Guard',p:'Seal number',s:'ok',d:'BR-7731905 matches the EHC. Recorded for the identity check at the border.',r:'EHC Part I, B/L',k:['seal']},
+  {a:'Cold Chain Agent',p:'Reefer log vs -18 °C regime',s:'mis',d:'Maximum reading -14.2 °C for 3 h 40 min on day 9. This exceeds the frozen regime.',r:'Frozen storage requirement',k:['tmp']}
+ ],
+ twin:{h:'Cold chain status shared',li:['Permissioned stakeholders see the cold chain status during transit.','Seal number and B/L reference linked to the record. Temperature exceedance shown to insurer and buyer.'],ev:'TWIN-DEMO-0001 · event: coldchain.exceedance',tag:'prop'}},
+{n:'UK pre-arrival notification and import licensing',loc:'UK, IPAFFS / RPA',
+ intro:'The CHED-P reference and timing are checked, and licence needs are confirmed.',
+ docs:[
+  {t:'IPAFFS pre-notification (CHED-P)',ref:'PRE-NOTIFICATION · TILBURY BCP',rows:[['CHED-P reference','CHEDP.GB.2026.0412385','ched'],['Submitted','14 Sep 2026 · 4 working days before arrival','sub'],['Expected arrival','18 Sep 2026'],['Commodity','0202 30'],['Border Control Post','Tilbury']]},
+  {t:'EHC Part I, Box I.2 (excerpt)',ref:'EHC-DEMO-2026-00931',rows:[['CHED-P reference','CHEDP.GB.2026.0412358','ehc']]},
+  {t:'TRQ import licence',ref:'RURAL PAYMENTS AGENCY',rows:[['Quota 05.4453','Not claimed','trq'],['Licence needed','No','trq']]}
+ ],
+ checks:[
+  {a:'CHED Guard',p:'CHED-P reference vs EHC Box I.2',s:'mis',d:'The last digits are transposed: ...0412385 on the pre-notification, ...0412358 on the EHC.',r:'IPAFFS vs EHC Part I',k:['ched','ehc']},
+  {a:'Timing Guard',p:'Pre-notification timing',s:'ok',d:'Submitted at least one working day before arrival.',r:'IPAFFS',k:['sub']},
+  {a:'Licence Guard',p:'TRQ licence',s:'ok',d:'Quota not claimed, so no licence is needed.',r:'Rural Payments Agency',k:['trq']}
+ ],
+ twin:{h:'Pre-arrival status visible to agencies',li:['Port health and APHA see a consignment expected, with pre-checks completed.','One open mismatch on the CHED reference is shown with the record.'],ev:'TWIN-DEMO-0001 · event: prenotification.seen',tag:'prop'}},
+{n:'UK customs declaration',loc:'UK, HMRC CDS',
+ intro:'The declaration is cross-referenced against the documents already verified.',
+ docs:[
+  {t:'Customs import declaration (CDS)',ref:'CDS-DEMO-26-0001',rows:[['Commodity code','0202 30 90','cc'],['Importer EORI','GB000123456000'],['CHED-P reference (CHD)','CHEDP.GB.2026.0412385','ched'],['Declared net mass','24,000.0 kg','dw'],['Customs value','GBP 117,500'],['Tariff treatment','Third country duty (MFN)','tar']]}
+ ],
+ checks:[
+  {a:'Tariff Guard',p:'Commodity code',s:'ok',d:'0202 30 90 validated against the UK Global Tariff.',r:'UK Global Tariff',k:['cc']},
+  {a:'Weight Guard',p:'Declared mass vs packing list',s:'mis',d:'Declared 24,000.0 kg. The packing list shows 24,360.0 kg. Resolve before clearance.',r:'Packing list vs CDS',k:['dw']},
+  {a:'CHED Guard',p:'CHED reference present',s:'rev',d:'The reference matches the pre-notification but not the EHC (see phase 07).',r:'CDS vs EHC Part I',k:['ched']},
+  {a:'Tariff Guard',p:'Tariff treatment',s:'ok',d:'Third country duty applies. No quota claimed.',r:'UK Global Tariff',k:['tar']}
+ ],
+ twin:{h:'Customs status linked',li:['Declaration status and duty outcome logged for importer and buyer records.'],ev:'TWIN-DEMO-0001 · event: customs.declared',tag:'prop'}},
+{n:'Border Control Post arrival checks',loc:'UK, Tilbury BCP',
+ intro:'A pre-verified findings signal reaches the border post before the consignment does.',
+ docs:[
+  {t:'BCP check record',ref:'TILBURY · ARRIVAL 18 SEP 2026',rows:[['Documentary check','100% · selected'],['Identity check','Risk-based · selected'],['Seal read on arrival','BR-7731905','seal'],['Physical check','Sampling pending','phys'],['APHA OV documentary outcome','Awaiting IPAFFS','oc']]},
+  {t:'Laboratory sampling request',ref:'HORMONE RESIDUE · MICROBIOLOGY',rows:[['Hormone residue sample','Awaiting result','lab'],['Microbiological sample','Awaiting result','lab']]}
+ ],
+ checks:[
+  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open mismatches from phases 06, 07 and 08, so the border team can plan its checks.',r:'Consignment findings'},
+  {a:'Seal Guard',p:'Seal on arrival',s:'ok',d:'BR-7731905 matches the B/L and the EHC.',r:'B/L, EHC Part I',k:['seal']},
+  {a:'Outcome Reader',p:'APHA OV documentary outcome',s:'nc',d:'Not yet available from IPAFFS, so this check could not run.',r:'IPAFFS',k:['oc']},
+  {a:'Lab Result Guard',p:'Physical and lab results',s:'nc',d:'Results are pending. Nothing to compare with thresholds yet.',r:'BCP sampling',k:['phys','lab']}
+ ],
+ twin:{h:'Border outcomes recorded',li:['Timestamped check outcomes linked to the CHED-P reference.','Audit log visible to permissioned parties: importer, insurer, buyer.'],ev:'TWIN-DEMO-0001 · event: bcp.recorded',tag:'prop'}},
+{n:'Post-BCP movement and ongoing compliance',loc:'UK, first destination',
+ intro:'Follow-up obligations are tracked and the evidence bundle is indexed.',
+ docs:[
+  {t:'Post-BCP obligations',ref:'FIRST DESTINATION · NORTHGATE MEATS LTD',rows:[['CHED-P Part II','Awaiting APHA completion','p2'],['72-hour OV notification','Not required (no VC-bearing cuts)','ov72'],['Record retention','12 months from arrival','ret']]},
+  {t:'Evidence index',ref:'DOCUMENT REFERENCE INDEX',rows:[['Documents indexed','Contract, EHC, RE, NF-e, packing list, invoice, B/L, reefer log, CHED-P, CDS, BCP record','idx']]}
+ ],
+ checks:[
+  {a:'Completion Guard',p:'CHED-P Part II',s:'nc',d:'APHA clearance is not yet recorded, so this check could not run.',r:'IPAFFS',k:['p2']},
+  {a:'Notification Guard',p:'72-hour OV notification',s:'ok',d:'No VC-bearing cuts, so the notification is not required.',r:'Post-BCP rules',k:['ov72']},
+  {a:'Evidence Agent',p:'Evidence bundle',s:'ok',d:'All documents indexed with references for audit.',r:'Evidence index',k:['idx']},
+  {a:'Retention Agent',p:'Retention period',s:'ok',d:'Document set held for the 12-month period.',r:'Retention rule',k:['ret']}
+ ],
+ twin:{h:'Findings and hashes committed',li:['Findings and verified document hashes committed on IOTA Rebased as a Verifiable Credential.','Sponsored transactions: no token needed by importer or exporter.'],ev:'TWIN-DEMO-0001 · hash 4be1…c90d (illustrative)',tag:'prop'}},
+{n:'Environmental and social compliance',loc:'UK, ongoing',
+ intro:'Farm locations and statutory duties are screened for forward-looking due diligence.',
+ docs:[
+  {t:'Deforestation screening summary',ref:'LOT-0819-A · MAPBIOMAS / PRODES',rows:[['Farms screened','14'],['Clear','13'],['Flagged','1 (F-07)','geo'],['CAR registry','14 of 14 active','car'],['IBAMA embargo list','F-07 listed','ib']]},
+  {t:'Importer obligations',ref:'NORTHGATE MEATS LTD',rows:[['Modern Slavery Act statement','Not supplied','ms'],['Environment Act 2021, Schedule 17','Secondary legislation pending','ea']]}
+ ],
+ checks:[
+  {a:'Geo Screen',p:'Farm polygons vs PRODES',s:'rev',d:'1 of 14 farms flagged (F-07). Same farm as the production-phase flag.',r:'MapBiomas, PRODES',k:['geo']},
+  {a:'Registry Guard',p:'CAR status',s:'ok',d:'All 14 farms have an active Rural Environmental Registry entry.',r:'CAR',k:['car']},
+  {a:'Statute Watch',p:'Environment Act 2021, Schedule 17',s:'nc',d:'Secondary legislation is pending. The rule is not yet in force, so there is nothing to check.',r:'Environment Act 2021',k:['ea']},
+  {a:'Statute Watch',p:'Modern Slavery Act statement',s:'rev',d:'The importer is in scope. No statement was supplied.',r:'Modern Slavery Act 2015',k:['ms']},
+  {a:'Partner Check',p:'IBAMA embargo list',s:'rev',d:'Farm F-07 appears on the embargo list (illustrative entry). The other 13 farms do not. Confirm with the exporter.',r:'IBAMA via certification body',k:['ib']}
+ ],
+ twin:{h:'Environmental status visible to buyers',li:['Risk screen and CAR status shown to buyers and institutional clients.','Alignment with the EU Digital Product Passport structure for food commodities.'],ev:'TWIN-DEMO-0001 · event: environmental.recorded',tag:'prop'}}
+];
+
+var OVD=[
+['Animal identity','SISBOV','MAPA / SISBOV','api','Pre-shipment','Certification body','',1],
+['Animal identity','CAR (Rural Environmental Registry)','SICAR','api','Pre-shipment','Certification body','',0],
+['Animal identity','Herd declaration','State / Agricultural Defense','paper','Pre-shipment','Certification body','',1],
+['Animal identity','Vaccination (Foot-and-Mouth)','State Veterinary Services','na','','','No longer required. FMD vaccination has been discontinued in Brazil.',1],
+['Movement','GTA (Animal Transit Permit)','States / MAPA','paper','Pre-shipment','Certification body','',1],
+['Movement','Health certificate','Veterinarian / State','paper','Pre-shipment','Certification body','',1],
+['Production','Feedlot record','MAPA / State','paper','Pre-shipment','Certification body','',0],
+['Production','Feed records','Producer','paper','Pre-shipment','Certification body','Own production protocol.',0],
+['Production','Veterinary records','Producer','paper','Pre-shipment','Certification body','Part of the general production protocol and management plan.',0],
+['Slaughter','SIF registration','MAPA SIF','paper','Pre-shipment','Meatpacker','',1],
+['Slaughter','Ante-mortem inspection','SIF','paper','Pre-shipment','Meatpacker','',1],
+['Slaughter','Post-mortem inspection','SIF','paper','Post-slaughter','Meatpacker','',1],
+['Slaughter','Slaughter batch','Meatpacker','paper','Pre-shipment','Meatpacker','',1],
+['Laboratory','COA (certificate of analysis)','Accredited laboratories','paper','Post-slaughter','Meatpacker','',1],
+['Laboratory','Residues and contaminants','Laboratories','paper','Post-slaughter','Meatpacker','',1],
+['Logistics','Cold chain temperature','Logistics operators','paper','Post-slaughter','Meatpacker','',1],
+['Logistics','Transport records','Carriers','paper','Pre-slaughter','Meatpacker','',0],
+['Logistics','Storage','Meatpackers / warehouses','paper','Pre-slaughter','Meatpacker','',0],
+['Environmental','CAR geolocation','SICAR','api','Pre-shipment','Certification body','',0],
+['Environmental','IBAMA embargoes','IBAMA','api','Pre-shipment','Certification body','',0],
+['Environmental','Land use','Geospatial','paper','Pre-shipment','Certification body','',0],
+['Export','CSI / CZI (international sanitary certificate)','MAPA','paper','Post-slaughter','Meatpacker','',1],
+['Export','DU-E (SISCOMEX)','Federal Revenue','paper','Post-slaughter','Meatpacker','',0],
+['Export','Certificate of origin','Chambers of commerce','paper','Post-slaughter','Meatpacker','',0],
+['Export','Packing list / invoice','Exporter','paper','Post-slaughter','Meatpacker','',0],
+['Export','EHC registry cross-check','MAPA / SIGSIF','api','Post-slaughter','Certification body','',1],
+['Export','DU-E registry cross-check','SISCOMEX','api','Post-slaughter','Certification body','',0]
+];
+var OVMAP={
+0:['SIF registration'],
+2:['SISBOV','CAR (Rural Environmental Registry)','Herd declaration','Vaccination (Foot-and-Mouth)','GTA (Animal Transit Permit)','Health certificate','Feedlot record','Feed records','Veterinary records','Slaughter batch','Ante-mortem inspection','Post-mortem inspection','COA (certificate of analysis)','Residues and contaminants'],
+3:['CSI / CZI (international sanitary certificate)','EHC registry cross-check'],
+4:['DU-E (SISCOMEX)','DU-E registry cross-check','Certificate of origin'],
+5:['Packing list / invoice','Cold chain temperature','Transport records','Storage'],
+10:['CAR geolocation','IBAMA embargoes','Land use']
+};
+var OVRES={
+'SISBOV':{s:'ok',d:'The animal ID range matches the batch on the commercial invoice. 14 of 14 farms returned.'},
+'CAR (Rural Environmental Registry)':{s:'ok',d:'14 of 14 farm entries are active in SICAR.'},
+'EHC registry cross-check':{s:'ok',d:'The certificate is found in the registry. Issue date, SIF number and lot match the uploaded copy.'},
+'DU-E registry cross-check':{s:'ok',d:'The declaration is found in Siscomex. NCM code, value and destination match.'},
+'CAR geolocation':{s:'rev',d:'14 farm polygons returned and screened. The polygon for F-07 overlaps a flagged area.'},
+'IBAMA embargoes':{s:'rev',d:'F-07 appears on the embargo list (illustrative entry). The other 13 farms do not.'}
+};
+function ovItems(i){return (OVMAP[i]||[]).map(function(n){return OVD.filter(function(x){return x[1]===n})[0]})}
+function ovHTML(i,ran){
+  var it=ovItems(i);if(!it.length)return '';
+  var chk=it.filter(function(x){return x[3]==='api'}).length,held=it.filter(function(x){return x[3]==='paper'}).length;
+  var h='<div class="card ov"><div class="sec-title"><span class="label">Independent validation · Brazilian partners</span></div><h3>Records VeriPura can obtain and check in Brazil.</h3><p style="font-size:14.5px;color:var(--ink2);margin-bottom:10px;max-width:80ch">Beyond the uploaded documents, VeriPura’s Brazilian partners supply these records for this phase. Checks against government registries run through the certification body. Other records are requested from the partner and held on file for audit and border-post requests.</p>';
+  h+='<div class="legend"><span><i class="dot ok"></i>Independently checked: '+chk+'</span><span><i class="dot" style="background:var(--blue);border-color:var(--blue)"></i>Held on file: '+held+'</span></div>';
+  function row(x){
+    var ran_=ran;
+    var kind=x[3],r=OVRES[x[1]],tag;
+    if(kind==='api')tag=ran_&&r?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>';
+    else if(kind==='paper')tag='<span class="tg prop">On file</span>';
+    else tag='<span class="tg nc">Not applicable</span>';
+    var chips='<span class="tg '+(kind==='api'?'ok':'prop')+'" style="font-size:10px;padding:2px 6px'+(kind==='na'?';background:var(--nc-bg);color:var(--nc)':'')+'">'+(kind==='api'?'Independently checked':kind==='paper'?'Record held on file':'No record needed')+'</span>'+(x[7]?'<span class="tg prop" style="font-size:10px;padding:2px 6px">Shared with port health via TWIN</span>':'');
+    var sub=[x[2],x[4],x[5]?'Provided by '+x[5].toLowerCase():''].filter(Boolean).join(' · ')+(x[6]?' · '+x[6]:'');
+    return '<div class="ovr"><div><div class="nm">'+esc(x[1])+'</div><div class="chips">'+chips+'</div><div class="sub">'+esc(sub)+'</div>'+(kind==='api'&&ran_&&r?'<div class="res">'+esc(r.d)+'</div>':'')+'</div><div>'+tag+'</div></div>';
+  }
+  var groups=[],gi={};
+  it.forEach(function(x){if(!(x[0] in gi)){gi[x[0]]=groups.length;groups.push({c:x[0],items:[]})}groups[gi[x[0]]].items.push(x)});
+  h+='<div style="display:flex;justify-content:flex-end;margin:4px 0"><button class="btn" id="ovAll" style="min-height:36px;padding:6px 12px;font-size:13px">Expand all</button></div>';
+  groups.forEach(function(g){
+    var key=i+'|'+g.c,na=g.items.filter(function(x){return x[3]==='api'}).length,pp=g.items.filter(function(x){return x[3]==='paper'}).length,nn=g.items.filter(function(x){return x[3]==='na'}).length;
+    var parts=[];if(na)parts.push(na+' independently checked');if(pp)parts.push(pp+' on file');if(nn)parts.push(nn+' not applicable');
+    var worstS=null;if(ran)g.items.forEach(function(x){var r=OVRES[x[1]];if(x[3]==='api'&&r){if(r.s==='rev')worstS='rev';else if(!worstS)worstS='ok'}});
+    h+='<details class="ovg" data-key="'+esc(key)+'"'+(ST.ovOpen[key]?' open':'')+'><summary><span class="chev">\u203a</span><span class="gn">'+esc(g.c)+'</span><span class="gc">'+g.items.length+' record'+(g.items.length===1?'':'s')+'</span><span class="gs">'+parts.join(' \u00b7 ')+'</span>'+(worstS?'<span class="tg '+worstS+'">'+LBL[worstS]+'</span>':'')+'</summary>'+g.items.map(row).join('')+'</details>';
+  });
+  return h+'<div class="cap">Illustrative example. Registry results shown here are fictional.</div></div>';
+}
+function ovWire(){
+  document.querySelectorAll('#ov details.ovg').forEach(function(d){d.addEventListener('toggle',function(){ST.ovOpen[d.dataset.key]=d.open;sync()})});
+  var b=document.getElementById('ovAll');
+  function sync(){if(!b)return;var all=document.querySelectorAll('#ov details.ovg'),open=document.querySelectorAll('#ov details.ovg[open]');b.textContent=(open.length===all.length)?'Collapse all':'Expand all'}
+  if(b){b.onclick=function(){var all=document.querySelectorAll('#ov details.ovg'),open=document.querySelectorAll('#ov details.ovg[open]'),want=open.length!==all.length;all.forEach(function(d){d.open=want;ST.ovOpen[d.dataset.key]=want});sync()};sync()}
+}
+function ovReport(){
+  var tot={api:0,paper:0,na:0},rows='';
+  Object.keys(OVMAP).forEach(function(k){ovItems(+k).forEach(function(x){tot[x[3]]++;if(x[3]==='api'){var r=OVRES[x[1]],ran=ST.ran[+k];rows+='<tr class="lnk" data-j="'+k+'"><td class="mono">'+pad(+k+1)+'</td><td><b>'+esc(x[1])+'</b><div style="color:var(--ink2)">'+esc(ran?r.d:'Runs when the phase checks run.')+'</div></td><td>'+(ran?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>')+'</td></tr>'}})});
+  return '<div class="card" style="margin-top:16px"><h3>Independent validation through Brazilian partners.</h3><p style="color:var(--ink2);margin-bottom:12px">Across the 11 phases, '+tot.api+' record types are checked independently against Brazilian registries and '+tot.paper+' more are supplied by the partners and held on file. '+tot.na+' is not applicable.</p><table class="t"><thead><tr><th>Phase</th><th>Independent check</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+var ST={ovOpen:{},cur:-1,ran:{},tab:{},busy:false,play:false};
+var $=function(s,r){return (r||document).querySelector(s)};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function worst(i){var c=P[i].checks,o={mis:4,rev:3,nc:2,ok:1},w=null;c.forEach(function(x){if(!w||o[x.s]>o[w])w=x.s});return w}
+function totals(){var t={ok:0,rev:0,mis:0,nc:0};P.forEach(function(p,i){if(ST.ran[i])p.checks.forEach(function(c){t[c.s]++})});return t}
+function pad(n){return (n<10?'0':'')+n}
+function nav(){
+  $('#phaseNav').innerHTML=P.map(function(p,i){
+    var d=ST.ran[i]?worst(i):'';
+    return '<button class="nav-i'+(ST.cur===i?' on':'')+'" data-go="'+i+'"><span class="n">'+pad(i+1)+'</span><span class="t">'+p.n+'</span><span class="dot '+d+'" title="'+(d?LBL[d]:'Not run')+'"></span></button>';
+  }).join('');
+  document.querySelectorAll('.nav-i[data-go]').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur)});
+  document.querySelectorAll('aside .nav-i').forEach(function(b){b.onclick=function(){go(+b.dataset.go)}});
+}
+function paper(doc,i,applied){
+  var h='<div class="paper"><span class="stamp">ILLUSTRATIVE</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
+  doc.rows.forEach(function(r){h+='<div class="row"'+(r[2]?' data-k="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></div>'});
+  if(doc.tbl){h+='<table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
+    doc.tbl.r.forEach(function(r){var k=r[doc.tbl.h.length];h+='<tr'+(k?' data-k="'+k+'"':'')+'>'+r.slice(0,doc.tbl.h.length).map(function(x){return '<td>'+esc(x)+'</td>'}).join('')+'</tr>'});h+='</tbody></table>'}
+  if(doc.note)h+='<div class="note">'+esc(doc.note)+'</div>';
+  return h+'</div>';
+}
+function mark(i){
+  P[i].checks.forEach(function(c){(c.k||[]).forEach(function(k){document.querySelectorAll('[data-k="'+k+'"]').forEach(function(e){e.className=e.className.replace(/f-\w+/g,'').trim();e.classList.add('f-'+c.s)})})});
+}
+function findHTML(c,i,x){return '<div class="find '+c.s+'" data-i="'+x+'" tabindex="0" role="button" aria-label="Show in document"><div class="h"><span class="p">'+esc(c.p)+'</span><span class="tg '+c.s+'">'+LBL[c.s]+'</span></div><div class="a">'+esc(c.a.toUpperCase())+'</div><div class="d">'+esc(c.d)+'</div><div class="r">Rule and source: '+esc(c.r)+'</div></div>'}
+function twinHTML(t){return '<div class="twin"><div class="sec-title"><span class="label">Visibility layer (TWIN)</span><span class="tg '+t.tag+'">'+(t.tagText||'Proposed model')+'</span></div><h4>'+esc(t.h)+'</h4><ul>'+t.li.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul><div class="ev">'+esc(t.ev)+'</div></div>'}
+function sum(i){var c=P[i].checks,m=c.filter(function(x){return x.s==='mis'}).length,r=c.filter(function(x){return x.s==='rev'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Review: '+m+' mismatch'+(m===1?'':'es')+', '+r+' flag'+(r===1?'':'s')+', '+n+' not checked.'}
+function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+function view(){
+  var v=$('#view'),i=ST.cur;
+  if(i===-1)return overview(v);
+  if(i===11)return report(v);
+  var p=P[i],tab=ST.tab[i]||0,ran=ST.ran[i];
+  var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF 11 · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn" '+(ran||ST.busy?'disabled':'')+'>'+(ran?'Checks complete':'Run checks')+'</button></div>';
+  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Illustrative documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d,i)+'</div>'}).join('')+'</div><div class="cap">Illustrative example. A fictional consignment. Select a finding to see where it comes from.</div></section>';
+  h+='<section aria-label="Findings"><div class="sec-title"><span class="label">VeriPura findings</span></div><div id="finds"></div><div id="twin"></div></section></div>';
+  h+='<div id="ov"></div>';
+  h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="play">Play the full walkthrough</button><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
+  v.innerHTML=h;
+  $('#topTitle').textContent='Phase '+pad(i+1)+' · '+p.loc;
+  var f=$('#finds');
+  $('#ov').innerHTML=ovHTML(i,!!ran);ovWire();
+  if(ran){f.innerHTML='<div class="result-line">'+sum(i)+' Your team makes the decision.</div>'+p.checks.map(function(c,x){return findHTML(c,i,x)}).join('');$('#twin').innerHTML=twinHTML(p.twin);mark(i)}
+  else f.innerHTML='<div class="empty">Checks have not run for this phase.<br>Select <b>Run checks</b> to start.</div>';
+  wire(i);
+}
+function wire(i){
+  var rb=$('#runBtn');if(rb)rb.onclick=function(){runPhase(i)};
+  document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){ST.tab[i]=+b.dataset.tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t===b)});document.querySelectorAll('.docp').forEach(function(d){d.style.display=(+d.dataset.doc===ST.tab[i])?'':'none'})}});
+  $('#prev').onclick=function(){go(i-1)};$('#next').onclick=function(){go(i+1)};
+  $('#play').onclick=function(){playAll(i)};
+  document.querySelectorAll('.find').forEach(function(e){var f=function(){focusFind(i,+e.dataset.i)};e.onclick=f;e.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();f()}}});
+}
+function focusFind(i,x){
+  var c=P[i].checks[x],k=(c.k||[])[0];if(!k)return;
+  P[i].docs.forEach(function(d,di){var s=JSON.stringify(d);if(s.indexOf('"'+k+'"')>-1&&(ST.tab[i]||0)!==di){var b=document.querySelectorAll('.tab')[di];if(b)b.click()}});
+  var el=document.querySelector('[data-k="'+k+'"]');
+  if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.animate([{outline:'3px solid #2E55C9'},{outline:'3px solid transparent'}],{duration:1200})}
+}
+async function runPhase(i){
+  if(ST.ran[i]||ST.busy)return;ST.busy=true;
+  var p=P[i],f=$('#finds'),rb=$('#runBtn');if(rb){rb.disabled=true;rb.textContent='Running checks'}
+  f.innerHTML='';
+  var fast=ST.play;
+  for(var x=0;x<p.checks.length;x++){
+    var run=document.createElement('div');run.className='running';run.innerHTML='<span class="spin"></span>'+esc(p.checks[x].a)+' · '+esc(p.checks[x].p);f.appendChild(run);
+    await sleep(fast?260:520);
+    var w=document.createElement('div');w.innerHTML=findHTML(p.checks[x],i,x);var node=w.firstChild;f.replaceChild(node,run);
+    node.onclick=(function(xx){return function(){focusFind(i,xx)}})(x);
+    (p.checks[x].k||[]).forEach(function(k){document.querySelectorAll('[data-k="'+k+'"]').forEach(function(e){e.classList.add('f-'+p.checks[x].s)})});
+  }
+  ST.ran[i]=true;ST.busy=false;
+  var ovel=$('#ov');if(ovel&&ST.cur===i){ovel.innerHTML=ovHTML(i,true);ovWire()}
+  if(ST.cur!==i){return}
+  var rl=document.createElement('div');rl.className='result-line';rl.textContent=sum(i)+' Your team makes the decision.';f.insertBefore(rl,f.firstChild);
+  await sleep(fast?200:350);
+  $('#twin').innerHTML=twinHTML(p.twin);
+  if(rb){rb.textContent='Checks complete'}
+  nav();
+}
+async function playAll(from){
+  ST.play=true;
+  for(var i=from;i<11;i++){
+    if(!ST.play)break;
+    if(ST.cur!==i)go(i);
+    await sleep(300);
+    if(!ST.ran[i])await runPhase(i);
+    await sleep(900);
+  }
+  if(ST.play){go(11)}
+  ST.play=false;
+}
+function go(i){
+  if(i<-1||i>11)return;
+  if(ST.busy&&!ST.play)return;
+  if(ST.play&&ST.busy){return}
+  ST.cur=i;nav();view();window.scrollTo({top:0});
+}
+function overview(v){
+  $('#topTitle').textContent='Demonstration';
+  var t=totals();
+  v.innerHTML='<h2>Brazilian beef to the United Kingdom</h2><p class="lede">Follow one fictional consignment through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.</p>'
+  +'<div class="stats"><div class="stat"><span class="label">Phases</span><b>11</b></div><div class="stat"><span class="label">Documents shown</span><b>'+P.reduce(function(a,p){return a+p.docs.length},0)+'</b></div><div class="stat"><span class="label">Checks</span><b>'+P.reduce(function(a,p){return a+p.checks.length},0)+'</b></div><div class="stat"><span class="label">Phases run</span><b>'+Object.keys(ST.ran).length+'</b></div></div>'
+  +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Frozen boneless beef cuts, HS 0202 30</dd><dt>Quantity</dt><dd>24,000 kg · 1,000 cartons</dd><dt>Exporter</dt><dd>Frigorífico Serra Verde Ltda. (fictional), SIF 9012</dd><dt>Importer</dt><dd>Northgate Meats Ltd (fictional)</dd><dt>Route</dt><dd>Santos to Tilbury, container DEMU 4821907</dd><dt>Purchase order</dt><dd>'+C.po+'</dd></dl></div>'
+  +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Pick a phase and select <b>Run checks</b>, or play the whole walkthrough. Select any finding to see the document field it relates to.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
+  +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div><span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p></div></div></div>';
+  $('#start').onclick=function(){go(0)};$('#playall').onclick=function(){playAll(0)};
+}
+function report(v){
+  $('#topTitle').textContent='Findings report';
+  var t=totals(),n=Object.keys(ST.ran).length,rows='',order={mis:0,rev:1,nc:2};
+  var all=[];P.forEach(function(p,i){if(ST.ran[i])p.checks.forEach(function(c){all.push({i:i,c:c})})});
+  var act=all.filter(function(x){return x.c.s!=='ok'}).sort(function(a,b){return order[a.c.s]-order[b.c.s]||a.i-b.i});
+  rows=act.map(function(x){return '<tr class="lnk" data-j="'+x.i+'"><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td><td class="mono">'+pad(x.i+1)+'</td><td><b>'+esc(x.c.p)+'</b><div style="color:var(--ink2)">'+esc(x.c.d)+'</div></td></tr>'}).join('');
+  var trail=all.map(function(x,k){return '<tr><td class="mono">'+pad(x.i+1)+'</td><td>'+esc(x.c.a)+'</td><td>'+esc(x.c.p)+'</td><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td></tr>'}).join('');
+  v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases run: '+n+' of 11.'):'No phases have been run yet. Run checks in the workflow, or play the full walkthrough, to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
+  +'<div class="stats"><div class="stat ok"><span class="label">Matched</span><b>'+t.ok+'</b></div><div class="stat rev"><span class="label">Review</span><b>'+t.rev+'</b></div><div class="stat mis"><span class="label">Mismatch</span><b>'+t.mis+'</b></div><div class="stat nc"><span class="label">Not checked</span><b>'+t.nc+'</b></div></div>'
+  +(n?'<div class="card"><h3>What to review and fix</h3><table class="t"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')
+  +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Mismatch, Review and Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
+  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Illustrative example. A fictional consignment of frozen boneless beef.</div></div>':'')
+  +'<div class="pager"><button class="btn" id="back">Back to phase 11</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
+  document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
+  $('#back').onclick=function(){go(10)};$('#print').onclick=function(){window.print()};
+  $('#again').onclick=function(){ST.ran={};ST.tab={};ST.play=false;go(-1)};
+}
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);$('#themeIco').textContent=t==='dark'?'☾':'☀';try{localStorage.setItem('vp-demo-theme',t)}catch(e){}}
+$('#themeBtn').onclick=function(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')};
+var saved=null;try{saved=localStorage.getItem('vp-demo-theme')}catch(e){}
+setTheme(saved||'dark');
+nav();view();
+</script>
+</body>
+</html>
