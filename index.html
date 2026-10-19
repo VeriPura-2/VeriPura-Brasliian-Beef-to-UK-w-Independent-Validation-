@@ -183,6 +183,24 @@ body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api as
 .call pre .k{color:#7fb2ff}.call pre .s{color:#9be3a6}.call pre .n{color:#ffcf7a}.call pre .h{color:#8aa0c0}
 .call .note{font-size:12.5px;color:#9db3d1;margin-top:8px;font-family:var(--sans,inherit)}
 @media (max-width:1100px){.apigrid{grid-template-columns:1fr}}
+body.hosted{background:#eef1f6;color:#1c2430}
+body.hosted aside,body.hosted .top,body.hosted .banner{display:none!important}
+body.hosted .player{left:0}
+body.hosted main#view{max-width:none;background:#eef1f6;color:#1c2430}
+body.hosted #view h2{color:#1c2430}
+body.hosted #view .lede{color:#445}
+body.hosted .seg .label{color:#667}
+body.hosted .seg .sb{border-color:#cfd6df}
+body.hosted .seg button{background:#fff;color:#334}
+body.hosted .seg button.on{background:var(--gold-bg);color:var(--gold-ink)}
+#hostBar{position:sticky;top:0;z-index:6}
+#hostBar .bk{font:inherit;font-size:13.5px;font-weight:600;border:1.5px solid #cfd6df;background:#fff;color:#1c2430;border-radius:8px;padding:8px 12px;cursor:pointer;min-height:40px}
+#hostBar .bk:hover{border-color:#2E55C9}
+#hostBar select{font:inherit;font-size:14px;border:1.5px solid #cfd6df;background:#fff;color:#1c2430;border-radius:8px;padding:7px 9px;min-height:40px}
+#hostBar .seg .label{color:#667}
+#hostBar .seg .sb{border-color:#cfd6df}
+#hostBar .seg button{background:#fff;color:#334;min-height:36px}
+#hostBar .seg button.on{background:var(--gold-bg);color:var(--gold-ink)}
 .pickl{display:grid;gap:8px;margin:12px 0 18px}
 .pick{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;min-height:48px}
 .pick:hover{border-color:var(--blue)}
@@ -1432,7 +1450,7 @@ function docData(d){var f={};d.rows.forEach(function(r){f[snake(r[0])]=r[1]});va
 function findingObj(c,i,x){var t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[c.s],area:c.a,title:c.p,detail:c.d,rule_and_source:c.r,documents:t}}
 function findingsBody(i){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x)}),sm={matched:0,review:0,mismatch:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});return {consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm,findings:fs,decision:'Findings only. The decision rests with your team.'}}
 function apiSteps(){var s=[{t:'create'},{t:'req'}];P.forEach(function(p,i){if(!p.docs.length)return;s.push({t:'docs',i:i});s.push({t:API.upd==='callback'?'cb':'poll',i:i})});s.push({t:'share'});return s}
-function roleLong(r){var x=ROLES.filter(function(q){return q[0]===r})[0];return x?x[1]:r}
+function roleLong(r){if(r==='ff')return 'Freight forwarder (customs agent and carrier documents)';var x=ROLES.filter(function(q){return q[0]===r})[0];return x?x[1]:r}
 function callOf(st){
   var id=cnsId(),auth='Authorization: Bearer <token>',js='Content-Type: application/json',c={};
   if(st.t==='create'){var m={};CUR.meta.forEach(function(q){m[snake(q[0])]=q[1]});
@@ -1466,7 +1484,7 @@ function hostHTML(){
   var st=hostState(),id=curId(),tot={ok:0,rev:0,mis:0,nc:0};
   P.forEach(function(p,i){if(st.found[i])p.checks.forEach(function(c){tot[c.s]++})});
   var any=Object.keys(st.found).length,all=P.filter(function(p){return p.docs.length}).length;
-  var h='<h3>'+(SC===2?esc(impName(id))+' · client file':'Order · '+esc(startDoc(id)?startDoc(id).t:'')+'')+'</h3><div class="hsub">'+esc(CUR.name)+'</div>';
+  var h='<h3>'+(SC===2?esc(impName(id))+' · '+W().file:W().title+' · '+esc(startDoc(id)?startDoc(id).t:''))+'</h3><div class="hsub">'+esc(CUR.name)+'</div>';
   if(!st.created)return h+'<div class="hsub">Waiting for the first call. Press Play or Forward.</div><div class="hnote">This screen is built by the host system from the data it receives. It is not VeriPura\u2019s interface.</div>';
   h+='<div class="hsub">Compliance: '+(any===0?'awaiting documents':(any<all?'in progress':'all phases received'))+'</div>';
   if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' matched</span><span class="rev">'+tot.rev+' review</span>'+(tot.mis?'<span class="mis">'+tot.mis+' mismatch</span>':'')+'<span class="nc">'+tot.nc+' not checked</span></div>';
@@ -1481,7 +1499,7 @@ function apiView(v){
   API.steps=apiSteps();API.pos=Math.min(API.pos,API.steps.length);API.json=[];
   $('#topTitle').textContent='Data exchange';
   var seg=function(lab,key,opts){return '<div class="seg"><span class="label">'+lab+'</span><span class="sb">'+opts.map(function(o){return '<button data-k="'+key+'" data-v="'+o[0]+'" class="'+(API[key]===o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')+'</span></div>'};
-  var h='<h2>'+(SC===2?'Forwarder (Core)':'Importer (Core)')+'</h2><p class="lede" style="margin-bottom:12px">Their system and VeriPura Core exchange JSON over an API. The host decides what to show. Example payloads built from this consignment.</p>';
+  var h='<h2>'+(SC===2?W().brand:esc(partyName(curId()))+' \u00b7 '+W().title+' compliance')+'</h2><p class="lede" style="margin-bottom:12px">Their system and VeriPura Core exchange JSON over an API. The host decides what to show. Example payloads built from this consignment.</p>';
   h+='<div class="apihead">'+seg('Documents','mode',[['data','Extracted data'],['file','Files']])+seg('Updates','upd',[['callback','Callback'],['poll','Poll']])+'</div>';
   h+='<div class="apigrid"><section class="hostp" id="hostp"></section><section class="apip" id="apip"></section></div>';
   v.innerHTML=h;
@@ -1549,20 +1567,37 @@ function reqHTML(cur){
 function packCounts(id){var c={ok:0,rev:0,mis:0,nc:0};PK[id].phases.forEach(function(p){p.checks.forEach(function(x){c[x.s]++})});return c}
 function cnHTML(c){return '<span class="cn"><span class="ok">'+c.ok+' matched</span><span class="rev">'+c.rev+' review</span>'+(c.mis?'<span class="mis">'+c.mis+' mismatch</span>':'')+'<span class="nc">'+c.nc+' not checked</span></span>'}
 function impName(id){var x=PK[id].roles.filter(function(q){return q[0]==='imp'})[0];return x?x[1].replace(/^[^,]*,\s*/,''):''}
+
+var HT={2:'ff',3:'imp'};
+function ensureFF(){Object.keys(DOCVIS).forEach(function(t){var a=DOCVIS[t];if((a.indexOf('agt')>-1||a.indexOf('car')>-1)&&a.indexOf('ff')<0)a.push('ff')})}
+function expName(id){var x=PK[id].roles.filter(function(q){return q[0]==='exp'})[0];return x?x[1].replace(/^[^,]*,\s*/,''):''}
+function W(){
+  if(SC===2)return HT[2]==='ff'?{brand:'Forwarder platform',list:'Client queue',file:'client file'}:{brand:'Broker platform',list:'Client queue',file:'customs file'};
+  return HT[3]==='imp'?{brand:'trade platform',list:'Orders',title:'Order'}:{brand:'trade platform',list:'Shipments',title:'Shipment'};
+}
+function partyName(id){return (SC===3&&HT[3]==='exp')?expName(id):impName(id)}
 function hostBar(){
-  var hb=$('#hostBar');
-  if(SC===2)hb.innerHTML='<span class="hb">Forwarder platform</span><button class="ht'+(document.body.classList.contains('hl')?' on':'')+'" data-t="list">Client queue</button><button class="ht'+(document.body.classList.contains('hl')?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span><span class="pw">Illustrative host platform · Powered by VeriPura</span>';
-  else if(SC===3){var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0];hb.innerHTML='<span class="hb">'+esc(impName(cur))+' · trade platform</span><button class="ht'+(document.body.classList.contains('hl')?' on':'')+'" data-t="list">Orders</button><button class="ht'+(document.body.classList.contains('hl')?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span><span class="pw">Illustrative host platform · VeriPura Core™ inside</span>'}
-  hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(Object.keys(PK).filter(function(k){return PK[k]===CUR})[0])}});
+  var hb=$('#hostBar'),hl=document.body.classList.contains('hl'),cur=curId(),w=W();
+  var types=SC===2?[['ff','Forwarder'],['agt','Broker']]:[['imp','Importer'],['exp','Exporter']];
+  var h='<button class="bk" id="hbBack">← Back to demo</button><span class="hb">'+(SC===2?w.brand:esc(partyName(cur))+' · '+w.brand)+'</span>';
+  h+='<button class="ht'+(hl?' on':'')+'" data-t="list">'+w.list+'</button><button class="ht'+(hl?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span>';
+  h+='<span class="seg"><span class="label">I am</span><span class="sb">'+types.map(function(t){return '<button data-ty="'+t[0]+'" class="'+(HT[SC]===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</span></span>';
+  if(SC===3)h+='<select id="hbCo" aria-label="Company">'+Object.keys(PK).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(partyName(k))+'</option>'}).join('')+'</select>';
+  h+='<span class="pw">'+(SC===2?'Illustrative host platform · Powered by VeriPura':'Illustrative host platform · VeriPura Core™ inside')+'</span>';
+  hb.innerHTML=h;
+  $('#hbBack').onclick=function(){$('#scenSel').value='1';setScenario(1)};
+  hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(curId())}});
+  hb.querySelectorAll('[data-ty]').forEach(function(b){b.onclick=function(){HT[SC]=b.dataset.ty;if(document.body.classList.contains('hl'))showHost();else openFromHost(curId())}});
+  var co=$('#hbCo');if(co)co.onchange=function(){loadPack(this.value,-1);if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)};
 }
 function showHost(){
   pause();API.on=false;document.body.classList.remove('api');document.body.classList.add('hl');
-  var h='';
+  var w=W(),h='';
   if(SC===2){
-    h='<h2>Client queue</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a forwarder platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
+    h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a '+(HT[2]==='ff'?'forwarder':'broker')+' platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }else{
-    var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0];
-    h='<h2>Orders</h2><div class="hn">Open orders for '+esc(impName(cur))+'. The Compliance tab is provided by VeriPura Core™ inside this platform. Illustrative mock of an importer platform. Use Consignment in the sidebar to show another importer.</div><table><thead><tr><th>Order</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody><tr class="lnk" data-p="'+cur+'"><td><b>'+esc(startDoc(cur).t)+'</b></td><td>'+esc(PK[cur].name)+'</td><td>'+cnHTML(packCounts(cur))+'</td><td>Open</td></tr></tbody></table>';
+    var cur=curId();
+    h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' for '+esc(partyName(cur))+'. The Compliance tab is provided by VeriPura Core™ inside this platform. Illustrative mock of a trade platform. Use the company list above to show another company.</div><table><thead><tr><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody><tr class="lnk" data-p="'+cur+'"><td><b>'+esc(startDoc(cur).t)+'</b></td><td>'+esc(PK[cur].name)+'</td><td>'+cnHTML(packCounts(cur))+'</td><td>Open</td></tr></tbody></table>';
   }
   $('#host').innerHTML=h;
   document.querySelectorAll('#host tr.lnk').forEach(function(r){r.onclick=function(){openFromHost(r.dataset.p)}});
@@ -1571,7 +1606,7 @@ function showHost(){
 function openFromHost(id){
   document.body.classList.remove('hl');
   if(PK[id]!==CUR)loadPack(id,-1);
-  pause();var r=SC===2?'agt':'imp';ROLE=r;buildP(r);NP=P.length;build();rs.value=r;
+  pause();var r=HT[SC];if(r==='ff')ensureFF();ROLE=r;buildP(r);NP=P.length;build();if(r!=='ff')rs.value=r;
   API.on=true;API.pos=0;API.playing=false;API.steps=apiSteps();
   document.body.classList.add('api');ST.pos=0;ST.cur=-3;calc();nav();view();updPlayer();hostBar();window.scrollTo({top:0});
 }
@@ -1582,7 +1617,7 @@ function setScenario(n){
   if(n===1){document.body.classList.remove('hl','hosted');$('#startBtn').style.display='';loadPack(cur,-2)}
   else{document.body.classList.add('hosted');$('#startBtn').style.display='none';loadPack(cur,-1);showHost()}
 }
-$('#scenSel').innerHTML='<option value="1">Importer (Food)</option><option value="2">Forwarder (Core)</option><option value="3">Importer (Core)</option>';
+$('#scenSel').innerHTML='<option value="1">Importer (Food)</option><option value="3">Importer / Exporter (Core)</option><option value="2">Forwarder / Broker (Core)</option>';
 $('#scenSel').onchange=function(){setScenario(+this.value)};
 var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
