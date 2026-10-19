@@ -548,6 +548,7 @@ function go(i){if(i<-2||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0
 /* ---------- phase view ---------- */
 function view(){
   var v=$('#view'),i=ST.cur;
+  $('#packBar').style.display=(i>=0)?'none':'';
   if(i===-2)return intake(v);
   if(i===-1)return overview(v);
   if(i===NP)return report(v);
