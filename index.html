@@ -992,7 +992,8 @@ var PH=[
  ],
  checks:[
   {a:'Certificate Guard',p:'One certificate per medium-risk CHED',s:'ok',d:'Each of the eight medium-risk CHEDs links to one EHC model and one TRACES certificate number. None is shared and none is missing.',r:'Certificate and CHED map',k:['c1','c2','c3','c4','c5','c6','c7','c8','cert']},
-  {a:'Certificate Guard',p:'Commodity families against certificate models',s:'rev',d:'Lines group by chapter in a regular way: 0207 under GBHC330, 0203 and 0209 under GBHC310, 0201 under GBHC300, 1604 and 0305 under GBHC401, 0401 under GBHC412, 0407 under GBHC420. Raw sausages (1601) sit under GBHC350 while other 1601 lines sit under GBHC352. The scope of each model should be confirmed on the current GOV.UK list.',r:'Certificate and CHED map, GOV.UK model certificates',k:['c4','c5']},
+  {a:'Certificate Guard',p:'Commodity families against certificate models',s:'ok',d:'Each model matches its GOV.UK title: GBHC300 bovine fresh meat (0201), GBHC310 porcine fresh meat (0203, 0209), GBHC330 poultry meat (0207), GBHC350 meat preparations (raw sausages, 1601), GBHC352 meat products (cooked and cured, 1601, 1602, 0210), GBHC401 fishery products (1604, 0305), GBHC412 dairy products (0401), GBHC420 eggs (0407).',r:'GOV.UK model health certificates',k:['c1','c2','c3','c4','c5','c6','c7','c8']},
+  {a:'Certificate Guard',p:'Raw products under the meat products certificate',s:'rev',d:'Four lines of raw smoked frankfurters (surowe wędzone, 1601 00 99 11) sit under GBHC352 meat products. The ten raw sausage lines under GBHC350 are meat preparations. Your team should confirm which certificate fits the frankfurters.',r:'GOV.UK model health certificates, line sheet',k:['c4','c5']},
   {a:'Certificate Guard',p:'Weights per certificate',s:'nc',d:'The map gives a net mass for each certificate, for example 5,285.216 kg for GBHC352. The EHCs were not supplied, so the weights could not be compared.',r:'EHCs, certificate map',k:['ehc']},
   {a:'Pre-notification Guard',p:'CHED documents',s:'nc',d:'The nine CHEDs were not supplied. Only their references appear in the map, so notice periods and parties could not be checked.',r:'CHED documents',k:['chd']}
  ],
@@ -1074,6 +1075,265 @@ return {id:'maspo',name:'Poland groupage to UK, Maspo (real)',h2:'Mixed food gro
  trailNote:'Findings come from the supplied invoices and spreadsheet of one real consignment.',
  layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Registry checks for Poland, such as TRACES NT, are not part of this demonstration.</p>',
  phases:PH,roles:ROLES_M,docvis:DV,cls:CLS_M,ovd:[],ovmap:{},ovres:{},C:{}};
+})();
+
+PK.spices=(function(){
+var NSF='Not supplied with this consignment';
+var PH=[
+/* 1 */
+{n:'Exporter registration and eligibility',loc:'India',
+ intro:'Before an order ships, the exporter’s registrations are read and the spice categories are matched to the UK controls that apply on 1 January 2026 and later.',
+ docs:[
+  {t:'Exporter registrations',ref:'ILLUSTRATIVE · EXAMPLE SPICES PVT LTD, KOCHI',real:0,rows:[['Exporter','Example Spices Pvt Ltd, Kochi (fictional)'],['Import Export Code (DGFT)','0000000000','iec'],['Spices Board registration','Registered exporter, certificate on file','sb'],['FSSAI licence','Licence with export listed','fs'],['Products','Turmeric powder, cumin seeds, green cardamom']],note:'Illustrative. Numbers are placeholders.'},
+  {t:'UK control category table',ref:'FROM GB RULES IN FORCE 1 JAN 2026',real:0,rows:[['Turmeric (CN 0910 30)','High-risk, Annex II, 20% checks, certificate and test results','a1'],['Cumin seeds (CN 0909 31)','High-risk, Annex II, 20% checks, certificate and test results','a2'],['Green cardamom (CN 0908 31)','Annex I, 50% checks, no certificate','a3']],note:'For India, from the Dover Port Health notice of 1 January 2026 changes.'}
+ ],
+ checks:[
+  {a:'Exporter Guard',p:'Registrations present',s:'ok',d:'The exporter shows an Import Export Code, a Spices Board registration and an FSSAI licence with export listed.',r:'DGFT, Spices Board, FSSAI',k:['iec','sb','fs']},
+  {a:'Exporter Guard',p:'Registrations checked live',s:'nc',d:'The live registries were not queried, so the registrations could not be confirmed as valid.',r:'DGFT, Spices Board, FSSAI',k:['sb']},
+  {a:'Rules Agent',p:'Control category for each spice',s:'ok',d:'Turmeric and cumin seeds from India are Annex II, so each needs an official certificate and laboratory results. Green cardamom is Annex I at 50%, with no certificate.',r:'HRFNAO Annex I and II, changes of 1 January 2026',k:['a1','a2','a3']},
+  {a:'Alert Watch',p:'Food alerts for Indian spices',s:'nc',d:'Live alert feeds were not queried for this demonstration.',r:'FSA alerts, RASFF'}
+ ],
+ twin:{h:'Transaction record created',li:['Exporter registrations and control categories recorded for importer and port health.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0301 · event: eligibility.recorded',tag:'prop'}},
+/* 2 */
+{n:'Product, lots and commercial invoice',loc:'India',
+ intro:'The invoice fixes products, lots, quantities and terms. Later checks compare everything against it.',
+ docs:[
+  {t:'Commercial invoice',ref:'ILLUSTRATIVE · INV-DEMO-0457',real:0,rows:[['Seller','Example Spices Pvt Ltd, Kochi'],['Buyer','Example Foods UK Ltd, Felixstowe (fictional)'],['Invoice date','25 September 2026'],['Terms','CIF Felixstowe'],['Container','DEMU1234567, seal DEM00457','ctr'],['Total','USD 69,600','tot']],tbl:{h:['Product','CN','Lot','Net kg','USD'],r:[['Turmeric powder','0910 30 00','TUR-26-118','8,000','16,800','l1'],['Cumin seeds','0909 31 00','CUM-26-072','6,000','22,800','l2'],['Green cardamom','0908 31 00','CAR-26-031','1,250','30,000','l3']]},note:'Net total 15,250 kg.'}
+ ],
+ checks:[
+  {a:'Product Guard',p:'Line values against the invoice total',s:'ok',d:'16,800, 22,800 and 30,000 add up to USD 69,600.',r:'Invoice',k:['l1','l2','l3','tot']},
+  {a:'Product Guard',p:'Commodity codes',s:'ok',d:'The codes match the products: 0910 30 turmeric, 0909 31 cumin seeds neither crushed nor ground, 0908 31 cardamom.',r:'Invoice, UK Global Tariff',k:['l1','l2','l3']},
+  {a:'Product Guard',p:'Lot numbers present',s:'ok',d:'Each line has a lot number, so laboratory reports can be matched to lots.',r:'Invoice',k:['l1','l2','l3']},
+  {a:'Product Guard',p:'Tariff and preference rates',s:'nc',d:'Duty rates under the UK-India agreement, in force since 15 July 2026, were not confirmed for these codes.',r:'UK Integrated Online Tariff',k:['tot']}
+ ],
+ twin:{h:'Invoice recorded',li:['Products, lots and quantities recorded against the consignment.','Available to importer and insurer.'],ev:'TWIN-DEMO-0302 · event: invoice.recorded',tag:'prop'}},
+/* 3 */
+{n:'Laboratory results and official certificate',loc:'India',
+ intro:'For Annex II spices the exporting country issues an official certificate, backed by laboratory results no more than 6 months older than the certificate.',
+ docs:[
+  {t:'Laboratory reports',ref:'ILLUSTRATIVE · EXAMPLE ANALYTICAL LABORATORY, KOCHI',real:0,rows:[['Laboratory','Example Analytical Laboratory, Kochi (fictional)'],['Accreditation','Certificate not attached','acc']],tbl:{h:['Product','Lot','Sampled','Report date','Pesticides','Ethylene oxide','Aflatoxin'],r:[['Turmeric','TUR-26-118','17 Sep 2026','23 Sep 2026','Within limits','Not detected','Within limits','t1'],['Cumin seeds','CUM-26-072','02 Mar 2026','09 Mar 2026','Within limits','Not detected','Within limits','c1'],['Green cardamom','CAR-26-031','17 Sep 2026','23 Sep 2026','Within limits','Not detected','Within limits','k1']]}},
+  {t:'Official certificate (Spices Board)',ref:'ILLUSTRATIVE · SB/OC/2026/0457',real:0,rows:[['Issued by','Spices Board, Ministry of Commerce and Industry, India'],['Date of issue','29 September 2026','cd'],['Consignee','Example Foods UK Ltd, Felixstowe'],['Turmeric','TUR-26-118 · 8,000 kg','cl'],['Cumin seeds','CUM-26-072 · 6,000 kg','cl'],['Cardamom','Not covered (Annex I)','card'],['Original','Sent by courier on 1 October 2026. A scan is attached.','orig']],note:'Illustrative. The issuing authority is the Spices Board per its circulars for UK spice exports.'}
+ ],
+ checks:[
+  {a:'Certificate Guard',p:'Turmeric report age against certificate',s:'ok',d:'The report is dated 23 September 2026, six days before the certificate date of 29 September 2026. The limit is 6 months.',r:'HRFNAO Annex II, report no more than 6 months before the certificate',k:['t1','cd']},
+  {a:'Certificate Guard',p:'Cumin report age against certificate',s:'mis',d:'The cumin report is dated 9 March 2026, more than 6 months and 20 days before the certificate date of 29 September 2026. The limit is 6 months, so the report is too old.',r:'HRFNAO Annex II, report no more than 6 months before the certificate',k:['c1','cd']},
+  {a:'Certificate Guard',p:'Lots on the reports and the certificate',s:'ok',d:'Lots TUR-26-118 and CUM-26-072 appear on both the laboratory reports and the certificate.',r:'Laboratory reports, certificate',k:['t1','c1','cl']},
+  {a:'Laboratory Agent',p:'Ethylene oxide results',s:'ok',d:'All three reports show ethylene oxide not detected. It is not permitted in the UK.',r:'Laboratory reports, FSA controls on Indian spices',k:['t1','c1','k1']},
+  {a:'Certificate Guard',p:'Quantities on the certificate against the invoice',s:'ok',d:'8,000 kg turmeric and 6,000 kg cumin match the invoice lines.',r:'Certificate, commercial invoice',k:['cl']},
+  {a:'Certificate Guard',p:'Original certificate',s:'rev',d:'Only a scan is attached. The original must travel with the consignment and be presented at the border post. It was sent by courier.',r:'HRFNAO Annex II, original certificate with the consignment',k:['orig']},
+  {a:'Certificate Guard',p:'Cardamom outside the certificate',s:'ok',d:'Cardamom is Annex I, so it needs no certificate. Its report is held on file.',r:'HRFNAO Annex I, 1 January 2026 changes',k:['card','k1']},
+  {a:'Laboratory Agent',p:'Laboratory accreditation',s:'nc',d:'No accreditation certificate is attached, so the laboratory’s status could not be checked.',r:'Laboratory accreditation',k:['acc']}
+ ],
+ twin:{h:'Certificate and results recorded',li:['Certificate reference, laboratory report dates and lots recorded.','Port health can see the dates before the container arrives. Proposed.'],ev:'TWIN-DEMO-0303 · event: certificate.recorded',tag:'prop'}},
+/* 4 */
+{n:'Export clearance and shipment',loc:'India to the UK',
+ intro:'The container leaves India by sea. VeriPura compares the packing list, the shipping bill and the bill of lading.',
+ docs:[
+  {t:'Packing list',ref:'ILLUSTRATIVE · PL-DEMO-0457',real:0,rows:[['Packages','Turmeric 400 bags, cumin 300 bags, cardamom 50 bags','pk'],['Net weight','15,250 kg','nw'],['Gross weight','15,402.5 kg','gw'],['Container and seal','DEMU1234567 · DEM00457','ctr']]},
+  {t:'Shipping bill',ref:'ILLUSTRATIVE · SB-DEMO-0457',real:0,rows:[['Shipping bill date','30 September 2026'],['Port of export','Nhava Sheva (JNPT)'],['Declared net weight','15,250 kg','nw'],['Product codes','0910 30 00, 0909 31 00, 0908 31 00']]},
+  {t:'Bill of lading',ref:'ILLUSTRATIVE · BL-DEMO-0457',real:0,rows:[['Carrier','Example Line (fictional)'],['Port of loading / discharge','Nhava Sheva / Felixstowe'],['Container and seal','DEMU1234567 · DEM00457','ctr'],['Packages','750','pk'],['Gross weight','15,520 kg','gw'],['Shipped on board','4 October 2026'],['Expected arrival','30 October 2026','eta']]}
+ ],
+ checks:[
+  {a:'Transport Guard',p:'Container and seal across documents',s:'ok',d:'DEMU1234567 and seal DEM00457 are the same on the packing list and the bill of lading.',r:'Packing list, bill of lading',k:['ctr']},
+  {a:'Transport Guard',p:'Package count',s:'ok',d:'400, 300 and 50 bags add up to 750, the number on the bill of lading.',r:'Packing list, bill of lading',k:['pk']},
+  {a:'Transport Guard',p:'Gross weight',s:'rev',d:'The packing list shows 15,402.5 kg gross and the bill of lading shows 15,520 kg. The 117.5 kg difference should be explained before the declaration.',r:'Packing list, bill of lading',k:['gw']},
+  {a:'Customs Guard',p:'Net weight on the shipping bill',s:'ok',d:'15,250 kg matches the packing list.',r:'Shipping bill, packing list',k:['nw']},
+  {a:'Transport Guard',p:'Certificate issued before shipment',s:'ok',d:'The certificate (29 September) and the shipping bill (30 September) both precede shipment on board on 4 October.',r:'Certificate, shipping bill, bill of lading',k:['eta']}
+ ],
+ twin:{h:'Shipment recorded',li:['Container, seal and sailing recorded against the consignment.','Expected arrival of 30 October shared with the importer and port health.'],ev:'TWIN-DEMO-0304 · event: shipment.departed',tag:'prop'}},
+/* 5 */
+{n:'UK pre-notification',loc:'Great Britain',
+ intro:'The importer pre-notifies the spices on a CHED-D at least one working day before arrival. VeriPura checks it against the certificate and the invoice.',
+ docs:[
+  {t:'CHED-D, Part I',ref:'ILLUSTRATIVE · CHEDD.GB.2026.0000457',real:0,rows:[['Importer','Example Foods UK Ltd, Felixstowe'],['Consignor','Example Spices Pvt Ltd, Kochi'],['Border control post','Felixstowe'],['Accompanying document','Official certificate SB/OC/2026/0457','oc'],['Expected arrival','30 October 2026, 06:00','pn'],['Notified','27 October 2026, 11:00','pn'],['Container','DEMU1234567 · DEM00457','ctr']],tbl:{h:['Product','CN','Annex shown','Net kg'],r:[['Turmeric','0910 30 00','Annex II','8,000','d1'],['Cumin seeds','0909 31 00','Annex II','6,000','d2'],['Green cardamom','0908 31 00','Annex II','1,250','d3']]}}
+ ],
+ checks:[
+  {a:'Pre-notification Guard',p:'CHED type',s:'ok',d:'A CHED-D is the right document for high-risk food not of animal origin.',r:'IPAFFS, HRFNAO',k:['oc']},
+  {a:'Pre-notification Guard',p:'Notice before arrival',s:'ok',d:'Notified on 27 October for arrival on 30 October, more than one working day ahead.',r:'BTOM pre-notification',k:['pn']},
+  {a:'Pre-notification Guard',p:'Certificate reference',s:'ok',d:'SB/OC/2026/0457 is the reference on the official certificate.',r:'CHED-D, certificate',k:['oc']},
+  {a:'Rules Agent',p:'Annex shown for cardamom',s:'rev',d:'The CHED-D shows green cardamom as Annex II. From 1 January 2026 it is Annex I at 50%, with no certificate. The importer should correct the entry.',r:'HRFNAO Annex I, 1 January 2026 changes',k:['d3']},
+  {a:'Pre-notification Guard',p:'Net weights against the invoice',s:'ok',d:'8,000, 6,000 and 1,250 kg match the invoice.',r:'CHED-D, commercial invoice',k:['d1','d2','d3']},
+  {a:'Pre-notification Guard',p:'Container and seal',s:'ok',d:'DEMU1234567 and seal DEM00457 match the bill of lading.',r:'CHED-D, bill of lading',k:['ctr']}
+ ],
+ twin:{h:'Pre-notification recorded',li:['CHED-D reference, certificate and container linked to one record.','Port health and agent see the same references.'],ev:'TWIN-DEMO-0305 · event: prenotification.recorded',tag:'prop'}},
+/* 6 */
+{n:'Customs import declaration and origin',loc:'Great Britain',
+ intro:'The agent declares the goods on CDS with the CHED-D, and claims preference with an origin declaration under the UK-India agreement.',
+ docs:[
+  {t:'Customs import declaration (CDS)',ref:'ILLUSTRATIVE · MRN DEMO',real:0,rows:[['Declarant','Example Customs Agent Ltd (fictional)'],['Importer','Example Foods UK Ltd'],['Origin country','India'],['Document code C678','CHEDD.GB.2026.0000457','ched'],['Origin proof code 9001','IN-OD-2026-0475','od'],['Preference claimed','Yes, UK-India agreement','pref']],tbl:{h:['Item','CN','Net kg','Value USD'],r:[['1','0910 30 00','8,000','16,800'],['2','0909 31 00','6,000','22,800'],['3','0908 31 00','1,250','30,000']]}},
+  {t:'Origin declaration (UK-India agreement)',ref:'ILLUSTRATIVE · ON THE INVOICE',real:0,rows:[['Reference','IN-OD-2026-0457','od2'],['Statement','The products are of Indian origin under the agreement'],['Exporter','Example Spices Pvt Ltd']]}
+ ],
+ checks:[
+  {a:'Customs Guard',p:'CHED-D reference in the declaration',s:'ok',d:'Document code C678 gives CHEDD.GB.2026.0000457, the CHED-D reference.',r:'CDS, CHED-D',k:['ched']},
+  {a:'Customs Guard',p:'Origin declaration reference',s:'mis',d:'The CDS quotes IN-OD-2026-0475. The origin declaration says IN-OD-2026-0457. The two digits are swapped, so the preference claim does not match its proof.',r:'CDS origin proof code 9001, origin declaration',k:['od','od2']},
+  {a:'Customs Guard',p:'Values against the invoice',s:'ok',d:'The three item values match the invoice lines and add up to USD 69,600.',r:'CDS, commercial invoice'},
+  {a:'Customs Guard',p:'Duty rate under the agreement',s:'nc',d:'Spice rates under the UK-India agreement were not confirmed, so the duty could not be checked.',r:'UK Integrated Online Tariff',k:['pref']}
+ ],
+ twin:{h:'Declaration linked',li:['CDS reference, CHED-D and origin declaration linked to one record.','Release status shared with the importer.'],ev:'TWIN-DEMO-0306 · event: declaration.linked',tag:'prop'}},
+/* 7 */
+{n:'Border control, Felixstowe',loc:'Felixstowe',
+ intro:'Annex II consignments are sampled at 20%. The port health authority records its checks and decision on Part II of the CHED-D.',
+ docs:[
+  {t:'CHED-D, Part II controls',ref:'ILLUSTRATIVE · CHEDD.GB.2026.0000457',real:0,rows:[['Documentary check','Satisfactory','dc'],['Original certificate presented','Yes','oc'],['Identity and physical check','Selected for sampling, turmeric lot TUR-26-118','sam'],['Laboratory test','Sample taken 30 October 2026, result pending','lab'],['Decision','Pending the laboratory result','dec']],note:'Illustrative.'}
+ ],
+ checks:[
+  {a:'Border Guard',p:'Documentary check against earlier findings',s:'rev',d:'The documentary check is recorded as satisfactory. Earlier checks found a cumin laboratory report older than 6 months and an origin declaration reference that does not match. These should be reviewed before release.',r:'CHED-D Part II, phases 03 and 06',k:['dc']},
+  {a:'Border Guard',p:'Original certificate presented',s:'ok',d:'Recorded as presented, which resolves the scan-only note from phase 03.',r:'CHED-D Part II',k:['oc']},
+  {a:'Border Guard',p:'Laboratory sampling',s:'nc',d:'A turmeric sample was taken and the result is pending. The decision cannot be checked until it arrives.',r:'CHED-D Part II',k:['sam','lab','dec']}
+ ],
+ twin:{h:'Control status recorded',li:['Sampling and pending result recorded against the consignment.','Importer and agent see the status. Proposed.'],ev:'TWIN-DEMO-0307 · event: border.sampling',tag:'prop'}}
+];
+var ROLES_S=[['all','All documents (VeriPura team view)','Sees every document and finding.','All'],
+['imp','Importer, Example Foods UK Ltd','Sees the documents it is party to, the customs and border documents, and its own obligations.','Importer'],
+['exp','Exporter, Example Spices Pvt Ltd','Sees the registrations, laboratory, certificate, export and shipping documents it issued or holds.','Exporter'],
+['agt','Customs agent','Sees the customs, border and shipping documents it needs to declare and clear the goods.','Agent'],
+['bcp','Felixstowe port health','Sees the health, certificate, laboratory and border documents needed for official checks. Commercial documents are not shared.','Port health'],
+['car','Shipping line','Sees the transport documents only.','Carrier'],
+['ins','Insurer','Sees the invoice and transport documents needed to assess cargo risk.','Insurer']];
+var DV={
+'Exporter registrations':['imp','exp','bcp'],
+'UK control category table':['imp','exp','agt','bcp'],
+'Commercial invoice':['imp','exp','agt','ins'],
+'Laboratory reports':['imp','exp','bcp'],
+'Official certificate (Spices Board)':['imp','exp','agt','bcp'],
+'Packing list':['imp','exp','agt','car','ins'],
+'Shipping bill':['exp','agt'],
+'Bill of lading':['imp','exp','agt','car','ins'],
+'CHED-D, Part I':['imp','exp','agt','bcp'],
+'Customs import declaration (CDS)':['imp','agt'],
+'Origin declaration (UK-India agreement)':['imp','exp','agt'],
+'CHED-D, Part II controls':['imp','agt','bcp']
+};
+var CLS_S=[[/invoice/i,'Commercial invoice'],[/laboratory report|laboratory reports|ethylene oxide|accreditation/i,'Laboratory reports'],[/certificate/i,'Official certificate (Spices Board)'],[/packing list/i,'Packing list'],[/shipping bill/i,'Shipping bill'],[/bill of lading/i,'Bill of lading'],[/CHED-D\b/,'CHED-D, Part I'],[/\bCDS\b/,'Customs import declaration (CDS)'],[/origin declaration/i,'Origin declaration (UK-India agreement)']];
+return {id:'spices',name:'India spices (illustrative)',h2:'Spices, India to Great Britain',
+ lede:'Follow an illustrative container of turmeric, cumin seeds and cardamom from Kochi to Felixstowe, through seven phases. The documents are built from published rules for this route. Turmeric and cumin are Annex II, so they need an official certificate and laboratory results. Cardamom is Annex I. You see the checks VeriPura runs and the findings your team reviews.',
+ meta:[['Product','Turmeric powder, cumin seeds, green cardamom'],['Quantity','15,250 kg net · 750 bags · one container'],['Exporter','Example Spices Pvt Ltd, Kochi (fictional)'],['Importer','Example Foods UK Ltd, Felixstowe (fictional)'],['Route','Nhava Sheva to Felixstowe by sea'],['Controls','HRFNAO Annex II (turmeric, cumin), Annex I (cardamom), CHED-D'],['Certificate','Spices Board official certificate'],['Trade terms','UK-India agreement, in force 15 July 2026']],
+ banner:'<span class="tg rev">Illustrative</span><span>This consignment is illustrative. The companies are fictional and the documents are built from published rules for this trade route. Some findings are seeded to show how VeriPura works. Rules to confirm: the certificate issuer for each spice and the duty rates. VeriPura shows findings. Your team makes the decision.</span>',
+ docCap:'Every document in this pack is illustrative. Select a finding to see where it comes from.',
+ trailNote:'This is an illustrative consignment. Findings are seeded to show how the checks work.',
+ layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Checks with the Spices Board and accredited laboratories could be added. They are not part of this demonstration.</p>',
+ phases:PH,roles:ROLES_S,docvis:DV,cls:CLS_S,ovd:[],ovmap:{},ovres:{},C:{}};
+})();
+
+PK.berries=(function(){
+var NSF='Not supplied with this consignment';
+var PH=[
+/* 1 */
+{n:'Grower, packhouse and eligibility',loc:'Morocco',
+ intro:'Before packing, the grower and packhouse records are read and the plant health category for each berry is matched to the GB rules.',
+ docs:[
+  {t:'Grower and packhouse record',ref:'ILLUSTRATIVE · EXAMPLE BERRIES SARL, AGADIR',real:0,rows:[['Exporter','Example Berries SARL, Agadir (fictional)'],['Packhouse','Example Packhouse, Souss-Massa (fictional)'],['Crops','Blueberries (Vaccinium corymbosum), raspberries (Rubus idaeus)','crop'],['Farm audit','Certificate on file','aud']],note:'Illustrative.'},
+  {t:'GB plant health category table',ref:'FROM THE DEFRA PLANT HEALTH PORTAL',real:0,rows:[['Blueberries (Vaccinium)','Medium risk A: phytosanitary certificate and CHED-PP','c1'],['Raspberries (Rubus), fruit','Medium risk A: phytosanitary certificate and CHED-PP','c2']],note:'Rubus is also listed under high-risk plants. Fruit is Medium risk A.'}
+ ],
+ checks:[
+  {a:'Exporter Guard',p:'Grower and packhouse records present',s:'ok',d:'Exporter, packhouse, crops and a farm audit certificate are on file.',r:'Grower and packhouse record',k:['crop','aud']},
+  {a:'Rules Agent',p:'Plant health category',s:'ok',d:'Blueberries and raspberry fruit from Morocco are Medium risk A, so each needs a phytosanitary certificate and a CHED-PP.',r:'Defra plant health portal, BTOM risk categorisations',k:['c1','c2']},
+  {a:'Exporter Guard',p:'Moroccan authorisations',s:'nc',d:'The exporter’s authorisations with the Moroccan authorities (ONSSA and export control) were not supplied, so they could not be checked.',r:'ONSSA, EACCE',k:['aud']},
+  {a:'Alert Watch',p:'Plant health alerts',s:'nc',d:'Live plant health alert feeds were not queried for this demonstration.',r:'APHA, Defra'}
+ ],
+ twin:{h:'Transaction record created',li:['Grower, packhouse and crop categories recorded for importer and plant health inspectors.','Audit trail starts at this step.'],ev:'TWIN-DEMO-0401 · event: eligibility.recorded',tag:'prop'}},
+/* 2 */
+{n:'Product, lots and commercial documents',loc:'Morocco',
+ intro:'The invoice and the packing list fix quantities, cartons and pallets. Later checks compare against them.',
+ docs:[
+  {t:'Commercial invoice',ref:'ILLUSTRATIVE · INV-DEMO-0612',real:0,rows:[['Seller','Example Berries SARL, Agadir'],['Buyer','Example Fresh UK Ltd, Slough (fictional)'],['Invoice date','11 November 2026'],['Terms','CIP London Heathrow'],['Total','EUR 43,200','tot']],tbl:{h:['Product','CN','Net kg','EUR'],r:[['Blueberries','0810 40 50','4,800','33,600','b1'],['Raspberries','0810 20 10','1,200','9,600','r1']]}},
+  {t:'Packing list',ref:'ILLUSTRATIVE · PL-DEMO-0612',real:0,rows:[['Cartons','Blueberries 960 (5 kg), raspberries 400 (3 kg)','ct'],['Pallets','12','pl'],['Net weight','6,000 kg','nw'],['Gross weight','6,740 kg','gw']]}
+ ],
+ checks:[
+  {a:'Product Guard',p:'Invoice total against the lines',s:'ok',d:'33,600 and 9,600 add up to EUR 43,200.',r:'Invoice',k:['b1','r1','tot']},
+  {a:'Product Guard',p:'Net weight against the packing list',s:'ok',d:'4,800 kg and 1,200 kg make 6,000 kg, the packing list net weight. 960 cartons of 5 kg and 400 cartons of 3 kg give the same quantities.',r:'Invoice, packing list',k:['b1','r1','ct','nw']},
+  {a:'Product Guard',p:'Marketing standard',s:'ok',d:'Blueberries and raspberries fall under the general marketing standard, so no certificate of conformity is needed. Strawberries would need one.',r:'GB marketing standards for fresh fruit',k:['b1','r1']},
+  {a:'Product Guard',p:'Tariff codes and preference rates',s:'nc',d:'Codes 0810 40 50 and 0810 20 10, and preference rates under the UK-Morocco agreement and any seasonal quota, were not confirmed.',r:'UK Integrated Online Tariff',k:['tot']}
+ ],
+ twin:{h:'Invoice recorded',li:['Products, cartons and pallets recorded against the consignment.','Available to importer and insurer.'],ev:'TWIN-DEMO-0402 · event: invoice.recorded',tag:'prop'}},
+/* 3 */
+{n:'Phytosanitary certificate and residue results',loc:'Morocco',
+ intro:'A phytosanitary certificate must be issued no more than 13 days before or after the consignment leaves the country.',
+ docs:[
+  {t:'Phytosanitary certificate',ref:'ILLUSTRATIVE · ONSSA-DEMO-0612',real:0,rows:[['Issued by','ONSSA (fictional reference)','iss'],['Date of issue','11 November 2026','cd'],['Consignee','Example Fresh UK Ltd'],['Blueberries','Vaccinium corymbosum · 4,800 kg','p1'],['Raspberries','Rubus idaeus · 1,320 kg','p2'],['Place of origin','Souss-Massa, Morocco'],['Treatment and declarations','Free from quarantine pests, per the certificate wording']],note:'Illustrative. Confirm the issuing body and certificate name with the Moroccan authority.'},
+  {t:'Laboratory residue report',ref:'NOT SUPPLIED',real:3,rows:[['Document','Pesticide residue results for the lots','lab'],['Status',NSF,'lab']]}
+ ],
+ checks:[
+  {a:'Certificate Guard',p:'Species on the certificate',s:'ok',d:'The certificate names Vaccinium corymbosum and Rubus idaeus, the species of the blueberries and raspberries on the invoice.',r:'Phytosanitary certificate, invoice',k:['p1','p2']},
+  {a:'Certificate Guard',p:'Raspberry quantity against the invoice',s:'rev',d:'The certificate states 1,320 kg of raspberries. The invoice and the packing list show 1,200 kg. The 120 kg difference should be explained.',r:'Phytosanitary certificate, commercial invoice',k:['p2']},
+  {a:'Certificate Guard',p:'Certificate date against departure',s:'ok',d:'Issued on 11 November 2026, one day before the flight on 12 November. The limit is 13 days either side.',r:'GB plant health import rules, 13 days',k:['cd']},
+  {a:'Certificate Guard',p:'Issuing body',s:'nc',d:'The certificate names ONSSA. Whether ONSSA is the right body and the certificate form is current was not confirmed.',r:'Moroccan authority',k:['iss']},
+  {a:'Laboratory Agent',p:'Pesticide residue results',s:'nc',d:'No residue report was supplied. Limits are set by HSE CRD and contaminant limits by the FSA, so the lots could not be checked.',r:'Laboratory residue report',k:['lab']}
+ ],
+ twin:{h:'Certificate recorded',li:['Certificate reference, date and quantities recorded.','Plant health inspectors can see them before landing. Proposed.'],ev:'TWIN-DEMO-0403 · event: certificate.recorded',tag:'prop'}},
+/* 4 */
+{n:'Air freight and cold chain',loc:'Morocco to the UK',
+ intro:'The pallets fly from Casablanca to Heathrow. VeriPura compares the air waybill with the packing list and looks for the temperature record.',
+ docs:[
+  {t:'Air waybill',ref:'ILLUSTRATIVE · AWB-DEMO-0612',real:0,rows:[['Airline','Example Air Cargo (fictional)'],['Route','Casablanca (CMN) to London Heathrow (LHR)'],['Departure','12 November 2026, 20:10 (Morocco)','dep'],['Landing','12 November 2026, 22:50 (UK)','land'],['Pieces','Pallets 12 · cartons 1,360','pl'],['Gross weight','6,810 kg','gw'],['Nature of goods','Fresh blueberries and raspberries, keep chilled','nat']]},
+  {t:'Temperature record',ref:'NOT SUPPLIED',real:3,rows:[['Document','Data logger record from packing to handover','tmp'],['Status',NSF,'tmp']]}
+ ],
+ checks:[
+  {a:'Transport Guard',p:'Pallets and cartons',s:'ok',d:'12 pallets and 1,360 cartons match the packing list (960 plus 400 cartons).',r:'Air waybill, packing list',k:['pl']},
+  {a:'Transport Guard',p:'Gross weight',s:'rev',d:'The air waybill shows 6,810 kg and the packing list shows 6,740 kg. The 70 kg difference should be explained.',r:'Air waybill, packing list',k:['gw']},
+  {a:'Transport Guard',p:'Description of the goods',s:'ok',d:'Fresh blueberries and raspberries, keep chilled, fits the invoice and the phytosanitary certificate.',r:'Air waybill, invoice',k:['nat']},
+  {a:'Cold Chain Agent',p:'Temperature record',s:'nc',d:'No logger record was supplied, so the cold chain from packing to the airport could not be checked.',r:'Temperature record',k:['tmp']}
+ ],
+ twin:{h:'Flight recorded',li:['Flight, pallets and landing time recorded against the consignment.','Landing time can feed the notice-period check. Proposed.'],ev:'TWIN-DEMO-0404 · event: shipment.departed',tag:'prop'}},
+/* 5 */
+{n:'UK pre-notification and customs',loc:'Great Britain',
+ intro:'The importer pre-notifies on a CHED-PP at least 4 working hours before landing. The agent declares the goods on CDS.',
+ docs:[
+  {t:'CHED-PP, Part I',ref:'ILLUSTRATIVE · CHEDPP.GB.2026.0000612',real:0,rows:[['Importer','Example Fresh UK Ltd, Slough'],['Consignor','Example Berries SARL, Agadir'],['Border control post','London Heathrow plant BCP (example)'],['Accompanying document','Phytosanitary certificate ONSSA-DEMO-0612','pc'],['Landing','12 November 2026, 22:50','land'],['Notified','12 November 2026, 19:30','pn'],['Transport','Air waybill AWB-DEMO-0612','awb']],tbl:{h:['Commodity','Species','Net kg','Packages'],r:[['Blueberries','Vaccinium corymbosum','4,800','960 cartons','h1'],['Raspberries','Rubus idaeus','1,200','400 cartons','h2']]}},
+  {t:'Customs import declaration (CDS)',ref:'ILLUSTRATIVE · MRN DEMO',real:0,rows:[['Declarant','Example Customs Agent Ltd (fictional)'],['Origin country','Morocco'],['CHED-PP declared','CHEDPP.GB.2026.0000612','ched'],['Origin proof','EUR.1, preference claimed','pref'],['Invoice value','EUR 43,200']],tbl:{h:['Item','CN','Net kg'],r:[['1','0810 40 50','4,800'],['2','0810 20 10','1,200']]}}
+ ],
+ checks:[
+  {a:'Pre-notification Guard',p:'Notice before landing',s:'mis',d:'The CHED-PP was notified at 19:30 for landing at 22:50, 3 hours 20 minutes ahead. For air freight the rule is at least 4 working hours.',r:'GB plant health import rules, notice for air freight',k:['land','pn']},
+  {a:'Pre-notification Guard',p:'Certificate reference',s:'ok',d:'ONSSA-DEMO-0612 is the reference on the phytosanitary certificate.',r:'CHED-PP, phytosanitary certificate',k:['pc']},
+  {a:'Pre-notification Guard',p:'Quantities against the invoice',s:'ok',d:'4,800 kg and 1,200 kg, with 960 and 400 cartons, match the invoice and the packing list.',r:'CHED-PP, invoice, packing list',k:['h1','h2']},
+  {a:'Pre-notification Guard',p:'Air waybill reference',s:'ok',d:'AWB-DEMO-0612 is the air waybill number.',r:'CHED-PP, air waybill',k:['awb']},
+  {a:'Customs Guard',p:'CHED-PP reference in the declaration',s:'ok',d:'The CDS quotes CHEDPP.GB.2026.0000612, the CHED-PP reference.',r:'CDS, CHED-PP',k:['ched']},
+  {a:'Customs Guard',p:'Preference and quota',s:'nc',d:'A EUR.1 is claimed for preference under the UK-Morocco agreement. The rate and any seasonal quota were not confirmed.',r:'UK Integrated Online Tariff, UK-Morocco agreement',k:['pref']}
+ ],
+ twin:{h:'Pre-notification recorded',li:['CHED-PP, certificate and air waybill linked to one record.','Notification time against landing time shown to the importer. Proposed.'],ev:'TWIN-DEMO-0405 · event: prenotification.recorded',tag:'prop'}},
+/* 6 */
+{n:'Border control at the airport',loc:'London Heathrow',
+ intro:'Plant health inspectors check the documents and may inspect the goods. VeriPura reads what is recorded.',
+ docs:[
+  {t:'CHED-PP, Part II controls',ref:'ILLUSTRATIVE · CHEDPP.GB.2026.0000612',real:0,rows:[['Documentary check','Satisfactory','dc'],['Documentary check fee','GBP 5.25 per phytosanitary certificate','fee'],['Identity and physical check','Not selected','idc'],['Decision','Released, goods may move to the importer’s control point','dec']],note:'Illustrative.'}
+ ],
+ checks:[
+  {a:'Border Guard',p:'Documentary check fee',s:'ok',d:'GBP 5.25 per phytosanitary certificate is the documentary check fee in England.',r:'GB plant health import rules, check fees',k:['fee']},
+  {a:'Border Guard',p:'Documentary check against earlier findings',s:'rev',d:'The documentary check is recorded as satisfactory. Earlier checks found a late notification (3 hours 20 minutes before landing) and a raspberry quantity of 1,320 kg on the certificate against 1,200 kg on the invoice. These should be reviewed.',r:'CHED-PP Part II, phases 03 and 05',k:['dc']},
+  {a:'Border Guard',p:'Identity and physical check',s:'nc',d:'The consignment was not selected. The selection rate for these crops was not supplied, so it could not be checked.',r:'CHED-PP Part II',k:['idc']},
+  {a:'Border Guard',p:'Release decision',s:'ok',d:'The decision is recorded as released to the importer’s control point.',r:'CHED-PP Part II',k:['dec']}
+ ],
+ twin:{h:'Release recorded',li:['Decision and release time recorded against the consignment.','Importer and handler see the outcome. Proposed.'],ev:'TWIN-DEMO-0406 · event: border.released',tag:'prop'}}
+];
+var ROLES_B=[['all','All documents (VeriPura team view)','Sees every document and finding.','All'],
+['imp','Importer, Example Fresh UK Ltd','Sees the documents it is party to, the customs and border documents, and its own obligations.','Importer'],
+['exp','Exporter, Example Berries SARL','Sees the grower, certificate, export and shipping documents it issued or holds.','Exporter'],
+['agt','Customs agent','Sees the customs, border and shipping documents it needs to declare and clear the goods.','Agent'],
+['bcp','Plant health inspectors, airport','Sees the certificate, laboratory, cold chain and border documents needed for official checks. Commercial documents are not shared.','Inspectors'],
+['car','Airline and handler','Sees the transport documents only.','Carrier'],
+['ins','Insurer','Sees the invoice and transport documents needed to assess cargo risk.','Insurer']];
+var DV={
+'Grower and packhouse record':['imp','exp','bcp'],
+'GB plant health category table':['imp','exp','agt','bcp'],
+'Commercial invoice':['imp','exp','agt','ins'],
+'Packing list':['imp','exp','agt','car','ins'],
+'Phytosanitary certificate':['imp','exp','agt','bcp'],
+'Laboratory residue report':['imp','exp','bcp'],
+'Air waybill':['imp','exp','agt','car','ins'],
+'Temperature record':['imp','exp','car','ins','bcp'],
+'CHED-PP, Part I':['imp','exp','agt','bcp'],
+'Customs import declaration (CDS)':['imp','agt'],
+'CHED-PP, Part II controls':['imp','agt','bcp']
+};
+var CLS_B=[[/invoice/i,'Commercial invoice'],[/packing list/i,'Packing list'],[/phytosanitary certificate|\bcertificate\b/i,'Phytosanitary certificate'],[/air waybill/i,'Air waybill'],[/CHED-PP\b/,'CHED-PP, Part I'],[/\bCDS\b/,'Customs import declaration (CDS)'],[/residue report/i,'Laboratory residue report']];
+return {id:'berries',name:'Morocco berries, air (illustrative)',h2:'Fresh berries, Morocco to Great Britain by air',
+ lede:'Follow an illustrative air consignment of blueberries and raspberries from Agadir to London Heathrow, through six phases. The documents are built from published rules for this route. Both crops are Medium risk A, so each needs a phytosanitary certificate and a CHED-PP, notified at least 4 working hours before landing. You see the checks VeriPura runs and the findings your team reviews.',
+ meta:[['Product','Fresh blueberries and raspberries'],['Quantity','6,000 kg net · 1,360 cartons · 12 pallets'],['Exporter','Example Berries SARL, Agadir (fictional)'],['Importer','Example Fresh UK Ltd, Slough (fictional)'],['Route','Casablanca to London Heathrow by air'],['Controls','Phytosanitary certificate, CHED-PP, notice 4 working hours before landing'],['Trade terms','UK-Morocco Association Agreement, EUR.1']],
+ banner:'<span class="tg rev">Illustrative</span><span>This consignment is illustrative. The companies are fictional and the documents are built from published rules for this trade route. Some findings are seeded to show how VeriPura works. Rules to confirm: the Moroccan issuing bodies, the airport entry point, tariff codes and quotas. VeriPura shows findings. Your team makes the decision.</span>',
+ docCap:'Every document in this pack is illustrative. Select a finding to see where it comes from.',
+ trailNote:'This is an illustrative consignment. Findings are seeded to show how the checks work.',
+ layer3:'<span class="tg nc">Independent validation · not built for this route</span><p style="margin-top:8px;color:var(--ink2)">Checks with Moroccan authorities and laboratories could be added. They are not part of this demonstration.</p>',
+ phases:PH,roles:ROLES_B,docvis:DV,cls:CLS_B,ovd:[],ovmap:{},ovres:{},C:{}};
 })();
 
 /*PACKS*/
