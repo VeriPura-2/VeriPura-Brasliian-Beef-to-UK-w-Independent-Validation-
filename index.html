@@ -52,7 +52,7 @@ aside{width:272px;flex-shrink:0;background:var(--side);border-right:1px solid va
 .theme span{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:var(--gold-bg);transition:left .2s;display:grid;place-items:center;font-size:12px;color:var(--gold-ink)}
 :root[data-theme="dark"] .theme span{left:29px}
 .banner{margin:0 32px;margin-top:18px;border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--ink2);display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-main{padding:22px 32px 60px;max-width:1240px;width:100%}
+main{padding:22px 32px 130px;max-width:1240px;width:100%}
 h2{font-family:var(--serif);font-weight:400;font-size:34px;line-height:1.15;margin-bottom:6px}
 h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:10px}
 .lede{color:var(--ink2);font-size:16px;max-width:70ch;margin-bottom:18px}
@@ -95,7 +95,8 @@ h3{font-family:var(--serif);font-weight:400;font-size:22px;margin-bottom:10px}
 .f-mis{box-shadow:inset 3px 0 0 #A8352A}.f-rev{box-shadow:inset 3px 0 0 #A8660F}.f-ok{box-shadow:inset 3px 0 0 #2B8A3E}.f-nc{box-shadow:inset 3px 0 0 #44546B}
 .cap{font-size:12px;color:var(--mut);margin-top:8px}
 /* findings */
-.find{border:1px solid var(--line);border-left-width:4px;border-radius:10px;background:var(--card);padding:12px 14px;margin-bottom:10px;cursor:pointer;animation:in .35s ease both}
+.find{border:1px solid var(--line);border-left-width:4px;border-radius:10px;background:var(--card);padding:12px 14px;margin-bottom:10px;cursor:pointer}
+.find.new{animation:in .35s ease both}
 .find:hover{border-color:var(--blue)}
 .find.ok{border-left-color:var(--ok)}.find.rev{border-left-color:var(--rev)}.find.mis{border-left-color:var(--mis)}.find.nc{border-left-color:var(--nc)}
 .find .h{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
@@ -139,12 +140,38 @@ table.t tr.lnk{cursor:pointer}table.t tr.lnk:hover td{background:var(--tint)}
 .ovr .sub{font-size:13px;color:var(--mut);margin-top:2px}
 .ovr .res{font-size:14px;color:var(--ink2);margin-top:6px;animation:in .35s ease both}
 .ovr .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+button.stat{width:100%;text-align:left;cursor:pointer;font:inherit;color:inherit}
+button.stat:hover{border-color:var(--blue)}
+.stat .hint{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-top:8px}
+.player{position:fixed;left:272px;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:12px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 -6px 18px rgba(0,0,0,.18)}
+.player .btn{min-width:92px}
+.pmid{flex:1;min-width:200px}
+.pmid #pInfo{font-size:12px;letter-spacing:.06em;color:var(--ink2);display:block;margin-bottom:6px}
+.pbar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
+.pspd{display:flex;align-items:center;gap:8px}
+.pspd select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 10px;min-height:44px}
+.dov{position:fixed;inset:0;background:rgba(5,12,25,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
+.dov.open{opacity:1;pointer-events:all}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(780px,96vw);background:var(--bg);border-left:1px solid var(--line);z-index:41;transform:translateX(100%);transition:transform .25s;overflow:auto;padding:22px 24px 60px}
+.drawer.open{transform:none}
+.dhead{display:flex;align-items:flex-start;gap:14px;justify-content:space-between;margin-bottom:12px}
+.dhead h2{font-size:30px}
+.dg{border:1px solid var(--line);border-radius:12px;background:var(--card);margin:12px 0;padding:0 16px}
+.dg summary{display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer;list-style:none;min-height:48px;flex-wrap:wrap}
+.dg summary::-webkit-details-marker{display:none}
+.dg .chev{font-size:18px;color:var(--mut);transition:transform .2s;width:14px}
+.dg[open] .chev{transform:rotate(90deg)}
+.dg .gn{font-family:var(--serif);font-size:18px;flex:1;min-width:180px}
+.dg .gc{font-family:var(--mono);font-size:11px;color:var(--mut);letter-spacing:.06em;text-transform:uppercase}
+.dgb{padding:4px 0 16px}
+.dgb .paper{margin:14px 0}
 @keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 @keyframes sp{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
 @media (max-width:1100px){.cols{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:860px){.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
-@media print{aside,.top,.banner,.pager,.btn{display:none!important}body{background:#fff}main{max-width:none}}
+@media (max-width:860px){.player{left:0;padding:10px 18px}.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
+@media print{aside,.top,.banner,.pager,.btn,.player,.drawer,.dov{display:none!important}body{background:#fff}main{max-width:none}}
 </style>
 </head>
 <body>
@@ -171,6 +198,15 @@ table.t tr.lnk{cursor:pointer}table.t tr.lnk:hover td{background:var(--tint)}
   <div class="banner"><span class="tg prop">Illustrative example</span><span>All companies, documents and figures are fictional. VeriPura shows findings. Your team makes the decision.</span></div>
   <main id="view" tabindex="-1"></main>
 </div>
+<div class="player" role="group" aria-label="Walkthrough controls">
+  <button class="btn" id="pBack">Back</button>
+  <button class="btn gold" id="pPlay">Play</button>
+  <button class="btn" id="pFwd">Forward</button>
+  <div class="pmid"><span id="pInfo" class="mono">Not started</span><div class="pbar"><i id="pFill"></i></div></div>
+  <label class="pspd"><span class="label">Speed</span><select id="pSpeed"><option value="slow">Slow</option><option value="normal">Normal</option><option value="fast">Fast</option></select></label>
+</div>
+<div class="dov" id="dov"></div>
+<div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="dhead"><div><div class="label" id="drawerSub"></div><h2 id="drawerTitle"></h2></div><button class="btn" id="drawerClose">Close</button></div><div id="drawerBody"></div></div>
 <script>
 var C={po:'PO-2026-0418'};
 var LBL={ok:'Matched',rev:'Review',mis:'Mismatch',nc:'Not checked'};
@@ -378,20 +414,34 @@ var OVRES={
 'IBAMA embargoes':{s:'rev',d:'F-07 appears on the embargo list (illustrative entry). The other 13 farms do not.'}
 };
 function ovItems(i){return (OVMAP[i]||[]).map(function(n){return OVD.filter(function(x){return x[1]===n})[0]})}
+var ST={cur:-1,pos:0,playing:false,speed:'slow',timer:null,stopAt:0,tab:{},ovOpen:{}};
+var $=function(s,r){return (r||document).querySelector(s)};
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
+function pad(n){return (n<10?'0':'')+n}
+/* ---------- steps and derived state ---------- */
+var STEPS=[],ENTER=[],END=[],SH=[],TW=[];
+P.forEach(function(p,i){ENTER[i]=STEPS.length;STEPS.push({i:i,t:'enter'});p.checks.forEach(function(c,x){STEPS.push({i:i,t:'check',x:x})});STEPS.push({i:i,t:'twin'});END[i]=STEPS.length});
+STEPS.push({t:'report'});
+var DELAY={slow:{enter:3200,check:4200,twin:3600},normal:{enter:2200,check:2600,twin:2200},fast:{enter:1000,check:1200,twin:1000}};
+function calc(){SH=P.map(function(){return 0});TW=P.map(function(){return false});for(var k=0;k<ST.pos;k++){var s=STEPS[k];if(s.t==='check')SH[s.i]=s.x+1;else if(s.t==='twin')TW[s.i]=true}}
+function ranChecks(i){return SH[i]===P[i].checks.length}
+function done(i){return ranChecks(i)&&TW[i]}
+function worst(i){var o={mis:4,rev:3,nc:2,ok:1},w=null;P[i].checks.slice(0,SH[i]).forEach(function(x){if(!w||o[x.s]>o[w])w=x.s});return w}
+function totals(){var t={ok:0,rev:0,mis:0,nc:0};P.forEach(function(p,i){p.checks.slice(0,SH[i]).forEach(function(c){t[c.s]++})});return t}
+/* ---------- independent validation section ---------- */
 function ovHTML(i,ran){
   var it=ovItems(i);if(!it.length)return '';
   var chk=it.filter(function(x){return x[3]==='api'}).length,held=it.filter(function(x){return x[3]==='paper'}).length;
   var h='<div class="card ov"><div class="sec-title"><span class="label">Independent validation · Brazilian partners</span></div><h3>Records VeriPura can obtain and check in Brazil.</h3><p style="font-size:14.5px;color:var(--ink2);margin-bottom:10px;max-width:80ch">Beyond the uploaded documents, VeriPura’s Brazilian partners supply these records for this phase. Checks against government registries run through the certification body. Other records are requested from the partner and held on file for audit and border-post requests.</p>';
   h+='<div class="legend"><span><i class="dot ok"></i>Independently checked: '+chk+'</span><span><i class="dot" style="background:var(--blue);border-color:var(--blue)"></i>Held on file: '+held+'</span></div>';
   function row(x){
-    var ran_=ran;
     var kind=x[3],r=OVRES[x[1]],tag;
-    if(kind==='api')tag=ran_&&r?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>';
+    if(kind==='api')tag=ran&&r?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>';
     else if(kind==='paper')tag='<span class="tg prop">On file</span>';
     else tag='<span class="tg nc">Not applicable</span>';
     var chips='<span class="tg '+(kind==='api'?'ok':'prop')+'" style="font-size:10px;padding:2px 6px'+(kind==='na'?';background:var(--nc-bg);color:var(--nc)':'')+'">'+(kind==='api'?'Independently checked':kind==='paper'?'Record held on file':'No record needed')+'</span>'+(x[7]?'<span class="tg prop" style="font-size:10px;padding:2px 6px">Shared with port health via TWIN</span>':'');
     var sub=[x[2],x[4],x[5]?'Provided by '+x[5].toLowerCase():''].filter(Boolean).join(' · ')+(x[6]?' · '+x[6]:'');
-    return '<div class="ovr"><div><div class="nm">'+esc(x[1])+'</div><div class="chips">'+chips+'</div><div class="sub">'+esc(sub)+'</div>'+(kind==='api'&&ran_&&r?'<div class="res">'+esc(r.d)+'</div>':'')+'</div><div>'+tag+'</div></div>';
+    return '<div class="ovr"><div><div class="nm">'+esc(x[1])+'</div><div class="chips">'+chips+'</div><div class="sub">'+esc(sub)+'</div>'+(kind==='api'&&ran&&r?'<div class="res">'+esc(r.d)+'</div>':'')+'</div><div>'+tag+'</div></div>';
   }
   var groups=[],gi={};
   it.forEach(function(x){if(!(x[0] in gi)){gi[x[0]]=groups.length;groups.push({c:x[0],items:[]})}groups[gi[x[0]]].items.push(x)});
@@ -400,7 +450,7 @@ function ovHTML(i,ran){
     var key=i+'|'+g.c,na=g.items.filter(function(x){return x[3]==='api'}).length,pp=g.items.filter(function(x){return x[3]==='paper'}).length,nn=g.items.filter(function(x){return x[3]==='na'}).length;
     var parts=[];if(na)parts.push(na+' independently checked');if(pp)parts.push(pp+' on file');if(nn)parts.push(nn+' not applicable');
     var worstS=null;if(ran)g.items.forEach(function(x){var r=OVRES[x[1]];if(x[3]==='api'&&r){if(r.s==='rev')worstS='rev';else if(!worstS)worstS='ok'}});
-    h+='<details class="ovg" data-key="'+esc(key)+'"'+(ST.ovOpen[key]?' open':'')+'><summary><span class="chev">\u203a</span><span class="gn">'+esc(g.c)+'</span><span class="gc">'+g.items.length+' record'+(g.items.length===1?'':'s')+'</span><span class="gs">'+parts.join(' \u00b7 ')+'</span>'+(worstS?'<span class="tg '+worstS+'">'+LBL[worstS]+'</span>':'')+'</summary>'+g.items.map(row).join('')+'</details>';
+    h+='<details class="ovg" data-key="'+esc(key)+'"'+(ST.ovOpen[key]?' open':'')+'><summary><span class="chev">›</span><span class="gn">'+esc(g.c)+'</span><span class="gc">'+g.items.length+' record'+(g.items.length===1?'':'s')+'</span><span class="gs">'+parts.join(' · ')+'</span>'+(worstS?'<span class="tg '+worstS+'">'+LBL[worstS]+'</span>':'')+'</summary>'+g.items.map(row).join('')+'</details>';
   });
   return h+'<div class="cap">Illustrative example. Registry results shown here are fictional.</div></div>';
 }
@@ -412,24 +462,11 @@ function ovWire(){
 }
 function ovReport(){
   var tot={api:0,paper:0,na:0},rows='';
-  Object.keys(OVMAP).forEach(function(k){ovItems(+k).forEach(function(x){tot[x[3]]++;if(x[3]==='api'){var r=OVRES[x[1]],ran=ST.ran[+k];rows+='<tr class="lnk" data-j="'+k+'"><td class="mono">'+pad(+k+1)+'</td><td><b>'+esc(x[1])+'</b><div style="color:var(--ink2)">'+esc(ran?r.d:'Runs when the phase checks run.')+'</div></td><td>'+(ran?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>')+'</td></tr>'}})});
+  Object.keys(OVMAP).forEach(function(k){ovItems(+k).forEach(function(x){tot[x[3]]++;if(x[3]==='api'){var r=OVRES[x[1]],ran=ranChecks(+k);rows+='<tr class="lnk" data-j="'+k+'"><td class="mono">'+pad(+k+1)+'</td><td><b>'+esc(x[1])+'</b><div style="color:var(--ink2)">'+esc(ran?r.d:'Runs when the phase checks run.')+'</div></td><td>'+(ran?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>')+'</td></tr>'}})});
   return '<div class="card" style="margin-top:16px"><h3>Independent validation through Brazilian partners.</h3><p style="color:var(--ink2);margin-bottom:12px">Across the 11 phases, '+tot.api+' record types are checked independently against Brazilian registries and '+tot.paper+' more are supplied by the partners and held on file. '+tot.na+' is not applicable.</p><table class="t"><thead><tr><th>Phase</th><th>Independent check</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
-var ST={ovOpen:{},cur:-1,ran:{},tab:{},busy:false,play:false};
-var $=function(s,r){return (r||document).querySelector(s)};
-function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
-function worst(i){var c=P[i].checks,o={mis:4,rev:3,nc:2,ok:1},w=null;c.forEach(function(x){if(!w||o[x.s]>o[w])w=x.s});return w}
-function totals(){var t={ok:0,rev:0,mis:0,nc:0};P.forEach(function(p,i){if(ST.ran[i])p.checks.forEach(function(c){t[c.s]++})});return t}
-function pad(n){return (n<10?'0':'')+n}
-function nav(){
-  $('#phaseNav').innerHTML=P.map(function(p,i){
-    var d=ST.ran[i]?worst(i):'';
-    return '<button class="nav-i'+(ST.cur===i?' on':'')+'" data-go="'+i+'"><span class="n">'+pad(i+1)+'</span><span class="t">'+p.n+'</span><span class="dot '+d+'" title="'+(d?LBL[d]:'Not run')+'"></span></button>';
-  }).join('');
-  document.querySelectorAll('.nav-i[data-go]').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur)});
-  document.querySelectorAll('aside .nav-i').forEach(function(b){b.onclick=function(){go(+b.dataset.go)}});
-}
-function paper(doc,i,applied){
+/* ---------- documents and findings ---------- */
+function paper(doc){
   var h='<div class="paper"><span class="stamp">ILLUSTRATIVE</span><h4>'+esc(doc.t)+'</h4><div class="ref">'+esc(doc.ref)+'</div>';
   doc.rows.forEach(function(r){h+='<div class="row"'+(r[2]?' data-k="'+r[2]+'"':'')+'><span>'+esc(r[0])+'</span><span>'+esc(r[1])+'</span></div>'});
   if(doc.tbl){h+='<table><thead><tr>'+doc.tbl.h.map(function(x){return '<th>'+x+'</th>'}).join('')+'</tr></thead><tbody>';
@@ -437,115 +474,188 @@ function paper(doc,i,applied){
   if(doc.note)h+='<div class="note">'+esc(doc.note)+'</div>';
   return h+'</div>';
 }
+function docKeys(d){var k=[];d.rows.forEach(function(r){if(r[2])k.push(r[2])});if(d.tbl)d.tbl.r.forEach(function(r){var x=r[d.tbl.h.length];if(x)k.push(x)});return k}
+function clearMarks(root){root.querySelectorAll('[data-k]').forEach(function(e){e.className=e.className.replace(/\bf-\w+\b/g,'').trim()})}
 function mark(i){
-  P[i].checks.forEach(function(c){(c.k||[]).forEach(function(k){document.querySelectorAll('[data-k="'+k+'"]').forEach(function(e){e.className=e.className.replace(/f-\w+/g,'').trim();e.classList.add('f-'+c.s)})})});
+  var root=$('#docs');if(!root)return;clearMarks(root);
+  P[i].checks.slice(0,SH[i]).forEach(function(c){(c.k||[]).forEach(function(k){root.querySelectorAll('[data-k="'+k+'"]').forEach(function(e){e.className=e.className.replace(/\bf-\w+\b/g,'').trim();e.classList.add('f-'+c.s)})})});
 }
-function findHTML(c,i,x){return '<div class="find '+c.s+'" data-i="'+x+'" tabindex="0" role="button" aria-label="Show in document"><div class="h"><span class="p">'+esc(c.p)+'</span><span class="tg '+c.s+'">'+LBL[c.s]+'</span></div><div class="a">'+esc(c.a.toUpperCase())+'</div><div class="d">'+esc(c.d)+'</div><div class="r">Rule and source: '+esc(c.r)+'</div></div>'}
-function twinHTML(t){return '<div class="twin"><div class="sec-title"><span class="label">Visibility layer (TWIN)</span><span class="tg '+t.tag+'">'+(t.tagText||'Proposed model')+'</span></div><h4>'+esc(t.h)+'</h4><ul>'+t.li.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul><div class="ev">'+esc(t.ev)+'</div></div>'}
+function findHTML(c,i,x,isNew){return '<div class="find '+c.s+(isNew?' new':'')+'" data-i="'+x+'" tabindex="0" role="button" aria-label="Show in document"><div class="h"><span class="p">'+esc(c.p)+'</span><span class="tg '+c.s+'">'+LBL[c.s]+'</span></div><div class="a">'+esc(c.a.toUpperCase())+'</div><div class="d">'+esc(c.d)+'</div><div class="r">Rule and source: '+esc(c.r)+'</div></div>'}
+function twinHTML(t){return '<div class="twin"><div class="sec-title"><span class="label">Visibility layer (TWIN)</span><span class="tg '+t.tag+'">Proposed model</span></div><h4>'+esc(t.h)+'</h4><ul>'+t.li.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul><div class="ev">'+esc(t.ev)+'</div></div>'}
 function sum(i){var c=P[i].checks,m=c.filter(function(x){return x.s==='mis'}).length,r=c.filter(function(x){return x.s==='rev'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Review: '+m+' mismatch'+(m===1?'':'es')+', '+r+' flag'+(r===1?'':'s')+', '+n+' not checked.'}
-function sleep(ms){return new Promise(function(r){setTimeout(r,ms)})}
+/* ---------- navigation ---------- */
+function nav(){
+  $('#phaseNav').innerHTML=P.map(function(p,i){
+    var d=SH[i]>0?worst(i):'';
+    return '<button class="nav-i" data-go="'+i+'"><span class="n">'+pad(i+1)+'</span><span class="t">'+p.n+'</span><span class="dot '+d+'" title="'+(d?LBL[d]:'Not run')+'"></span></button>';
+  }).join('');
+  document.querySelectorAll('aside .nav-i').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur);b.onclick=function(){go(+b.dataset.go)}});
+}
+function go(i){if(i<-1||i>11)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
+/* ---------- phase view ---------- */
 function view(){
   var v=$('#view'),i=ST.cur;
   if(i===-1)return overview(v);
   if(i===11)return report(v);
-  var p=P[i],tab=ST.tab[i]||0,ran=ST.ran[i];
-  var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF 11 · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn" '+(ran||ST.busy?'disabled':'')+'>'+(ran?'Checks complete':'Run checks')+'</button></div>';
-  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Illustrative documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d,i)+'</div>'}).join('')+'</div><div class="cap">Illustrative example. A fictional consignment. Select a finding to see where it comes from.</div></section>';
+  var p=P[i],tab=ST.tab[i]||0;
+  var h='<div class="phase-head"><div><div class="num">PHASE '+pad(i+1)+' OF 11 · '+esc(p.loc.toUpperCase())+'</div><h2>'+p.n+'</h2><p class="lede" style="margin-bottom:0">'+p.intro+'</p></div><span class="sp"></span><button class="btn gold" id="runBtn"></button></div>';
+  h+='<div class="cols"><section aria-label="Documents"><div class="sec-title"><span class="label">Illustrative documents</span></div><div class="tabs" role="tablist">'+p.docs.map(function(d,x){return '<button class="tab'+(x===tab?' on':'')+'" data-tab="'+x+'">'+esc(d.t)+'</button>'}).join('')+'</div><div id="docs">'+p.docs.map(function(d,x){return '<div class="docp" data-doc="'+x+'" style="'+(x===tab?'':'display:none')+'">'+paper(d)+'</div>'}).join('')+'</div><div class="cap">Illustrative example. A fictional consignment. Select a finding to see where it comes from.</div></section>';
   h+='<section aria-label="Findings"><div class="sec-title"><span class="label">VeriPura findings</span></div><div id="finds"></div><div id="twin"></div></section></div>';
   h+='<div id="ov"></div>';
-  h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="play">Play the full walkthrough</button><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
+  h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
   v.innerHTML=h;
   $('#topTitle').textContent='Phase '+pad(i+1)+' · '+p.loc;
-  var f=$('#finds');
-  $('#ov').innerHTML=ovHTML(i,!!ran);ovWire();
-  if(ran){f.innerHTML='<div class="result-line">'+sum(i)+' Your team makes the decision.</div>'+p.checks.map(function(c,x){return findHTML(c,i,x)}).join('');$('#twin').innerHTML=twinHTML(p.twin);mark(i)}
-  else f.innerHTML='<div class="empty">Checks have not run for this phase.<br>Select <b>Run checks</b> to start.</div>';
-  wire(i);
+  wire(i);paintPhase(i,null);
 }
 function wire(i){
-  var rb=$('#runBtn');if(rb)rb.onclick=function(){runPhase(i)};
+  $('#runBtn').onclick=function(){runPhase(i)};
   document.querySelectorAll('.tab').forEach(function(b){b.onclick=function(){ST.tab[i]=+b.dataset.tab;document.querySelectorAll('.tab').forEach(function(t){t.classList.toggle('on',t===b)});document.querySelectorAll('.docp').forEach(function(d){d.style.display=(+d.dataset.doc===ST.tab[i])?'':'none'})}});
   $('#prev').onclick=function(){go(i-1)};$('#next').onclick=function(){go(i+1)};
-  $('#play').onclick=function(){playAll(i)};
-  document.querySelectorAll('.find').forEach(function(e){var f=function(){focusFind(i,+e.dataset.i)};e.onclick=f;e.onkeydown=function(ev){if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();f()}}});
+  var f=$('#finds');
+  f.onclick=function(e){var n=e.target.closest('.find');if(n)focusFind(i,+n.dataset.i)};
+  f.onkeydown=function(e){if(e.key==='Enter'||e.key===' '){var n=e.target.closest('.find');if(n){e.preventDefault();focusFind(i,+n.dataset.i)}}};
 }
-function focusFind(i,x){
-  var c=P[i].checks[x],k=(c.k||[])[0];if(!k)return;
-  P[i].docs.forEach(function(d,di){var s=JSON.stringify(d);if(s.indexOf('"'+k+'"')>-1&&(ST.tab[i]||0)!==di){var b=document.querySelectorAll('.tab')[di];if(b)b.click()}});
-  var el=document.querySelector('[data-k="'+k+'"]');
-  if(el){el.scrollIntoView({block:'center',behavior:'smooth'});el.animate([{outline:'3px solid #2E55C9'},{outline:'3px solid transparent'}],{duration:1200})}
+function paintPhase(i,newX){
+  var p=P[i],n=p.checks.length,s=SH[i],f=$('#finds'),t=$('#twin'),rb=$('#runBtn');
+  if(!f)return;
+  if(s===0)f.innerHTML='<div class="empty">Checks have not run for this phase.<br>Press <b>Run checks</b> or use the player below.</div>';
+  else f.innerHTML=(s===n?'<div class="result-line">'+sum(i)+' Your team makes the decision.</div>':'<div class="result-line">Check '+s+' of '+n+'</div>')+p.checks.slice(0,s).map(function(c,x){return findHTML(c,i,x,x===newX)}).join('');
+  t.innerHTML=TW[i]?twinHTML(p.twin):'';
+  mark(i);
+  $('#ov').innerHTML=ovHTML(i,ranChecks(i));ovWire();
+  rb.disabled=done(i);
+  rb.textContent=done(i)?'Checks complete':(ST.playing&&ST.pos>ENTER[i]&&ST.pos<END[i]?'Running checks':(s>0?'Continue checks':'Run checks'));
 }
-async function runPhase(i){
-  if(ST.ran[i]||ST.busy)return;ST.busy=true;
-  var p=P[i],f=$('#finds'),rb=$('#runBtn');if(rb){rb.disabled=true;rb.textContent='Running checks'}
-  f.innerHTML='';
-  var fast=ST.play;
-  for(var x=0;x<p.checks.length;x++){
-    var run=document.createElement('div');run.className='running';run.innerHTML='<span class="spin"></span>'+esc(p.checks[x].a)+' · '+esc(p.checks[x].p);f.appendChild(run);
-    await sleep(fast?260:520);
-    var w=document.createElement('div');w.innerHTML=findHTML(p.checks[x],i,x);var node=w.firstChild;f.replaceChild(node,run);
-    node.onclick=(function(xx){return function(){focusFind(i,xx)}})(x);
-    (p.checks[x].k||[]).forEach(function(k){document.querySelectorAll('[data-k="'+k+'"]').forEach(function(e){e.classList.add('f-'+p.checks[x].s)})});
-  }
-  ST.ran[i]=true;ST.busy=false;
-  var ovel=$('#ov');if(ovel&&ST.cur===i){ovel.innerHTML=ovHTML(i,true);ovWire()}
-  if(ST.cur!==i){return}
-  var rl=document.createElement('div');rl.className='result-line';rl.textContent=sum(i)+' Your team makes the decision.';f.insertBefore(rl,f.firstChild);
-  await sleep(fast?200:350);
-  $('#twin').innerHTML=twinHTML(p.twin);
-  if(rb){rb.textContent='Checks complete'}
-  nav();
+function focusFind(i,x,auto){
+  var c=P[i].checks[x],k=(c.k||[])[0];
+  if(auto){var fe=document.querySelector('.find[data-i="'+x+'"]');if(fe)fe.scrollIntoView({block:'nearest',behavior:'smooth'})}
+  if(!k)return;
+  P[i].docs.forEach(function(d,di){if(docKeys(d).indexOf(k)>-1&&(ST.tab[i]||0)!==di){var b=document.querySelectorAll('.tab')[di];if(b)b.click()}});
+  var el=document.querySelector('#docs [data-k="'+k+'"]');
+  if(el){if(!auto)el.scrollIntoView({block:'center',behavior:'smooth'});el.animate([{outline:'3px solid #2E55C9'},{outline:'3px solid transparent'}],{duration:1600})}
 }
-async function playAll(from){
-  ST.play=true;
-  for(var i=from;i<11;i++){
-    if(!ST.play)break;
-    if(ST.cur!==i)go(i);
-    await sleep(300);
-    if(!ST.ran[i])await runPhase(i);
-    await sleep(900);
-  }
-  if(ST.play){go(11)}
-  ST.play=false;
+/* ---------- player ---------- */
+function applyPos(np){
+  np=Math.max(0,Math.min(STEPS.length,np));var prev=ST.pos;ST.pos=np;calc();
+  var s=np>0?STEPS[np-1]:null,target=np===0?-1:(s.t==='report'?11:s.i),fwd=np>prev;
+  if(ST.cur!==target||np===0||s.t==='enter'||s.t==='report'){go(target)}
+  else{nav();paintPhase(ST.cur,(s.t==='check'&&fwd)?s.x:null);if(s.t==='check'&&fwd)focusFind(ST.cur,s.x,true)}
+  updPlayer();
 }
-function go(i){
-  if(i<-1||i>11)return;
-  if(ST.busy&&!ST.play)return;
-  if(ST.play&&ST.busy){return}
-  ST.cur=i;nav();view();window.scrollTo({top:0});
+function schedule(ms){
+  clearTimeout(ST.timer);if(!ST.playing)return;
+  var last=ST.pos>0?STEPS[ST.pos-1]:null;
+  var d=ms!=null?ms:(last&&DELAY[ST.speed][last.t]?DELAY[ST.speed][last.t]:1500);
+  ST.timer=setTimeout(function(){
+    if(!ST.playing)return;
+    if(ST.pos>=ST.stopAt||ST.pos>=STEPS.length){pause();return}
+    applyPos(ST.pos+1);
+    if(ST.pos>=ST.stopAt||ST.pos>=STEPS.length){pause();return}
+    schedule();
+  },d);
 }
+function play(stopAt){
+  if(ST.pos>=STEPS.length)applyPos(0);
+  ST.stopAt=stopAt==null?STEPS.length:stopAt;ST.playing=true;updPlayer();schedule(500);
+}
+function pause(){ST.playing=false;clearTimeout(ST.timer);updPlayer();if(ST.cur>=0&&ST.cur<11)paintPhase(ST.cur,null)}
+function stepBack(){pause();applyPos(ST.pos-1)}
+function stepFwd(){pause();applyPos(ST.pos+1)}
+function runPhase(i){
+  if(done(i))return;
+  if(ST.pos<ENTER[i]+1){ST.pos=ENTER[i]+1;calc();nav();paintPhase(i,null)}
+  play(END[i]);
+}
+function updPlayer(){
+  var b=$('#pPlay');if(!b)return;
+  b.textContent=ST.playing?'Pause':'Play';b.setAttribute('aria-label',ST.playing?'Pause walkthrough':'Play walkthrough');
+  $('#pBack').disabled=ST.pos===0;$('#pFwd').disabled=ST.pos>=STEPS.length;
+  var s=ST.pos>0?STEPS[ST.pos-1]:null,txt='Not started';
+  if(s){if(s.t==='report')txt='Findings report';else{var pre='Phase '+pad(s.i+1)+' of 11 · ';txt=pre+(s.t==='enter'?'documents':s.t==='twin'?'visibility layer':'check '+(s.x+1)+' of '+P[s.i].checks.length)}}
+  $('#pInfo').textContent=txt;
+  $('#pFill').style.width=(ST.pos/STEPS.length*100)+'%';
+  $('#pSpeed').value=ST.speed;
+}
+function restart(){pause();ST.pos=0;calc();ST.tab={};ST.ovOpen={};go(-1);updPlayer()}
+/* ---------- drawer: documents by category ---------- */
+function openDrawer(title,sub,body){
+  $('#drawerTitle').textContent=title;$('#drawerSub').textContent=sub;$('#drawerBody').innerHTML=body;
+  $('#dov').classList.add('open');$('#drawer').classList.add('open');$('#drawer').scrollTop=0;
+}
+function closeDrawer(){$('#dov').classList.remove('open');$('#drawer').classList.remove('open')}
+function openCat(s){
+  var G=[],nf=0,nd=0;
+  P.forEach(function(p,i){
+    if(!SH[i])return;
+    var fs=[],ks={};
+    p.checks.slice(0,SH[i]).forEach(function(c,x){if(c.s===s){fs.push({c:c,x:x});(c.k||[]).forEach(function(k){ks[k]=1})}});
+    if(!fs.length)return;
+    var ds=[];p.docs.forEach(function(d){if(docKeys(d).some(function(k){return ks[k]}))ds.push(d)});
+    nf+=fs.length;nd+=ds.length;G.push({i:i,fs:fs,ds:ds,ks:ks});
+  });
+  var body='';
+  if(!nf)body='<div class="empty">No findings with this status yet.<br>Play the walkthrough or run the checks to build the report.</div>';
+  G.forEach(function(g){
+    body+='<details class="dg"'+(s==='ok'?'':' open')+'><summary><span class="chev">›</span><span class="gn">Phase '+pad(g.i+1)+' · '+esc(P[g.i].n)+'</span><span class="gc">'+g.fs.length+' finding'+(g.fs.length===1?'':'s')+' · '+g.ds.length+' document'+(g.ds.length===1?'':'s')+'</span></summary><div class="dgb">';
+    body+=g.fs.map(function(o){return findHTML(o.c,g.i,o.x,false).replace('role="button"','').replace(' tabindex="0"','')+((o.c.k&&o.c.k.length)?'':'<div class="cap" style="margin:-4px 0 10px">No uploaded document for this finding. It comes from a registry or partner check.</div>')}).join('');
+    body+=g.ds.map(function(d){return '<div class="dwrap" data-s="'+s+'" data-ks="'+Object.keys(g.ks).join(',')+'">'+paper(d)+'</div>'}).join('');
+    body+='</div></details>';
+  });
+  openDrawer(LBL[s],nf+' finding'+(nf===1?'':'s')+' · '+nd+' document'+(nd===1?'':'s')+' · only the documents behind these findings',body);
+  document.querySelectorAll('#drawerBody .dwrap').forEach(function(w){var ks=w.dataset.ks.split(',');w.querySelectorAll('[data-k]').forEach(function(e){if(ks.indexOf(e.dataset.k)>-1)e.classList.add('f-'+w.dataset.s)})});
+}
+function openLib(){
+  var nd=0,body='';
+  P.forEach(function(p,i){nd+=p.docs.length;body+='<details class="dg"><summary><span class="chev">›</span><span class="gn">Phase '+pad(i+1)+' · '+esc(p.n)+'</span><span class="gc">'+p.docs.length+' document'+(p.docs.length===1?'':'s')+'</span></summary><div class="dgb">'+p.docs.map(function(d){return paper(d)}).join('')+'</div></details>'});
+  openDrawer('All documents',nd+' illustrative documents across 11 phases',body);
+}
+/* ---------- overview and report ---------- */
 function overview(v){
   $('#topTitle').textContent='Demonstration';
-  var t=totals();
+  var nd=P.reduce(function(a,p){return a+p.docs.length},0),nc=P.reduce(function(a,p){return a+p.checks.length},0),dn=P.filter(function(p,i){return done(i)}).length;
   v.innerHTML='<h2>Brazilian beef to the United Kingdom</h2><p class="lede">Follow one fictional consignment through 11 phases, from order to border and beyond. In each phase you see the documents, the checks VeriPura runs and the findings your team reviews. The visibility layer shows what is recorded for other stakeholders.</p>'
-  +'<div class="stats"><div class="stat"><span class="label">Phases</span><b>11</b></div><div class="stat"><span class="label">Documents shown</span><b>'+P.reduce(function(a,p){return a+p.docs.length},0)+'</b></div><div class="stat"><span class="label">Checks</span><b>'+P.reduce(function(a,p){return a+p.checks.length},0)+'</b></div><div class="stat"><span class="label">Phases run</span><b>'+Object.keys(ST.ran).length+'</b></div></div>'
+  +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>11</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
   +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Frozen boneless beef cuts, HS 0202 30</dd><dt>Quantity</dt><dd>24,000 kg · 1,000 cartons</dd><dt>Exporter</dt><dd>Frigorífico Serra Verde Ltda. (fictional), SIF 9012</dd><dt>Importer</dt><dd>Northgate Meats Ltd (fictional)</dd><dt>Route</dt><dd>Santos to Tilbury, container DEMU 4821907</dd><dt>Purchase order</dt><dd>'+C.po+'</dd></dl></div>'
-  +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Pick a phase and select <b>Run checks</b>, or play the whole walkthrough. Select any finding to see the document field it relates to.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
+  +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
   +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div><span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p></div></div></div>';
-  $('#start').onclick=function(){go(0)};$('#playall').onclick=function(){playAll(0)};
+  $('#start').onclick=function(){go(0)};$('#playall').onclick=function(){play()};
+  document.querySelectorAll('.stat[data-act]').forEach(function(b){b.onclick=function(){var a=b.dataset.act;if(a==='phase')go(0);else if(a==='docs')openLib();else go(11)}});
 }
 function report(v){
   $('#topTitle').textContent='Findings report';
-  var t=totals(),n=Object.keys(ST.ran).length,rows='',order={mis:0,rev:1,nc:2};
-  var all=[];P.forEach(function(p,i){if(ST.ran[i])p.checks.forEach(function(c){all.push({i:i,c:c})})});
+  var t=totals(),dn=P.filter(function(p,i){return done(i)}).length,rows='',order={mis:0,rev:1,nc:2},all=[];
+  P.forEach(function(p,i){p.checks.slice(0,SH[i]).forEach(function(c){all.push({i:i,c:c})})});
   var act=all.filter(function(x){return x.c.s!=='ok'}).sort(function(a,b){return order[a.c.s]-order[b.c.s]||a.i-b.i});
   rows=act.map(function(x){return '<tr class="lnk" data-j="'+x.i+'"><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td><td class="mono">'+pad(x.i+1)+'</td><td><b>'+esc(x.c.p)+'</b><div style="color:var(--ink2)">'+esc(x.c.d)+'</div></td></tr>'}).join('');
-  var trail=all.map(function(x,k){return '<tr><td class="mono">'+pad(x.i+1)+'</td><td>'+esc(x.c.a)+'</td><td>'+esc(x.c.p)+'</td><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td></tr>'}).join('');
-  v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases run: '+n+' of 11.'):'No phases have been run yet. Run checks in the workflow, or play the full walkthrough, to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
-  +'<div class="stats"><div class="stat ok"><span class="label">Matched</span><b>'+t.ok+'</b></div><div class="stat rev"><span class="label">Review</span><b>'+t.rev+'</b></div><div class="stat mis"><span class="label">Mismatch</span><b>'+t.mis+'</b></div><div class="stat nc"><span class="label">Not checked</span><b>'+t.nc+'</b></div></div>'
+  var trail=all.map(function(x){return '<tr><td class="mono">'+pad(x.i+1)+'</td><td>'+esc(x.c.a)+'</td><td>'+esc(x.c.p)+'</td><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td></tr>'}).join('');
+  var n=all.length;
+  v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases complete: '+dn+' of 11.'):'No checks have run yet. Play the walkthrough or run the checks in a phase to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
+  +'<div class="stats"><button class="stat ok" data-cat="ok"><span class="label">Matched</span><b>'+t.ok+'</b><span class="hint">View documents</span></button><button class="stat rev" data-cat="rev"><span class="label">Review</span><b>'+t.rev+'</b><span class="hint">View documents</span></button><button class="stat mis" data-cat="mis"><span class="label">Mismatch</span><b>'+t.mis+'</b><span class="hint">View documents</span></button><button class="stat nc" data-cat="nc"><span class="label">Not checked</span><b>'+t.nc+'</b><span class="hint">View documents</span></button></div>'
   +(n?'<div class="card"><h3>What to review and fix</h3><table class="t"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')
   +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Mismatch, Review and Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
-  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Illustrative example. A fictional consignment of frozen boneless beef.</div></div>':'')
+  +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">Illustrative example. A fictional consignment of frozen beef.</div></div>':'')
   +'<div class="pager"><button class="btn" id="back">Back to phase 11</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
   document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
-  $('#back').onclick=function(){go(10)};$('#print').onclick=function(){window.print()};
-  $('#again').onclick=function(){ST.ran={};ST.tab={};ST.play=false;go(-1)};
+  document.querySelectorAll('[data-cat]').forEach(function(b){b.onclick=function(){openCat(b.dataset.cat)}});
+  $('#back').onclick=function(){go(10)};$('#print').onclick=function(){window.print()};$('#again').onclick=restart;
 }
+/* ---------- boot ---------- */
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);$('#themeIco').textContent=t==='dark'?'☾':'☀';try{localStorage.setItem('vp-demo-theme',t)}catch(e){}}
 $('#themeBtn').onclick=function(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')};
 var saved=null;try{saved=localStorage.getItem('vp-demo-theme')}catch(e){}
 setTheme(saved||'dark');
-nav();view();
+$('#pBack').onclick=stepBack;$('#pFwd').onclick=stepFwd;
+$('#pPlay').onclick=function(){ST.playing?pause():play()};
+$('#pSpeed').onchange=function(){ST.speed=this.value;if(ST.playing)schedule()};
+$('#drawerClose').onclick=closeDrawer;$('#dov').onclick=closeDrawer;
+document.addEventListener('keydown',function(e){
+  if(e.key==='Escape'){closeDrawer();return}
+  if(e.target.closest&&e.target.closest('button,select,input,summary,textarea,[role="button"]'))return;
+  if(e.key==='ArrowRight'){e.preventDefault();stepFwd()}
+  else if(e.key==='ArrowLeft'){e.preventDefault();stepBack()}
+  else if(e.key===' '){e.preventDefault();ST.playing?pause():play()}
+});
+calc();nav();view();updPlayer();
 </script>
 </body>
 </html>
