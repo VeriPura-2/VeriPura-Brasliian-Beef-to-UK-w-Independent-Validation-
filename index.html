@@ -150,6 +150,7 @@ button.stat:hover{border-color:var(--blue)}
 .pbar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
 #scenSel{font:inherit;font-size:13.5px;width:calc(100% - 28px);margin:2px 14px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 8px;min-height:44px}
+.paper{scroll-margin-top:90px}
 .pickl{display:grid;gap:8px;margin:12px 0 18px}
 .pick{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;min-height:48px}
 .pick:hover{border-color:var(--blue)}
@@ -1393,10 +1394,10 @@ function intake(v){
   var h='<h2>Start from a document</h2><p class="lede">Choose the document you hold for a shipment. VeriPura reads it, generates the requirements for the route, then validates the documents before the goods ship and shares the relevant ones with the other parties.</p>';
   h+='<div class="label">Demonstration samples</div><div class="pickl">'+Object.keys(PK).map(function(k){var sd=startDoc(k);return '<button class="pick'+(k===cur?' on':'')+'" data-p="'+k+'"><span class="rd"></span><span><span class="nm">'+esc(sd.t)+'</span><br><span class="sub">'+esc(PK[k].name)+'</span></span></button>'}).join('')+'</div>';
   h+='<div class="cap" style="margin-bottom:14px">These are built-in samples for the demonstration. VeriPura is not reading a file you upload here.</div>';
-  h+=paper(d);
+  h+='<div class="label" style="margin-top:6px">Selected document</div>'+paper(d);
   h+='<div style="margin:18px 0"><button class="btn gold" id="genReq">Generate requirements</button></div><div id="reqOut"></div>';
   v.innerHTML=h;
-  document.querySelectorAll('.pick').forEach(function(b){b.onclick=function(){REQ=false;loadPack(b.dataset.p,-2)}});
+  document.querySelectorAll('.pick').forEach(function(b){b.onclick=function(){REQ=false;loadPack(b.dataset.p,-2);setTimeout(function(){var pp=document.querySelector('#view .paper');if(pp)pp.scrollIntoView({behavior:'smooth',block:'start'})},60)}});
   $('#genReq').onclick=function(){
     var o=$('#reqOut');o.innerHTML='<div class="running"><i class="spin"></i>Reading the document and generating the requirements</div>';
     setTimeout(function(){REQ=true;reqHTML(cur)},900);
