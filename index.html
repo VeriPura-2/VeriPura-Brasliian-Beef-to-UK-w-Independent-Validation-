@@ -170,7 +170,9 @@ body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api as
 .hostp ul{margin:6px 0 6px 18px;font-size:13.5px}.hostp li{margin:3px 0}
 .hostp .hnote{font-size:12px;color:var(--mut);border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
 .hostp .hlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-top:12px}
-.apip{background:#0b1526;color:#d7e3f4;border:1px solid #20324d;border-radius:12px;padding:14px 16px}
+.apigrid .hostp,.apigrid .apip{position:sticky;top:76px}
+.hostp{max-height:calc(100vh - 170px);overflow:auto}
+.apip{max-height:calc(100vh - 170px);overflow:auto;background:#0b1526;color:#d7e3f4;border:1px solid #20324d;border-radius:12px;padding:14px 16px}
 .apip .ahead{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8aa0c0;margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap}
 .call{border:1px solid #20324d;border-radius:10px;margin:8px 0;background:#0f1d33}
 .call>summary{display:flex;gap:10px;align-items:center;padding:9px 12px;cursor:pointer;list-style:none;font-family:var(--mono);font-size:12.5px;flex-wrap:wrap}
@@ -182,7 +184,7 @@ body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api as
 .call pre{margin:0;background:#091120;border:1px solid #1b2c47;border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.5;overflow:auto;max-height:340px;white-space:pre;color:#d7e3f4}
 .call pre .k{color:#7fb2ff}.call pre .s{color:#9be3a6}.call pre .n{color:#ffcf7a}.call pre .h{color:#8aa0c0}
 .call .note{font-size:12.5px;color:#9db3d1;margin-top:8px;font-family:var(--sans,inherit)}
-@media (max-width:1100px){.apigrid{grid-template-columns:1fr}}
+@media (max-width:1100px){.apigrid{grid-template-columns:1fr}.apigrid .hostp,.apigrid .apip{position:static}.apip,.hostp{max-height:none}}
 
 body.hosted aside,body.hosted .top,body.hosted .banner{display:none!important}
 body.hosted .player{left:0}
@@ -1499,18 +1501,19 @@ function apiView(v){
   h+='<div class="apihead">'+seg('Documents','mode',[['data','Extracted data'],['file','Files']])+seg('Updates','upd',[['callback','Callback'],['poll','Poll']])+'</div>';
   h+='<div class="apigrid"><section class="hostp" id="hostp"></section><section class="apip" id="apip"></section></div>';
   v.innerHTML=h;
-  document.querySelectorAll('.apihead button').forEach(function(b){b.onclick=function(){apiPause();API[b.dataset.k]=b.dataset.v;view();updPlayer()}});
+  document.querySelectorAll('.apihead button').forEach(function(b){b.onclick=function(){apiPause();API[b.dataset.k]=b.dataset.v;API.pos=0;view();updPlayer();window.scrollTo({top:0});apiPlay()}});
   apiPaint();
 }
 function apiPaint(){
   var hp=$('#hostp'),ap=$('#apip');if(!hp)return;
-  API.json=[];hp.innerHTML=hostHTML();
+  API.json=[];var keep=ap.scrollTop;hp.innerHTML=hostHTML();
   var h='<div class="ahead"><span>Base URL '+esc(API_BASE)+'</span><span>Credentials: '+esc(roleLong(ROLE))+'</span></div>';
   if(!API.pos)h+='<div class="hsub" style="color:#9db3d1">No calls yet. Press Play or Forward to start the exchange.</div>';
   for(var k=0;k<API.pos;k++)h+=callHTML(API.steps[k],k,k===API.pos-1);
   ap.innerHTML=h;
   ap.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(e){e.preventDefault();e.stopPropagation();try{navigator.clipboard.writeText(API.json[+b.dataset.cp]);b.textContent='Copied'}catch(x){b.textContent='Copy not available'}}});
-  var last=ap.querySelector('details[open]');if(last)last.scrollIntoView({block:'nearest',behavior:'smooth'});
+  ap.scrollTop=keep;var last=ap.querySelector('details[open]');if(last&&ap.scrollHeight>ap.clientHeight)ap.scrollTo({top:Math.max(0,last.offsetTop-ap.offsetTop-8),behavior:'smooth'});
+  if(API.pos>=API.steps.length&&API.steps.length)window.scrollTo({top:0,behavior:'smooth'});
   apiPlayer();
 }
 function apiPlayer(){
