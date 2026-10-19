@@ -149,6 +149,35 @@ button.stat:hover{border-color:var(--blue)}
 .pmid #pInfo{font-size:12px;letter-spacing:.06em;color:var(--ink2);display:block;margin-bottom:6px}
 .pbar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
+#scenSel{font:inherit;font-size:13.5px;width:calc(100% - 28px);margin:2px 14px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 8px;min-height:44px}
+.pickl{display:grid;gap:8px;margin:12px 0 18px}
+.pick{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;min-height:48px}
+.pick:hover{border-color:var(--blue)}
+.pick.on{border-color:var(--gold-bg);box-shadow:0 0 0 2px var(--gold-bg) inset}
+.pick .rd{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);flex:none}
+.pick.on .rd{border-color:var(--gold-bg);background:var(--gold-bg)}
+.pick .nm{font-weight:700}.pick .sub{font-size:13px;color:var(--mut)}
+.pick .sp{flex:1}
+#hostBar{display:none;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 32px;background:#fff;color:#1c2430;border-bottom:1px solid #d5dae1;font-size:14px}
+body.hosted #hostBar{display:flex}
+#hostBar .hb{font-weight:700;font-size:16px}
+#hostBar .ht{border:0;background:none;font:inherit;padding:8px 10px;border-radius:6px;cursor:pointer;color:#445}
+#hostBar .ht.on{background:#e8edf5;font-weight:700;color:#1c2430}
+#hostBar .sp{flex:1}
+#hostBar .pw{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#556;border:1px solid #cfd6df;border-radius:6px;padding:5px 9px}
+#host{display:none;padding:26px 32px 60px;background:#f6f8fb;color:#1c2430;min-height:calc(100vh - 58px)}
+body.hl #host{display:block}
+body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!important}
+#host h2{font-family:var(--serif);font-weight:400;font-size:30px;margin-bottom:6px}
+#host .hn{font-size:13px;color:#667;margin-bottom:18px;max-width:80ch}
+#host table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d5dae1;border-radius:10px;overflow:hidden;font-size:14px}
+#host th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#667;text-align:left;padding:10px 12px;border-bottom:1.5px solid #d5dae1;background:#f0f3f8}
+#host td{padding:12px;border-bottom:1px solid #e6eaf0;vertical-align:middle}
+#host tr.lnk{cursor:pointer}#host tr.lnk:hover td{background:#eef3fb}
+#host .cn{display:inline-flex;gap:6px;flex-wrap:wrap}
+#host .cn span{font-family:var(--mono);font-size:11.5px;border-radius:6px;padding:3px 8px}
+#host .cn .ok{background:var(--ok-bg);color:var(--ok)}#host .cn .rev{background:var(--rev-bg);color:var(--rev)}#host .cn .mis{background:var(--mis-bg);color:var(--mis)}#host .cn .nc{background:var(--nc-bg);color:var(--nc)}
+@media (max-width:860px){#hostBar,#host{padding-left:18px;padding-right:18px}}
 #packSel{font:inherit;font-size:13.5px;width:calc(100% - 28px);margin:2px 14px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 8px;min-height:40px}
 .rolesel{display:flex;align-items:center;gap:8px}.rolesel select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;min-height:40px;max-width:320px}.mtx td,.mtx th{text-align:center}.mtx td:first-child,.mtx th:first-child{text-align:left}.mtx .y{color:var(--ok,#2e9e5b);font-weight:600}.mtx .n{color:var(--mut)}.mtx .ph td{background:var(--card2);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-align:left;color:var(--mut)}
 .pspd{display:flex;align-items:center;gap:8px}
@@ -182,8 +211,11 @@ button.stat:hover{border-color:var(--blue)}
     <svg width="30" height="30" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="13" fill="none" stroke="#D9A93F" stroke-width="2.5"/><path d="M9 16.5l5 5 10-12" fill="none" stroke="#D9A93F" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
     <span class="word">Veri<b>Pura</b><sup>™</sup></span><span class="tag-demo">DEMO</span>
   </div>
+  <div class="side-sec label">Scenario</div>
+  <select id="scenSel" aria-label="Choose a scenario"></select>
   <div class="side-sec label">Consignment</div>
   <select id="packSel" aria-label="Choose a consignment"></select>
+  <button class="nav-i" data-go="-2" id="startBtn"><span class="n">00</span><span class="t">Start from a document</span></button>
   <button class="nav-i" data-go="-1"><span class="n">00</span><span class="t">Overview</span></button>
   <div class="side-sec label">Workflow</div>
   <div id="phaseNav"></div>
@@ -191,6 +223,8 @@ button.stat:hover{border-color:var(--blue)}
   <button class="nav-i" id="resBtn" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
 </aside>
 <div class="wrap">
+  <div id="hostBar"></div>
+  <main id="host" aria-label="Host platform"></main>
   <div class="top">
     <h1 id="topTitle">Demonstration</h1>
     <span class="label">VeriPura Core™</span>
@@ -509,10 +543,11 @@ function nav(){
   }).join('');
   document.querySelectorAll('aside .nav-i').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur);b.onclick=function(){go(+b.dataset.go)}});
 }
-function go(i){if(i<-1||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
+function go(i){if(i<-2||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
 /* ---------- phase view ---------- */
 function view(){
   var v=$('#view'),i=ST.cur;
+  if(i===-2)return intake(v);
   if(i===-1)return overview(v);
   if(i===NP)return report(v);
   var p=P[i],tab=ST.tab[i]||0;
@@ -1337,20 +1372,88 @@ return {id:'berries',name:'Morocco berries, air (illustrative)',h2:'Fresh berrie
 })();
 
 /*PACKS*/
-function loadPack(id){
+function loadPack(id,startCur){
   pause();var k=PK[id];CUR=k;
   PALL=k.phases;ROLES=k.roles;DOCVIS=k.docvis;CLS=k.cls;OVD=k.ovd||[];OVMAP=k.ovmap||{};OVRES=k.ovres||{};C=k.C||{};
   ROLE='all';buildP('all');NP=P.length;build();
-  ST.pos=0;ST.cur=-1;ST.tab={};ST.ovOpen={};
+  ST.pos=0;ST.cur=(startCur===undefined?-1:startCur);ST.tab={};ST.ovOpen={};
   rs.innerHTML=ROLES.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');rs.value='all';
   $('#packBar').innerHTML=k.banner;$('#packSel').value=id;
   updRoleBar();calc();nav();view();updPlayer();window.scrollTo({top:0});
 }
+
+/* ---------- scenarios, document selector, requirements ---------- */
+var SC=1,REQ=false;
+var START={beef:'Packing list',forza:'Valuation worksheet (pro forma)',maspo:'Commercial invoices (sample of 71)',spices:'Commercial invoice',berries:'Commercial invoice'};
+function startDoc(id){var t=START[id],f=null;PK[id].phases.forEach(function(p){p.docs.forEach(function(d){if(d.t===t&&!f)f=d})});return f}
+function shortRole(id,r){var x=PK[id].roles.filter(function(q){return q[0]===r})[0];return x?(x[3]||x[1]):r}
+function intake(v){
+  $('#topTitle').textContent='Start from a document';
+  var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0],d=startDoc(cur);
+  var h='<h2>Start from a document</h2><p class="lede">Choose the document you hold for a shipment. VeriPura reads it, generates the requirements for the route, then validates the documents before the goods ship and shares the relevant ones with the other parties.</p>';
+  h+='<div class="label">Demonstration samples</div><div class="pickl">'+Object.keys(PK).map(function(k){var sd=startDoc(k);return '<button class="pick'+(k===cur?' on':'')+'" data-p="'+k+'"><span class="rd"></span><span><span class="nm">'+esc(sd.t)+'</span><br><span class="sub">'+esc(PK[k].name)+'</span></span></button>'}).join('')+'</div>';
+  h+='<div class="cap" style="margin-bottom:14px">These are built-in samples for the demonstration. VeriPura is not reading a file you upload here.</div>';
+  h+=paper(d);
+  h+='<div style="margin:18px 0"><button class="btn gold" id="genReq">Generate requirements</button></div><div id="reqOut"></div>';
+  v.innerHTML=h;
+  document.querySelectorAll('.pick').forEach(function(b){b.onclick=function(){REQ=false;loadPack(b.dataset.p,-2)}});
+  $('#genReq').onclick=function(){
+    var o=$('#reqOut');o.innerHTML='<div class="running"><i class="spin"></i>Reading the document and generating the requirements</div>';
+    setTimeout(function(){REQ=true;reqHTML(cur)},900);
+  };
+  if(REQ)reqHTML(cur);
+}
+function reqHTML(cur){
+  var o=$('#reqOut');if(!o)return;
+  var rows=PALL.map(function(p,i){
+    var who={};p.docs.forEach(function(d){(DOCVIS[d.t]||[]).forEach(function(r){if(r!=='imp')who[r]=1})});
+    return '<tr><td class="mono">'+pad(i+1)+'</td><td><b>'+esc(p.n)+'</b></td><td>'+p.docs.map(function(d){return esc(d.t)}).join('<br>')+'</td><td>'+(Object.keys(who).map(function(r){return esc(shortRole(cur,r))}).join(', ')||'Importer only')+'</td><td class="mono">'+p.checks.length+'</td></tr>';
+  }).join('');
+  var nc=PALL.reduce(function(a,p){return a+p.checks.length},0),nd=PALL.reduce(function(a,p){return a+p.docs.length},0);
+  o.innerHTML='<div class="card"><h3>Requirements for this shipment</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">'+nd+' documents across '+PALL.length+' phases, with '+nc+' checks. The list comes from the rules for this route and the documents in the sample. Your team makes the decision on every finding.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th>#</th><th>Phase</th><th>Documents needed</th><th>Shared with</th><th>Checks</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="goVal">Validate before shipment</button><button class="btn" id="goMtx">Show who sees what</button></div></div>';
+  $('#goVal').onclick=function(){go(0)};$('#goMtx').onclick=openMatrix;
+}
+function packCounts(id){var c={ok:0,rev:0,mis:0,nc:0};PK[id].phases.forEach(function(p){p.checks.forEach(function(x){c[x.s]++})});return c}
+function cnHTML(c){return '<span class="cn"><span class="ok">'+c.ok+' matched</span><span class="rev">'+c.rev+' review</span>'+(c.mis?'<span class="mis">'+c.mis+' mismatch</span>':'')+'<span class="nc">'+c.nc+' not checked</span></span>'}
+function impName(id){var x=PK[id].roles.filter(function(q){return q[0]==='imp'})[0];return x?x[1].replace(/^[^,]*,\s*/,''):''}
+function hostBar(){
+  var hb=$('#hostBar');
+  if(SC===2)hb.innerHTML='<span class="hb">Forwarder platform</span><button class="ht'+(document.body.classList.contains('hl')?' on':'')+'" data-t="list">Client queue</button><button class="ht'+(document.body.classList.contains('hl')?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span><span class="pw">Illustrative host platform · Powered by VeriPura</span>';
+  else if(SC===3){var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0];hb.innerHTML='<span class="hb">'+esc(impName(cur))+' · trade platform</span><button class="ht'+(document.body.classList.contains('hl')?' on':'')+'" data-t="list">Orders</button><button class="ht'+(document.body.classList.contains('hl')?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span><span class="pw">Illustrative host platform · VeriPura Core™ inside</span>'}
+  hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(Object.keys(PK).filter(function(k){return PK[k]===CUR})[0])}});
+}
+function showHost(){
+  pause();document.body.classList.add('hl');
+  var h='';
+  if(SC===2){
+    h='<h2>Client queue</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a forwarder platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
+  }else{
+    var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0];
+    h='<h2>Orders</h2><div class="hn">Open orders for '+esc(impName(cur))+'. The Compliance tab is provided by VeriPura Core™ inside this platform. Illustrative mock of an importer platform. Use Consignment in the sidebar to show another importer.</div><table><thead><tr><th>Order</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody><tr class="lnk" data-p="'+cur+'"><td><b>'+esc(startDoc(cur).t)+'</b></td><td>'+esc(PK[cur].name)+'</td><td>'+cnHTML(packCounts(cur))+'</td><td>Open</td></tr></tbody></table>';
+  }
+  $('#host').innerHTML=h;
+  document.querySelectorAll('#host tr.lnk').forEach(function(r){r.onclick=function(){openFromHost(r.dataset.p)}});
+  hostBar();window.scrollTo({top:0});
+}
+function openFromHost(id){
+  document.body.classList.remove('hl');
+  if(PK[id]!==CUR)loadPack(id,-1);
+  var r=SC===2?'agt':'imp';rs.value=r;setRole(r);ST.cur=-99;go(-1);hostBar();
+}
+function setScenario(n){
+  SC=n;REQ=false;pause();
+  var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0]||'beef';
+  $('#scenSel').value=String(n);
+  if(n===1){document.body.classList.remove('hl','hosted');$('#startBtn').style.display='';loadPack(cur,-2)}
+  else{document.body.classList.add('hosted');$('#startBtn').style.display='none';loadPack(cur,-1);showHost()}
+}
+$('#scenSel').innerHTML='<option value="1">1 · Importer tool (VeriPura Food)</option><option value="2">2 · Forwarder platform</option><option value="3">3 · Importer platform</option>';
+$('#scenSel').onchange=function(){setScenario(+this.value)};
 var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
 $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
-$('#packSel').onchange=function(){loadPack(this.value)};
-loadPack('beef');
+$('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1&&document.body.classList.contains('hl'))showHost();else if(SC!==1)hostBar()};
+setScenario(1);
 </script>
 </body>
 </html>
