@@ -158,18 +158,18 @@ body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api as
 .seg button{border:0;background:var(--card);color:var(--ink2);font:inherit;font-size:13px;padding:8px 12px;min-height:40px;cursor:pointer}
 .seg button.on{background:var(--gold-bg);color:var(--gold-ink);font-weight:700}
 .apigrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start;padding-bottom:90px}
-.hostp{background:#f6f8fb;color:#1c2430;border:1px solid #d5dae1;border-radius:12px;padding:18px 20px}
+.hostp{background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:18px 20px}
 .hostp h3{font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:4px}
-.hostp .hsub{font-size:13px;color:#667;margin-bottom:12px}
-.hostp table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d5dae1;font-size:13.5px;margin:10px 0}
-.hostp th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#667;text-align:left;padding:8px 10px;background:#f0f3f8;border-bottom:1px solid #d5dae1}
-.hostp td{padding:8px 10px;border-bottom:1px solid #e6eaf0;vertical-align:top}
+.hostp .hsub{font-size:13px;color:var(--mut);margin-bottom:12px}
+.hostp table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);font-size:13.5px;margin:10px 0}
+.hostp th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);text-align:left;padding:8px 10px;background:var(--card2);border-bottom:1px solid var(--line)}
+.hostp td{padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
 .hostp .cn{display:inline-flex;gap:5px;flex-wrap:wrap}
 .hostp .cn span{font-family:var(--mono);font-size:11px;border-radius:6px;padding:2px 7px}
 .hostp .cn .ok{background:var(--ok-bg);color:var(--ok)}.hostp .cn .rev{background:var(--rev-bg);color:var(--rev)}.hostp .cn .mis{background:var(--mis-bg);color:var(--mis)}.hostp .cn .nc{background:var(--nc-bg);color:var(--nc)}
 .hostp ul{margin:6px 0 6px 18px;font-size:13.5px}.hostp li{margin:3px 0}
-.hostp .hnote{font-size:12px;color:#667;border-top:1px dashed #c9d0da;margin-top:12px;padding-top:10px}
-.hostp .hlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#667;margin-top:12px}
+.hostp .hnote{font-size:12px;color:var(--mut);border-top:1px dashed var(--line);margin-top:12px;padding-top:10px}
+.hostp .hlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);margin-top:12px}
 .apip{background:#0b1526;color:#d7e3f4;border:1px solid #20324d;border-radius:12px;padding:14px 16px}
 .apip .ahead{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8aa0c0;margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap}
 .call{border:1px solid #20324d;border-radius:10px;margin:8px 0;background:#0f1d33}
@@ -183,23 +183,19 @@ body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api as
 .call pre .k{color:#7fb2ff}.call pre .s{color:#9be3a6}.call pre .n{color:#ffcf7a}.call pre .h{color:#8aa0c0}
 .call .note{font-size:12.5px;color:#9db3d1;margin-top:8px;font-family:var(--sans,inherit)}
 @media (max-width:1100px){.apigrid{grid-template-columns:1fr}}
-body.hosted{background:#eef1f6;color:#1c2430}
+
 body.hosted aside,body.hosted .top,body.hosted .banner{display:none!important}
 body.hosted .player{left:0}
-body.hosted main#view{max-width:none;background:#eef1f6;color:#1c2430}
-body.hosted #view h2{color:#1c2430}
-body.hosted #view .lede{color:#445}
-body.hosted .seg .label{color:#667}
-body.hosted .seg .sb{border-color:#cfd6df}
-body.hosted .seg button{background:#fff;color:#334}
-body.hosted .seg button.on{background:var(--gold-bg);color:var(--gold-ink)}
+body.hosted main#view{max-width:none}
+
+
 #hostBar{position:sticky;top:0;z-index:6}
-#hostBar .bk{font:inherit;font-size:13.5px;font-weight:600;border:1.5px solid #cfd6df;background:#fff;color:#1c2430;border-radius:8px;padding:8px 12px;cursor:pointer;min-height:40px}
+#hostBar .bk{font:inherit;font-size:13.5px;font-weight:600;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;cursor:pointer;min-height:40px}
 #hostBar .bk:hover{border-color:#2E55C9}
-#hostBar select{font:inherit;font-size:14px;border:1.5px solid #cfd6df;background:#fff;color:#1c2430;border-radius:8px;padding:7px 9px;min-height:40px}
-#hostBar .seg .label{color:#667}
-#hostBar .seg .sb{border-color:#cfd6df}
-#hostBar .seg button{background:#fff;color:#334;min-height:36px}
+#hostBar select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 9px;min-height:40px}
+#hostBar .seg .label{color:var(--mut)}
+#hostBar .seg .sb{border-color:var(--line)}
+#hostBar .seg button{background:var(--card);color:var(--ink2);min-height:36px}
 #hostBar .seg button.on{background:var(--gold-bg);color:var(--gold-ink)}
 .pickl{display:grid;gap:8px;margin:12px 0 18px}
 .pick{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;min-height:48px}
@@ -209,22 +205,22 @@ body.hosted .seg button.on{background:var(--gold-bg);color:var(--gold-ink)}
 .pick.on .rd{border-color:var(--gold-bg);background:var(--gold-bg)}
 .pick .nm{font-weight:700}.pick .sub{font-size:13px;color:var(--mut)}
 .pick .sp{flex:1}
-#hostBar{display:none;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 32px;background:#fff;color:#1c2430;border-bottom:1px solid #d5dae1;font-size:14px}
+#hostBar{display:none;align-items:center;gap:14px;flex-wrap:wrap;padding:10px 32px;background:var(--card);color:var(--ink);border-bottom:1px solid var(--line);font-size:14px}
 body.hosted #hostBar{display:flex}
 #hostBar .hb{font-weight:700;font-size:16px}
-#hostBar .ht{border:0;background:none;font:inherit;padding:8px 10px;border-radius:6px;cursor:pointer;color:#445}
-#hostBar .ht.on{background:#e8edf5;font-weight:700;color:#1c2430}
+#hostBar .ht{border:0;background:none;font:inherit;padding:8px 10px;border-radius:6px;cursor:pointer;color:var(--ink2)}
+#hostBar .ht.on{background:var(--card2);font-weight:700;color:var(--ink)}
 #hostBar .sp{flex:1}
-#hostBar .pw{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:#556;border:1px solid #cfd6df;border-radius:6px;padding:5px 9px}
-#host{display:none;padding:26px 32px 60px;background:#f6f8fb;color:#1c2430;min-height:calc(100vh - 58px)}
+#hostBar .pw{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:5px 9px}
+#host{display:none;padding:26px 32px 60px;background:var(--bg);color:var(--ink);min-height:calc(100vh - 58px)}
 body.hl #host{display:block}
 body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!important}
 #host h2{font-family:var(--serif);font-weight:400;font-size:30px;margin-bottom:6px}
-#host .hn{font-size:13px;color:#667;margin-bottom:18px;max-width:80ch}
-#host table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d5dae1;border-radius:10px;overflow:hidden;font-size:14px}
-#host th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#667;text-align:left;padding:10px 12px;border-bottom:1.5px solid #d5dae1;background:#f0f3f8}
-#host td{padding:12px;border-bottom:1px solid #e6eaf0;vertical-align:middle}
-#host tr.lnk{cursor:pointer}#host tr.lnk:hover td{background:#eef3fb}
+#host .hn{font-size:13px;color:var(--mut);margin-bottom:18px;max-width:80ch}
+#host table{width:100%;border-collapse:collapse;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden;font-size:14px}
+#host th{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);text-align:left;padding:10px 12px;border-bottom:1.5px solid var(--line);background:var(--card2)}
+#host td{padding:12px;border-bottom:1px solid var(--line);vertical-align:middle}
+#host tr.lnk{cursor:pointer}#host tr.lnk:hover td{background:var(--card2)}
 #host .cn{display:inline-flex;gap:6px;flex-wrap:wrap}
 #host .cn span{font-family:var(--mono);font-size:11.5px;border-radius:6px;padding:3px 8px}
 #host .cn .ok{background:var(--ok-bg);color:var(--ok)}#host .cn .rev{background:var(--rev-bg);color:var(--rev)}#host .cn .mis{background:var(--mis-bg);color:var(--mis)}#host .cn .nc{background:var(--nc-bg);color:var(--nc)}
