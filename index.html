@@ -149,6 +149,7 @@ button.stat:hover{border-color:var(--blue)}
 .pmid #pInfo{font-size:12px;letter-spacing:.06em;color:var(--ink2);display:block;margin-bottom:6px}
 .pbar{height:6px;border-radius:999px;background:var(--line);overflow:hidden}
 .pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
+.rolesel{display:flex;align-items:center;gap:8px}.rolesel select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 10px;min-height:40px;max-width:320px}.mtx td,.mtx th{text-align:center}.mtx td:first-child,.mtx th:first-child{text-align:left}.mtx .y{color:var(--ok,#2e9e5b);font-weight:600}.mtx .n{color:var(--mut)}.mtx .ph td{background:var(--card2);font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-align:left;color:var(--mut)}
 .pspd{display:flex;align-items:center;gap:8px}
 .pspd select{font:inherit;font-size:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 10px;min-height:44px}
 .dov{position:fixed;inset:0;background:rgba(5,12,25,.55);z-index:40;opacity:0;pointer-events:none;transition:opacity .2s}
@@ -192,10 +193,12 @@ button.stat:hover{border-color:var(--blue)}
     <h1 id="topTitle">Demonstration</h1>
     <span class="label">VeriPura Core™</span>
     <span class="sp"></span>
+    <label class="rolesel"><span class="label">View as</span><select id="roleSel"></select></label><button class="btn" id="mtxBtn" style="min-height:40px;padding:6px 12px;font-size:13px">Who sees what</button>
     <span class="pill"><i></i>Visibility layer: proposed</span>
     <button class="theme" id="themeBtn" aria-label="Toggle light and dark theme"><span id="themeIco">☀</span></button>
   </div>
   <div class="banner"><span class="tg prop">Real consignment</span><span>Documents marked Provided are real documents from a Brazil to UK beef consignment, shared by one of the companies involved. Illustrative and Not supplied items are not from this shipment. VeriPura shows findings. Your team makes the decision.</span></div>
+  <div class="banner" id="roleBar"></div>
   <main id="view" tabindex="-1"></main>
 </div>
 <div class="player" role="group" aria-label="Walkthrough controls">
@@ -378,6 +381,7 @@ var P=[
  twin:{h:'Environmental status visible to buyers',li:['Risk screen and CAR status shown to buyers and institutional clients once farm records are linked.','Alignment with the EU Digital Product Passport structure for food commodities.'],ev:'TWIN-DEMO-0001 · event: environmental.recorded',tag:'prop'}}
 ];
 
+var PALL=P;
 var OVD=[
 ['Animal identity','SISBOV','MAPA / SISBOV','api','Pre-shipment','Certification body','',1],
 ['Animal identity','CAR (Rural Environmental Registry)','SICAR','api','Pre-shipment','Certification body','',0],
@@ -423,15 +427,15 @@ var OVRES={
 'CAR geolocation':{s:'nc',d:'Needs the farm identifiers, which were not in the document set.'},
 'IBAMA embargoes':{s:'nc',d:'Needs the farm identifiers, which were not in the document set.'}
 };
-function ovItems(i){return (OVMAP[i]||[]).map(function(n){return OVD.filter(function(x){return x[1]===n})[0]})}
+function ovItems(i){return (OVMAP[i]||[]).map(function(n){return OVD.filter(function(x){return x[1]===n})[0]}).filter(function(x){return ROLE==='all'||ROLE==='imp'||ROLE==='exp'||(ROLE==='bcp'&&x[7])})}
 var ST={cur:-1,pos:0,playing:false,speed:'slow',timer:null,stopAt:0,tab:{},ovOpen:{}};
 var $=function(s,r){return (r||document).querySelector(s)};
 function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function pad(n){return (n<10?'0':'')+n}
 /* ---------- steps and derived state ---------- */
 var STEPS=[],ENTER=[],END=[],SH=[],TW=[];
-P.forEach(function(p,i){ENTER[i]=STEPS.length;STEPS.push({i:i,t:'enter'});p.checks.forEach(function(c,x){STEPS.push({i:i,t:'check',x:x})});STEPS.push({i:i,t:'twin'});END[i]=STEPS.length});
-STEPS.push({t:'report'});
+function build(){STEPS=[];ENTER=[];END=[];P.forEach(function(p,i){ENTER[i]=STEPS.length;STEPS.push({i:i,t:'enter'});p.checks.forEach(function(c,x){STEPS.push({i:i,t:'check',x:x})});STEPS.push({i:i,t:'twin'});END[i]=STEPS.length});STEPS.push({t:'report'})}
+build();
 var DELAY={slow:{enter:3200,check:4200,twin:3600},normal:{enter:2200,check:2600,twin:2200},fast:{enter:1000,check:1200,twin:1000}};
 function calc(){SH=P.map(function(){return 0});TW=P.map(function(){return false});for(var k=0;k<ST.pos;k++){var s=STEPS[k];if(s.t==='check')SH[s.i]=s.x+1;else if(s.t==='twin')TW[s.i]=true}}
 function ranChecks(i){return SH[i]===P[i].checks.length}
@@ -473,6 +477,7 @@ function ovWire(){
 function ovReport(){
   var tot={api:0,paper:0,na:0},rows='';
   Object.keys(OVMAP).forEach(function(k){ovItems(+k).forEach(function(x){tot[x[3]]++;if(x[3]==='api'){var r=OVRES[x[1]],ran=ranChecks(+k);rows+='<tr class="lnk" data-j="'+k+'"><td class="mono">'+pad(+k+1)+'</td><td><b>'+esc(x[1])+'</b><div style="color:var(--ink2)">'+esc(ran?r.d:'Runs when the phase checks run.')+'</div></td><td>'+(ran?'<span class="tg '+r.s+'">'+LBL[r.s]+'</span>':'<span class="tg nc">Queued</span>')+'</td></tr>'}})});
+  if(!tot.api&&!tot.paper&&!tot.na)return '';
   return '<div class="card" style="margin-top:16px"><h3>Independent validation through Brazilian partners.</h3><p style="color:var(--ink2);margin-bottom:12px">Across the 11 phases, '+tot.api+' record types are checked independently against Brazilian registries and '+tot.paper+' more are supplied by the partners and held on file. '+tot.na+' is not applicable.</p><table class="t"><thead><tr><th>Phase</th><th>Independent check</th><th>Status</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
 }
 /* ---------- documents and findings ---------- */
@@ -514,6 +519,7 @@ function view(){
   h+='<div id="ov"></div>';
   h+='<div class="pager"><button class="btn" id="prev" '+(i===0?'disabled':'')+'>Previous phase</button><span class="sp"></span><button class="btn" id="next">'+(i===10?'Findings report':'Next phase')+'</button></div>';
   v.innerHTML=h;
+  if(!p.docs.length)$('#docs').innerHTML='<div class="empty">No documents in this phase are shared with this role.</div>';
   $('#topTitle').textContent='Phase '+pad(i+1)+' · '+p.loc;
   wire(i);paintPhase(i,null);
 }
@@ -627,8 +633,9 @@ function overview(v){
   +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>11</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
   +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv"><dt>Product</dt><dd>Cooked seasoned frozen beef (silverside and topside), HS 1602.50</dd><dt>Quantity</dt><dd>18,247.460 kg net · 704 cartons</dd><dt>Exporter</dt><dd>MINERVA S.A., SIF 745</dd><dt>Importer</dt><dd>Sapphire Foods Ltd</dd><dt>Route</dt><dd>Santos to London Gateway, MSC Leila, container CRLU1288269</dd><dt>Bill of lading</dt><dd>'+C.bl+'</dl></div>'
   +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
+  +'<div class="card" style="margin-top:16px"><h3>Need to know, by role</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Not every party sees every document. Use View as at the top to see the demo as the importer, exporter, customs agent, port health, carrier or insurer. A finding is shown to a role only if that role can see every document the finding draws on.</p><button class="btn" id="mtx">Show who sees what</button><p class="cap" style="margin-top:10px">Working hypothesis for discussion. The roles and what each sees are a proposed model, not fixed ownership.</p></div>'
   +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div><span class="tg ok">Independent validation · Brazilian partners</span><p style="margin-top:8px;color:var(--ink2)">Obtains records in Brazil and checks them against government registries, so findings rest on more than the uploaded documents.</p></div></div></div>';
-  $('#start').onclick=function(){go(0)};$('#playall').onclick=function(){play()};
+  $('#start').onclick=function(){go(0)};$('#mtx').onclick=openMatrix;$('#playall').onclick=function(){play()};
   document.querySelectorAll('.stat[data-act]').forEach(function(b){b.onclick=function(){var a=b.dataset.act;if(a==='phase')go(0);else if(a==='docs')openLib();else go(11)}});
 }
 function report(v){
@@ -649,6 +656,81 @@ function report(v){
   document.querySelectorAll('[data-cat]').forEach(function(b){b.onclick=function(){openCat(b.dataset.cat)}});
   $('#back').onclick=function(){go(10)};$('#print').onclick=function(){window.print()};$('#again').onclick=restart;
 }
+
+/* ---------- roles: need to know ---------- */
+var ROLE='all';
+var ROLES=[['all','All documents (VeriPura team view)','Sees every document and finding.','All'],
+['imp','Importer, Sapphire Foods Ltd','Sees the documents it is party to, the customs and border documents, and its own obligations.','Importer'],
+['exp','Exporter, Minerva S.A.','Sees the production, certificate, export and shipping documents it issued or holds.','Exporter'],
+['agt','Customs agent, George Baker (Shipping) Ltd','Sees the customs, border and shipping documents it needs to declare and clear the goods.','Agent'],
+['bcp','Port health and APHA, border post','Sees the health, certificate, cold chain and border documents needed for official checks. Commercial documents are not shared.','Port health'],
+['car','Carrier, MSC','Sees the transport documents only.','Carrier'],
+['ins','Insurer','Sees the shipping, value and cold chain documents needed to assess cargo risk.','Insurer']];
+var DOCVIS={
+'Establishment record':['imp','exp','bcp','ins'],
+'MAPA SIGSIF export eligibility':['imp','exp','bcp'],
+'HACCP documentation':['imp','exp','bcp'],
+'Purchase order':['imp','exp','ins'],
+'Product identity across documents':['imp','exp','agt','bcp','ins'],
+'SISBOV traceability record':['imp','exp','bcp'],
+'Residue test results':['imp','exp','bcp'],
+'Establishments and official attestation':['imp','exp','bcp'],
+'Export Health Certificate, Part I':['imp','exp','agt','bcp'],
+'Export Health Certificate, Part II':['imp','exp','bcp'],
+'DU-E export declaration':['imp','exp'],
+'Certificate of origin':['imp','exp','agt'],
+'Packing list':['imp','exp','agt','car','ins'],
+'Bill of lading':['imp','exp','agt','car','ins'],
+'Commercial invoice':['imp','exp','agt','ins'],
+'Reefer data logger summary':['imp','exp','car','ins','bcp'],
+'CHED-P, Part I':['imp','exp','agt','bcp'],
+'EHC, reference box':['imp','exp','agt','bcp'],
+'TRQ import licence':['imp','agt'],
+'Customs import declaration (CDS)':['imp','agt'],
+'MSC arrival notice':['imp','agt','car'],
+'CHED-P, Part II controls':['imp','agt','bcp'],
+'CHED-P, Part III follow-up':['imp','agt','bcp'],
+'Evidence index':['imp','ins'],
+'Deforestation screening summary':['imp','exp'],
+'Importer obligations':['imp']
+};
+var CLS=[[/packing list/i,'Packing list'],[/B\/L|bill of lading/i,'Bill of lading'],[/\bEHC\b/,'Export Health Certificate, Part I'],[/EHC Part II|BSE|attestation/i,'Export Health Certificate, Part II'],[/\bCHED\b/,'CHED-P, Part I'],[/CHED Part II|CHED-P Part II/,'CHED-P, Part II controls'],[/\bCDS\b|customs declaration/i,'Customs import declaration (CDS)'],[/invoice/i,'Commercial invoice'],[/certificate of origin/i,'Certificate of origin'],[/arrival notice/i,'MSC arrival notice'],[/purchase order/i,'Purchase order'],[/reefer|temperature log/i,'Reefer data logger summary']];
+function seesTitle(role,t){return role==='all'||(DOCVIS[t]||[]).indexOf(role)>-1}
+function buildP(role){
+  P=PALL.map(function(p){
+    var docs=p.docs.filter(function(d){return seesTitle(role,d.t)});
+    var keys={};docs.forEach(function(d){docKeys(d).forEach(function(k){keys[k]=1})});
+    var checks=p.checks.filter(function(c){
+      if(role==='all')return true;
+      if(!docs.length)return false;
+      if(c.k&&c.k.length&&!c.k.every(function(k){return keys[k]}))return false;
+      var t=c.p+' '+c.d+' '+c.r;
+      return CLS.every(function(x){return !x[0].test(t)||seesTitle(role,x[1])});
+    });
+    var q={};for(var f in p)q[f]=p[f];q.docs=docs;q.checks=checks;if(docs.length<p.docs.length)q.intro='Only the documents and findings shared with this role are shown for this phase.';return q;
+  });
+}
+function roleName(){return ROLES.filter(function(x){return x[0]===ROLE})[0]}
+function updRoleBar(){
+  var R=roleName(),nd=P.reduce(function(a,p){return a+p.docs.length},0),na=PALL.reduce(function(a,p){return a+p.docs.length},0);
+  $('#roleBar').innerHTML='<span class="tg '+(ROLE==='all'?'prop':'ok')+'">Viewing as</span><span><b>'+esc(R[1])+'.</b> '+esc(R[2])+' '+(ROLE==='all'?'':'Documents shared with this role: '+nd+' of '+na+'.')+'</span>';
+}
+function setRole(r){
+  pause();
+  var old=STEPS,oldPos=ST.pos,oSH=SH.slice(),oTW=TW.slice(),s=oldPos>0?old[oldPos-1]:null;
+  ROLE=r;buildP(r);build();ST.tab={};ST.ovOpen={};
+  var np=0;
+  if(s){if(s.t==='report')np=STEPS.length;else{var c=s.i;np=oTW[c]?END[c]:ENTER[c]+1+Math.min(oSH[c],P[c].checks.length)}}
+  ST.cur=-99;updRoleBar();applyPos(np);
+}
+function openMatrix(){
+  var h='<p class="cap" style="margin-bottom:10px">Working hypothesis for discussion. A finding is shown to a role only if that role can see every document the finding draws on. The VeriPura team view sees everything.</p><table class="t mtx"><thead><tr><th>Document</th>'+ROLES.slice(1).map(function(x){return '<th>'+x[3]+'</th>'}).join('')+'</tr></thead><tbody>';
+  PALL.forEach(function(p,i){
+    h+='<tr class="ph"><td colspan="7">PHASE '+pad(i+1)+' · '+esc(p.n.toUpperCase())+'</td></tr>';
+    p.docs.forEach(function(d){h+='<tr><td>'+esc(d.t)+'</td>'+ROLES.slice(1).map(function(x){var y=seesTitle(x[0],d.t);return '<td class="'+(y?'y':'n')+'" title="'+(y?'Can see':'Cannot see')+'">'+(y?'Yes':'-')+'</td>'}).join('')+'</tr>'});
+  });
+  openDrawer('Who sees what','Need to know by role, for discussion',h+'</tbody></table>');
+}
 /* ---------- boot ---------- */
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);$('#themeIco').textContent=t==='dark'?'☾':'☀';try{localStorage.setItem('vp-demo-theme',t)}catch(e){}}
 $('#themeBtn').onclick=function(){setTheme(document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark')};
@@ -665,7 +747,9 @@ document.addEventListener('keydown',function(e){
   else if(e.key==='ArrowLeft'){e.preventDefault();stepBack()}
   else if(e.key===' '){e.preventDefault();ST.playing?pause():play()}
 });
-calc();nav();view();updPlayer();
+var rs=$('#roleSel');rs.innerHTML=ROLES.map(function(x){return '<option value="'+x[0]+'">'+esc(x[1])+'</option>'}).join('');
+rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
+updRoleBar();calc();nav();view();updPlayer();
 </script>
 </body>
 </html>
