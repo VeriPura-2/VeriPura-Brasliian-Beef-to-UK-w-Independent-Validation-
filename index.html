@@ -1447,7 +1447,7 @@ function setScenario(n){
   if(n===1){document.body.classList.remove('hl','hosted');$('#startBtn').style.display='';loadPack(cur,-2)}
   else{document.body.classList.add('hosted');$('#startBtn').style.display='none';loadPack(cur,-1);showHost()}
 }
-$('#scenSel').innerHTML='<option value="1">1 · Importer tool (VeriPura Food)</option><option value="2">2 · Forwarder platform</option><option value="3">3 · Importer platform</option>';
+$('#scenSel').innerHTML='<option value="1">Importer (Food)</option><option value="2">Forwarder (Core)</option><option value="3">Importer (Core)</option>';
 $('#scenSel').onchange=function(){setScenario(+this.value)};
 var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
