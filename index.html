@@ -151,6 +151,38 @@ button.stat:hover{border-color:var(--blue)}
 .pbar i{display:block;height:100%;width:0;background:var(--gold-bg);transition:width .3s}
 #scenSel{font:inherit;font-size:13.5px;width:calc(100% - 28px);margin:2px 14px 8px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 8px;min-height:44px}
 .paper{scroll-margin-top:90px}
+body.api #phaseNav,body.api #resBtn,body.api #wfLbl,body.api #resLbl,body.api aside .nav-i[data-go="-1"],body.api .top,body.api #packBar,body.api #roleBar{display:none!important}
+.apihead{display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.seg{display:inline-flex;align-items:center;gap:8px}
+.seg .sb{display:inline-flex;border:1.5px solid var(--line);border-radius:8px;overflow:hidden}
+.seg button{border:0;background:var(--card);color:var(--ink2);font:inherit;font-size:13px;padding:8px 12px;min-height:40px;cursor:pointer}
+.seg button.on{background:var(--gold-bg);color:var(--gold-ink);font-weight:700}
+.apigrid{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:18px;align-items:start;padding-bottom:90px}
+.hostp{background:#f6f8fb;color:#1c2430;border:1px solid #d5dae1;border-radius:12px;padding:18px 20px}
+.hostp h3{font-family:var(--serif);font-weight:400;font-size:24px;margin-bottom:4px}
+.hostp .hsub{font-size:13px;color:#667;margin-bottom:12px}
+.hostp table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #d5dae1;font-size:13.5px;margin:10px 0}
+.hostp th{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#667;text-align:left;padding:8px 10px;background:#f0f3f8;border-bottom:1px solid #d5dae1}
+.hostp td{padding:8px 10px;border-bottom:1px solid #e6eaf0;vertical-align:top}
+.hostp .cn{display:inline-flex;gap:5px;flex-wrap:wrap}
+.hostp .cn span{font-family:var(--mono);font-size:11px;border-radius:6px;padding:2px 7px}
+.hostp .cn .ok{background:var(--ok-bg);color:var(--ok)}.hostp .cn .rev{background:var(--rev-bg);color:var(--rev)}.hostp .cn .mis{background:var(--mis-bg);color:var(--mis)}.hostp .cn .nc{background:var(--nc-bg);color:var(--nc)}
+.hostp ul{margin:6px 0 6px 18px;font-size:13.5px}.hostp li{margin:3px 0}
+.hostp .hnote{font-size:12px;color:#667;border-top:1px dashed #c9d0da;margin-top:12px;padding-top:10px}
+.hostp .hlab{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#667;margin-top:12px}
+.apip{background:#0b1526;color:#d7e3f4;border:1px solid #20324d;border-radius:12px;padding:14px 16px}
+.apip .ahead{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#8aa0c0;margin-bottom:10px;display:flex;gap:10px;flex-wrap:wrap}
+.call{border:1px solid #20324d;border-radius:10px;margin:8px 0;background:#0f1d33}
+.call>summary{display:flex;gap:10px;align-items:center;padding:9px 12px;cursor:pointer;list-style:none;font-family:var(--mono);font-size:12.5px;flex-wrap:wrap}
+.call>summary::-webkit-details-marker{display:none}
+.call .ar{color:#ffcf7a}.call .mt{color:#7fb2ff;font-weight:700}.call .st{margin-left:auto;color:#9be3a6}
+.call .cb{padding:0 12px 12px}
+.call .bl{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8aa0c0;margin:10px 0 4px;display:flex;gap:10px;align-items:center}
+.call .bl button{margin-left:auto;font:inherit;font-size:10.5px;background:#16294a;color:#cfe0ff;border:1px solid #2a4170;border-radius:6px;padding:3px 8px;cursor:pointer}
+.call pre{margin:0;background:#091120;border:1px solid #1b2c47;border-radius:8px;padding:10px 12px;font-family:var(--mono);font-size:12px;line-height:1.5;overflow:auto;max-height:340px;white-space:pre;color:#d7e3f4}
+.call pre .k{color:#7fb2ff}.call pre .s{color:#9be3a6}.call pre .n{color:#ffcf7a}.call pre .h{color:#8aa0c0}
+.call .note{font-size:12.5px;color:#9db3d1;margin-top:8px;font-family:var(--sans,inherit)}
+@media (max-width:1100px){.apigrid{grid-template-columns:1fr}}
 .pickl{display:grid;gap:8px;margin:12px 0 18px}
 .pick{display:flex;gap:12px;align-items:center;text-align:left;width:100%;background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:12px 14px;font:inherit;color:inherit;cursor:pointer;min-height:48px}
 .pick:hover{border-color:var(--blue)}
@@ -218,9 +250,9 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
   <select id="packSel" aria-label="Choose a consignment"></select>
   <button class="nav-i" data-go="-2" id="startBtn"><span class="n">00</span><span class="t">Start from a document</span></button>
   <button class="nav-i" data-go="-1"><span class="n">00</span><span class="t">Overview</span></button>
-  <div class="side-sec label">Workflow</div>
+  <div class="side-sec label" id="wfLbl">Workflow</div>
   <div id="phaseNav"></div>
-  <div class="side-sec label">Results</div>
+  <div class="side-sec label" id="resLbl">Results</div>
   <button class="nav-i" id="resBtn" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
 </aside>
 <div class="wrap">
@@ -544,11 +576,12 @@ function nav(){
   }).join('');
   document.querySelectorAll('aside .nav-i').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur);b.onclick=function(){go(+b.dataset.go)}});
 }
-function go(i){if(i<-2||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
+function go(i){if(i<-3||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
 /* ---------- phase view ---------- */
 function view(){
   var v=$('#view'),i=ST.cur;
   $('#packBar').style.display=(i>=0)?'none':'';$('#roleBar').style.display=(i>=0)?'none':'';
+  if(i===-3)return apiView(v);
   if(i===-2)return intake(v);
   if(i===-1)return overview(v);
   if(i===NP)return report(v);
@@ -611,12 +644,13 @@ function schedule(ms){
   },d);
 }
 function play(stopAt){
+  if(API.on)return apiPlay();
   if(ST.pos>=STEPS.length)applyPos(0);
   ST.stopAt=stopAt==null?STEPS.length:stopAt;ST.playing=true;updPlayer();schedule(500);
 }
-function pause(){ST.playing=false;clearTimeout(ST.timer);updPlayer();if(ST.cur>=0&&ST.cur<NP)paintPhase(ST.cur,null)}
-function stepBack(){pause();applyPos(ST.pos-1)}
-function stepFwd(){pause();applyPos(ST.pos+1)}
+function pause(){if(API.on)return apiPause();ST.playing=false;clearTimeout(ST.timer);updPlayer();if(ST.cur>=0&&ST.cur<NP)paintPhase(ST.cur,null)}
+function stepBack(){if(API.on)return apiStep(-1);pause();applyPos(ST.pos-1)}
+function stepFwd(){if(API.on)return apiStep(1);pause();applyPos(ST.pos+1)}
 function runPhase(i){
   if(done(i))return;
   if(ST.pos<ENTER[i]+1){ST.pos=ENTER[i]+1;calc();nav();paintPhase(i,null)}
@@ -624,6 +658,7 @@ function runPhase(i){
 }
 function updPlayer(){
   var b=$('#pPlay');if(!b)return;
+  if(API.on)return apiPlayer();
   b.textContent=ST.playing?'Pause':'Play';b.setAttribute('aria-label',ST.playing?'Pause walkthrough':'Play walkthrough');
   $('#pBack').disabled=ST.pos===0;$('#pFwd').disabled=ST.pos>=STEPS.length;
   var s=ST.pos>0?STEPS[ST.pos-1]:null,txt='Not started';
@@ -1384,6 +1419,102 @@ function loadPack(id,startCur){
   updRoleBar();calc();nav();view();updPlayer();window.scrollTo({top:0});
 }
 
+
+/* ---------- Core scenarios: API exchange ---------- */
+var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[]};
+var API_BASE='https://api.veripura.com/v1';
+var STAT={ok:'matched',rev:'review',mis:'mismatch',nc:'not_checked'};
+function snake(x){return String(x).toLowerCase().replace(/&amp;/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')}
+function curId(){return Object.keys(PK).filter(function(k){return PK[k]===CUR})[0]}
+function cnsId(){return 'cns_'+curId()}
+function hookUrl(){return SC===2?'https://platform.forwarder.example/hooks/veripura':'https://orders.importer.example/hooks/veripura'}
+function docData(d){var f={};d.rows.forEach(function(r){f[snake(r[0])]=r[1]});var o={document_type:d.t,reference:d.ref,fields:f};if(d.tbl){var c=d.tbl.h.map(snake);o.lines=d.tbl.r.slice(0,3).map(function(r){var x={};c.forEach(function(k,i){x[k]=r[i]});return x});o.lines_total=d.tbl.r.length}return o}
+function findingObj(c,i,x){var t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[c.s],area:c.a,title:c.p,detail:c.d,rule_and_source:c.r,documents:t}}
+function findingsBody(i){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x)}),sm={matched:0,review:0,mismatch:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});return {consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm,findings:fs,decision:'Findings only. The decision rests with your team.'}}
+function apiSteps(){var s=[{t:'create'},{t:'req'}];P.forEach(function(p,i){if(!p.docs.length)return;s.push({t:'docs',i:i});s.push({t:API.upd==='callback'?'cb':'poll',i:i})});s.push({t:'share'});return s}
+function roleLong(r){var x=ROLES.filter(function(q){return q[0]===r})[0];return x?x[1]:r}
+function callOf(st){
+  var id=cnsId(),auth='Authorization: Bearer <token>',js='Content-Type: application/json',c={};
+  if(st.t==='create'){var m={};CUR.meta.forEach(function(q){m[snake(q[0])]=q[1]});
+    c={out:1,method:'POST',path:'/consignments',status:'201 Created',req:[auth,js],reqBody:{external_reference:'ORD-'+curId().toUpperCase(),route:CUR.name,client:impName(curId()),consignment:m},resBody:{id:id,status:'created',links:{requirements:'/v1/consignments/'+id+'/requirements',documents:'/v1/consignments/'+id+'/documents'}},note:'The host system registers the consignment. Names and references are examples.'}}
+  else if(st.t==='req'){c={out:1,method:'GET',path:'/consignments/'+id+'/requirements',status:'200 OK',req:[auth],resBody:{consignment_id:id,phases:P.map(function(p,i){return {number:i+1,name:p.n,documents_required:p.docs.map(function(d){return d.t}),checks:p.checks.length}}),totals:{documents:P.reduce(function(a,p){return a+p.docs.length},0),checks:P.reduce(function(a,p){return a+p.checks.length},0)}},note:'CORE generates the requirements for this route. The host decides how to show them.'}}
+  else if(st.t==='docs'){var p=P[st.i];
+    if(API.mode==='data')c={out:1,method:'POST',path:'/consignments/'+id+'/documents',status:'202 Accepted',req:[auth,js],reqBody:{phase:st.i+1,source:'extracted_data',documents:p.docs.map(docData)},resBody:{consignment_id:id,phase:st.i+1,documents:p.docs.map(function(d){return {document_id:'doc_'+snake(d.t),status:'processing'}})},note:'Extracted data sent as JSON. Long tables are shortened here for display.'};
+    else c={out:1,method:'POST',path:'/consignments/'+id+'/documents',status:'202 Accepted',req:[auth,'Content-Type: multipart/form-data; boundary=----vp'],reqText:['phase = '+(st.i+1)].concat(p.docs.map(function(d){return 'files[]  filename="'+snake(d.t)+'.pdf"  type=application/pdf  document_type="'+d.t+'"'})).join('\n'),resBody:{consignment_id:id,phase:st.i+1,documents:p.docs.map(function(d){return {document_id:'doc_'+snake(d.t),status:'processing',extraction:'queued'}})},note:'Document files sent as a multipart upload. CORE reads the fields from the files.'}}
+  else if(st.t==='cb'){c={out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: findings.updated','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'findings.updated'},findingsBody(st.i)),note:'CORE calls the host. The host answers with a 2xx to confirm receipt.'}}
+  else if(st.t==='poll'){c={out:1,method:'GET',path:'/consignments/'+id+'/findings?phase='+(st.i+1),status:'200 OK',req:[auth],resBody:findingsBody(st.i),note:'The host asks for the findings for this phase. A callback does the same without asking.'}}
+  else{var pr=ROLES.slice(1).map(function(r){var ds=[];P.forEach(function(q){q.docs.forEach(function(d){if((DOCVIS[d.t]||[]).indexOf(r[0])>-1&&ds.indexOf(d.t)<0)ds.push(d.t)})});return {party:r[3]||r[0],name:r[1],documents:ds}});
+    c={out:1,method:'GET',path:'/consignments/'+id+'/sharing',status:'200 OK',req:[auth],resBody:{consignment_id:id,parties:pr},note:'Which documents each party may receive. The host does the sharing, or uses its own rules.'}}
+  return c;
+}
+function hlj(o){var j=esc(JSON.stringify(o,null,2));return j.replace(/("(?:\\.|[^"\\])*")(\s*:)?|\b(true|false|null)\b|(-?\b\d+\.?\d*\b)/g,function(m,str,col,bo,num){if(str)return col?'<span class="k">'+str+'</span>'+col:'<span class="s">'+str+'</span>';if(bo)return '<span class="n">'+bo+'</span>';return '<span class="n">'+num+'</span>'})}
+function callHTML(st,k,open){
+  var c=callOf(st),tx=[],ix=API.json.length;
+  var h='<details class="call"'+(open?' open':'')+'><summary><span class="ar">'+(c.out?'HOST \u2192 CORE':'CORE \u2192 HOST')+'</span><span class="mt">'+c.method+'</span><span>'+esc(c.out?'/v1'+c.path:c.path)+'</span><span class="st">'+c.status+'</span></summary><div class="cb">';
+  h+='<div class="bl">Request</div><pre><span class="h">'+esc((c.out?c.method+' '+API_BASE+c.path:c.method+' '+c.path)+'\n'+c.req.join('\n'))+'</span>'+(c.reqBody?'\n\n'+hlj(c.reqBody):(c.reqText?'\n\n'+esc(c.reqText):''))+'</pre>';
+  if(c.reqBody){API.json.push(JSON.stringify(c.reqBody,null,2));h=h.replace('<div class="bl">Request</div>','<div class="bl">Request<button data-cp="'+ix+'">Copy JSON</button></div>')}
+  if(c.resBody){var jx=API.json.length;API.json.push(JSON.stringify(c.resBody,null,2));h+='<div class="bl">Response \u00b7 '+c.status+'<button data-cp="'+jx+'">Copy JSON</button></div><pre>'+hlj(c.resBody)+'</pre>'}
+  else h+='<div class="bl">Response</div><pre><span class="h">'+c.status+'</span></pre>';
+  return h+'<div class="note">'+esc(c.note)+'</div></div></details>';
+}
+function hostState(){
+  var S=API.steps,n=API.pos,o={created:false,req:false,docs:{},found:{},shared:false};
+  for(var k=0;k<n;k++){var x=S[k];if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;else if(x.t==='docs')o.docs[x.i]=true;else if(x.t==='cb'||x.t==='poll')o.found[x.i]=true;else o.shared=true}
+  return o;
+}
+function hostHTML(){
+  var st=hostState(),id=curId(),tot={ok:0,rev:0,mis:0,nc:0};
+  P.forEach(function(p,i){if(st.found[i])p.checks.forEach(function(c){tot[c.s]++})});
+  var any=Object.keys(st.found).length,all=P.filter(function(p){return p.docs.length}).length;
+  var h='<h3>'+(SC===2?esc(impName(id))+' · client file':'Order · '+esc(startDoc(id)?startDoc(id).t:'')+'')+'</h3><div class="hsub">'+esc(CUR.name)+'</div>';
+  if(!st.created)return h+'<div class="hsub">Waiting for the first call. Press Play or Forward.</div><div class="hnote">This screen is built by the host system from the data it receives. It is not VeriPura\u2019s interface.</div>';
+  h+='<div class="hsub">Compliance: '+(any===0?'awaiting documents':(any<all?'in progress':'all phases received'))+'</div>';
+  if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' matched</span><span class="rev">'+tot.rev+' review</span>'+(tot.mis?'<span class="mis">'+tot.mis+' mismatch</span>':'')+'<span class="nc">'+tot.nc+' not checked</span></div>';
+  h+='<table><thead><tr><th>Phase</th><th>'+(SC===2?'Documents':'Required')+'</th><th>Status</th></tr></thead><tbody>'+P.map(function(p,i){if(!p.docs.length)return '';var f=st.found[i],cnt={ok:0,rev:0,mis:0,nc:0};if(f)p.checks.forEach(function(c){cnt[c.s]++});
+    return '<tr><td>'+pad(i+1)+' '+esc(p.n)+'</td><td>'+(st.req?p.docs.length:'')+'</td><td>'+(f?'<span class="cn"><span class="ok">'+cnt.ok+'</span><span class="rev">'+cnt.rev+'</span>'+(cnt.mis?'<span class="mis">'+cnt.mis+'</span>':'')+'<span class="nc">'+cnt.nc+'</span></span>':(st.docs[i]?'Processing':(st.req?'Not received':'')))+'</td></tr>'}).join('')+'</tbody></table>';
+  var items=[];P.forEach(function(p,i){if(st.found[i])p.checks.forEach(function(c){if(c.s==='rev'||c.s==='mis')items.push((c.s==='mis'?'Mismatch: ':'Review: ')+c.p)})});
+  if(items.length)h+='<div class="hlab">'+(SC===2?'For the client file':'For your team')+'</div><ul>'+items.slice(0,6).map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+(items.length>6?'<li>and '+(items.length-6)+' more</li>':'')+'</ul>';
+  if(st.shared)h+='<div class="hlab">Documents the host can share</div><ul>'+ROLES.slice(1).map(function(r){var c=0;P.forEach(function(q){q.docs.forEach(function(d){if((DOCVIS[d.t]||[]).indexOf(r[0])>-1)c++})});return '<li>'+esc(r[3]||r[1])+': '+c+' documents</li>'}).join('')+'</ul>';
+  return h+'<div class="hnote">This screen is built by the host system from the data it receives. It is not VeriPura\u2019s interface.</div>';
+}
+function apiView(v){
+  API.steps=apiSteps();API.pos=Math.min(API.pos,API.steps.length);API.json=[];
+  $('#topTitle').textContent='Data exchange';
+  var seg=function(lab,key,opts){return '<div class="seg"><span class="label">'+lab+'</span><span class="sb">'+opts.map(function(o){return '<button data-k="'+key+'" data-v="'+o[0]+'" class="'+(API[key]===o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')+'</span></div>'};
+  var h='<h2>'+(SC===2?'Forwarder (Core)':'Importer (Core)')+'</h2><p class="lede" style="margin-bottom:12px">Their system and VeriPura Core exchange JSON over an API. The host decides what to show. Example payloads built from this consignment.</p>';
+  h+='<div class="apihead">'+seg('Documents','mode',[['data','Extracted data'],['file','Files']])+seg('Updates','upd',[['callback','Callback'],['poll','Poll']])+'</div>';
+  h+='<div class="apigrid"><section class="hostp" id="hostp"></section><section class="apip" id="apip"></section></div>';
+  v.innerHTML=h;
+  document.querySelectorAll('.apihead button').forEach(function(b){b.onclick=function(){apiPause();API[b.dataset.k]=b.dataset.v;view();updPlayer()}});
+  apiPaint();
+}
+function apiPaint(){
+  var hp=$('#hostp'),ap=$('#apip');if(!hp)return;
+  API.json=[];hp.innerHTML=hostHTML();
+  var h='<div class="ahead"><span>Base URL '+esc(API_BASE)+'</span><span>Credentials: '+esc(roleLong(ROLE))+'</span></div>';
+  if(!API.pos)h+='<div class="hsub" style="color:#9db3d1">No calls yet. Press Play or Forward to start the exchange.</div>';
+  for(var k=0;k<API.pos;k++)h+=callHTML(API.steps[k],k,k===API.pos-1);
+  ap.innerHTML=h;
+  ap.querySelectorAll('[data-cp]').forEach(function(b){b.onclick=function(e){e.preventDefault();e.stopPropagation();try{navigator.clipboard.writeText(API.json[+b.dataset.cp]);b.textContent='Copied'}catch(x){b.textContent='Copy not available'}}});
+  var last=ap.querySelector('details[open]');if(last)last.scrollIntoView({block:'nearest',behavior:'smooth'});
+  apiPlayer();
+}
+function apiPlayer(){
+  var b=$('#pPlay');b.textContent=API.playing?'Pause':'Play';
+  $('#pBack').disabled=API.pos===0;$('#pFwd').disabled=API.pos>=API.steps.length;
+  var c=API.pos>0?callOf(API.steps[API.pos-1]):null;
+  $('#pInfo').textContent=c?('Call '+API.pos+' of '+API.steps.length+' \u00b7 '+c.method+' '+(c.out?'/v1'+c.path:'callback')):'Not started';
+  $('#pFill').style.width=(API.steps.length?API.pos/API.steps.length*100:0)+'%';$('#pSpeed').value=ST.speed;
+}
+function apiStep(d){apiPause();API.pos=Math.max(0,Math.min(API.steps.length,API.pos+d));apiPaint();apiPlayer()}
+function apiPause(){API.playing=false;clearTimeout(API.timer);apiPlayer()}
+function apiPlay(){
+  if(API.pos>=API.steps.length){API.pos=0;apiPaint()}
+  API.playing=true;apiPlayer();
+  var ms={slow:3600,normal:2400,fast:1100}[ST.speed]||2400;
+  (function tick(){API.timer=setTimeout(function(){if(!API.playing)return;if(API.pos>=API.steps.length){apiPause();return}API.pos++;apiPaint();apiPlayer();if(API.pos>=API.steps.length){apiPause();return}tick()},API.pos===0?400:ms)})();
+}
+
 /* ---------- scenarios, document selector, requirements ---------- */
 var SC=1,REQ=false;
 var START={beef:'Packing list',forza:'Valuation worksheet (pro forma)',maspo:'Commercial invoices (sample of 71)',spices:'Commercial invoice',berries:'Commercial invoice'};
@@ -1425,7 +1556,7 @@ function hostBar(){
   hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(Object.keys(PK).filter(function(k){return PK[k]===CUR})[0])}});
 }
 function showHost(){
-  pause();document.body.classList.add('hl');
+  pause();API.on=false;document.body.classList.remove('api');document.body.classList.add('hl');
   var h='';
   if(SC===2){
     h='<h2>Client queue</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a forwarder platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
@@ -1440,10 +1571,12 @@ function showHost(){
 function openFromHost(id){
   document.body.classList.remove('hl');
   if(PK[id]!==CUR)loadPack(id,-1);
-  var r=SC===2?'agt':'imp';rs.value=r;setRole(r);ST.cur=-99;go(-1);hostBar();
+  pause();var r=SC===2?'agt':'imp';ROLE=r;buildP(r);NP=P.length;build();rs.value=r;
+  API.on=true;API.pos=0;API.playing=false;API.steps=apiSteps();
+  document.body.classList.add('api');ST.pos=0;ST.cur=-3;calc();nav();view();updPlayer();hostBar();window.scrollTo({top:0});
 }
 function setScenario(n){
-  SC=n;REQ=false;pause();
+  SC=n;REQ=false;pause();API.on=false;document.body.classList.remove('api');
   var cur=Object.keys(PK).filter(function(k){return PK[k]===CUR})[0]||'beef';
   $('#scenSel').value=String(n);
   if(n===1){document.body.classList.remove('hl','hosted');$('#startBtn').style.display='';loadPack(cur,-2)}
@@ -1454,7 +1587,7 @@ $('#scenSel').onchange=function(){setScenario(+this.value)};
 var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
 $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
-$('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1&&document.body.classList.contains('hl'))showHost();else if(SC!==1)hostBar()};
+$('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1){if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)}};
 setScenario(1);
 </script>
 </body>
