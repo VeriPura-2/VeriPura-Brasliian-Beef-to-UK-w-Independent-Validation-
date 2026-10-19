@@ -225,6 +225,9 @@ body.hosted main#view{max-width:none}
 .srcb{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--mut);border:1px solid var(--line);border-radius:6px;padding:5px 9px;align-self:center}
 .bk2{font:inherit;font-size:13px;font-weight:600;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:7px 12px;cursor:pointer;align-self:center}
 @media (max-width:760px){.frow{grid-template-columns:22px 1fr}.frow .fp,.frow .ft{grid-column:2}}
+.hinfo{background:var(--rev-bg);color:var(--ink);border:1px solid var(--rev);border-radius:8px;padding:10px 12px;font-size:13.5px;margin:10px 0}
+.hinfo .hsrc{font-size:12px;color:var(--mut)}
+.hinfo a{color:inherit}
 .herr{background:var(--mis-bg);color:var(--mis);border-radius:8px;padding:9px 12px;font-size:13.5px;margin:10px 0}
 .hok{background:var(--ok-bg);color:var(--ok);border-radius:8px;padding:9px 12px;font-size:13.5px;margin:10px 0}
 .ptabs{display:flex;gap:6px;margin-bottom:10px}
@@ -1535,8 +1538,16 @@ function apiSteps(){
   if(cs==='miss')s.push({t:'err',k:'miss'});
   s.push({t:'share'});
   if(cs==='fix'){s.push({t:'fix'});s.push({t:'rechk'})}
+  if(cs==='rule')s.push({t:'rule'});
   return s}
 function firstFile(){var l=selList();return l.filter(function(x){return x.d.real===1})[0]||l[0]}
+
+var RULES={
+  beef:{topic:'Antimicrobial assurance for Brazilian animal products',jurisdiction:'GB',status:'pending',summary:'GB is assessing Brazil’s antimicrobial assurance arrangements. No new GB import restriction applies today.',expected:'About six months from the 30 July 2026 update. No exact date.',note:'Separately, Regulation (EU) 2023/905 applies from 3 September 2026. Brazil was not on the EU list on 12 May 2026. This affects Northern Ireland.',source:{name:'British Retail Consortium, citing Defra and APHA, 30 July 2026',url:'https://brc.org.uk/news-and-events/news/food/2026/ungated/brazillian-imports-restrictions-eu-uk-update/'}},
+  sps:{topic:'UK-EU SPS agreement',jurisdiction:'GB',status:'pending',summary:'A proposed shared SPS zone with dynamic alignment to EU rules. Details are still under negotiation.',expected:'UK-EU summit on 20 November 2026. Implementation targeted for mid-2027.',note:'Routine SPS checks on EU goods would largely end if the agreement is concluded.',source:{name:'British Agriculture Bureau, updated 12 October 2026; Hogan Lovells, March 2026',url:'https://britishagriculturebureau.co.uk/updates-and-information/eu-uk-summit-postponed'}},
+  ex:{topic:'Example rule change',jurisdiction:'Example',status:'example',summary:'Illustrative route. A change to a requirement on this route would appear here with its source and the consignments it affects.',expected:'Example only.',note:'',source:{name:'Example',url:''}}
+};
+function ruleOf(){var k=curId();return k==='beef'?RULES.beef:(k==='forza'||k==='maspo')?RULES.sps:RULES.ex}
 function fixTarget(){var best=null,any=null;P.forEach(function(p,i){selDocs(p,i).forEach(function(d){if(!any)any={i:i,d:d};var dk=docKeys(d);if(!best&&p.checks.some(function(c){return (c.s==='rev'||c.s==='mis')&&(c.k||[]).some(function(k){return dk.indexOf(k)>-1})}))best={i:i,d:d}})});return best||any}
 function affected(t){var dk=docKeys(t.d),o=[];P[t.i].checks.forEach(function(c,x){if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))o.push(findingObj(c,t.i,x))});return o}
 function missingDocs(){var sel=API.sel,o=[];allDocs().forEach(function(x){if(!sel[x.k])o.push({phase:x.i+1,document_type:x.d.t})});return o}
@@ -1554,6 +1565,8 @@ function callOf(st){
       c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: document.failed','X-VeriPura-Signature: sha256=<hmac>'],reqBody:{event:'document.failed',consignment_id:id,document_id:did,error:er,next_step:'Send a new file for this document.'},note:'CORE tells the host which document failed and why. No findings are produced from an unreadable file.'}:{out:1,method:'GET',path:'/consignments/'+id+'/documents/'+did,status:'200 OK',req:[auth],resBody:{document_id:did,status:'failed',error:er,next_step:'Send a new file for this document.'},note:'The host asks for the document status and finds that it failed. No findings are produced from an unreadable file.'}}
     else if(st.k==='dup')c={out:1,method:'POST',path:'/consignments/'+id+'/documents',status:'409 Conflict',req:[auth,js,'Idempotency-Key: <key>'],reqBody:{phase:fd.i+1,documents:[{document_type:fd.d.t,reference:fd.d.ref}]},resBody:{error:{code:'duplicate_document',message:'This document was already received.',existing_document_id:did}},note:'The same document sent twice is not processed twice, so the host can retry safely.'};
     else c={out:1,method:'GET',path:'/consignments/'+id+'/requirements?status=missing',status:'200 OK',req:[auth],resBody:{consignment_id:id,missing_count:missingDocs().length,missing:missingDocs()},note:'Required documents not yet received. Checks that depend on them stay not_checked.'}}
+  else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Review. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
+    c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: rules.pending','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'rules.pending'},rb),note:'CORE watches the rules for this route. The in-house team does not have to. The host decides how to alert its users.'}:{out:1,method:'GET',path:'/consignments/'+id+'/rule-updates',status:'200 OK',req:[auth],resBody:{updates:[rb]},note:'CORE watches the rules for this route. The host asks for updates and decides how to alert its users.'}}
   else if(st.t==='fix'){var ft=fixTarget(),fid='doc_'+snake(ft.d.t);
     c=API.mode==='data'?{out:1,method:'PUT',path:'/consignments/'+id+'/documents/'+fid,status:'200 OK',req:[auth,js],reqBody:{phase:ft.i+1,source:'extracted_data',origin:origin(),document:docData(ft.d)},resBody:{document_id:fid,version:2,previous_version:1,status:'processing'},note:'A corrected version replaces the earlier one. The earlier version stays in the audit trail.'}:{out:1,method:'PUT',path:'/consignments/'+id+'/documents/'+fid,status:'200 OK',req:[auth,'Content-Type: multipart/form-data; boundary=----vp'],reqText:'file  filename="'+snake(ft.d.t)+'_corrected.pdf"  type=application/pdf\norigin = '+JSON.stringify(origin()),resBody:{document_id:fid,version:2,previous_version:1,status:'processing',extraction:'queued'},note:'A corrected file replaces the earlier one. The earlier version stays in the audit trail.'}}
   else if(st.t==='rechk'){var rt=fixTarget(),af=affected(rt),rb={consignment_id:id,phase:rt.i+1,document_id:'doc_'+snake(rt.d.t),version:2,checks_rerun:af,checks_unchanged:P.reduce(function(a,q){return a+q.checks.length},0)-af.length,decision:'Findings only. The decision rests with your team.'};
@@ -1579,7 +1592,7 @@ function callHTML(st,k,open){
 }
 function hostState(){
   var S=API.steps,n=API.pos,o={created:false,req:false,docs:{},found:{},shared:false};
-  for(var k=0;k<n;k++){var x=S[k];if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;else if(x.t==='docs')o.docs[x.i]=true;else if(x.t==='batch'){P.forEach(function(p,i){if(selDocs(p,i).length)o.docs[i]=true})}else if(x.t==='err'){o.err=x.k}else if(x.t==='fix'){o.fix=true}else if(x.t==='rechk'){o.rechk=true}else if(x.t==='cb'||x.t==='poll')o.found[x.i]=true;else o.shared=true}
+  for(var k=0;k<n;k++){var x=S[k];if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;else if(x.t==='docs')o.docs[x.i]=true;else if(x.t==='batch'){P.forEach(function(p,i){if(selDocs(p,i).length)o.docs[i]=true})}else if(x.t==='err'){o.err=x.k}else if(x.t==='fix'){o.fix=true}else if(x.t==='rule'){o.rule=true}else if(x.t==='rechk'){o.rechk=true}else if(x.t==='cb'||x.t==='poll')o.found[x.i]=true;else o.shared=true}
   return o;
 }
 function hostHTML(){
@@ -1594,6 +1607,7 @@ function hostHTML(){
   if(st.err==='dup'&&fs0)h+='<div class="herr">Already received: '+esc(fs0.d.t)+'. The duplicate was ignored.</div>';
   if(st.err==='miss'){var md=missingDocs();h+='<div class="herr">Missing documents: '+md.length+(md.length?'. '+md.slice(0,4).map(function(m){return esc(m.document_type)}).join(', ')+(md.length>4?' and '+(md.length-4)+' more':''):'')+'</div>'}
   if(st.fix&&fz)h+='<div class="hok">Corrected file received: '+esc(fz.d.t)+' (version 2). '+(st.rechk?affected(fz).length+' checks re-run, the others unchanged.':'Re-checking.')+'</div>';
+  if(st.rule){var ru=ruleOf();h+='<div class="hinfo"><b>Rule update'+(ru.status==='example'?' (example)':'')+': '+esc(ru.topic)+'</b><br>'+esc(ru.summary)+' No change to your checklist today.<br><span class="hsrc">'+esc(ru.expected)+(ru.source.url?' Source: <a href="'+ru.source.url+'" target="_blank" rel="noopener">'+esc(ru.source.name)+'</a>':'')+'</span></div>'}
   h+='<div class="hsub">Compliance: '+(any===0?'awaiting documents':(any<all?'in progress':'all phases received'))+'</div>';
   if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' matched</span><span class="rev">'+tot.rev+' review</span>'+(tot.mis?'<span class="mis">'+tot.mis+' mismatch</span>':'')+'<span class="nc">'+tot.nc+' not checked</span></div>';
   h+='<table><thead><tr><th>Phase</th><th>'+(SC===2?'Documents':'Required')+'</th><th>Status</th></tr></thead><tbody>'+P.map(function(p,i){if(!p.docs.length)return '';var f=st.found[i],cnt={ok:0,rev:0,mis:0,nc:0};if(f)p.checks.forEach(function(c){cnt[c.s]++});
@@ -1610,7 +1624,7 @@ function apiView(v){
   $('#topTitle').textContent='Data exchange';
   var seg=function(lab,key,opts){return '<div class="seg"><span class="label">'+lab+'</span><span class="sb">'+opts.map(function(o){return '<button data-k="'+key+'" data-v="'+o[0]+'" class="'+(API[key]===o[0]?'on':'')+'">'+o[1]+'</button>'}).join('')+'</span></div>'};
   var h='<h2>'+(SC===2?W().brand:esc(partyName(curId()))+' \u00b7 '+W().title+' compliance')+'</h2><p class="lede" style="margin-bottom:12px">Their system and VeriPura Core exchange JSON over an API. The host decides what to show. Example payloads built from this consignment.</p>';
-  h+='<div class="apihead">'+seg('Documents','mode',[['data','Extracted data'],['file','Files']])+seg('Updates','upd',[['callback','Callback'],['poll','Poll']])+seg('Case','cs',[['','Normal'],['token','Invalid token'],['bad','Unreadable file'],['dup','Duplicate'],['miss','Missing document'],['fix','Corrected document']])+'<span class="srcb">Source: '+esc(srcLabel(API.src))+'</span><button class="bk2" id="chg">Change documents</button></div>';
+  h+='<div class="apihead">'+seg('Documents','mode',[['data','Extracted data'],['file','Files']])+seg('Updates','upd',[['callback','Callback'],['poll','Poll']])+seg('Case','cs',[['','Normal'],['token','Invalid token'],['bad','Unreadable file'],['dup','Duplicate'],['miss','Missing document'],['fix','Corrected document'],['rule','Rule update']])+'<span class="srcb">Source: '+esc(srcLabel(API.src))+'</span><button class="bk2" id="chg">Change documents</button></div>';
   h+='<div class="apigrid"><section class="hostp" id="hostp"></section><section class="apip" id="apip"></section></div>';
   v.innerHTML=h;
   document.querySelectorAll('.apihead button').forEach(function(b){b.onclick=function(){apiPause();API[b.dataset.k]=b.dataset.v;API.pos=0;view();updPlayer();window.scrollTo({top:0});apiPlay()}});
@@ -1628,6 +1642,7 @@ function auditEntries(){
     else if(x.t==='cb'||x.t==='poll')o.push({t:t,a:'Core',e:'findings.delivered',d:'Phase '+pad(x.i+1)+' · '+P[x.i].checks.length+' checks'});
     else if(x.t==='share')o.push({t:t,a:'Host',e:'sharing.read',d:'Document access by party'});
     else if(x.t==='fix'){var f=fixTarget();o.push({t:t,a:'Host',e:'document.replaced',d:f.d.t+' · version 2 · version 1 kept'})}
+    else if(x.t==='rule'){o.push({t:t,a:'Core',e:'rules.pending',d:ruleOf().topic})}
     else if(x.t==='rechk'){var f2=fixTarget();o.push({t:t,a:'Core',e:'checks.rerun',d:affected(f2).length+' checks for '+f2.d.t})}
     else if(x.t==='err'){var m={token:['request.rejected','401 invalid_token'],bad:['document.failed','unreadable_file'],dup:['request.rejected','409 duplicate_document'],miss:['requirements.checked',missingDocs().length+' documents missing']}[x.k];o.push({t:t,a:x.k==='bad'?'Core':'Core',e:m[0],d:m[1]})}
   }
