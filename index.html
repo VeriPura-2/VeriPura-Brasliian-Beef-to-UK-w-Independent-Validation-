@@ -1717,25 +1717,22 @@ function partyName(id){return (SC===3&&HT[3]==='exp')?expName(id):impName(id)}
 function hostBar(){
   var hb=$('#hostBar'),hl=document.body.classList.contains('hl'),cur=curId(),w=W();
   var types=SC===2?[['ff','Forwarder'],['agt','Broker']]:[['imp','Importer'],['exp','Exporter']];
-  var h='<button class="bk" id="hbBack">← Back to demo</button><span class="hb">'+(SC===2?w.brand:esc(partyName(cur))+' · '+w.brand)+'</span>';
+  var h='<button class="bk" id="hbBack">← Back to demo</button><span class="hb">'+(SC===2?w.brand:(hl?'Trade platform':esc(partyName(cur))+' · '+w.brand))+'</span>';
   h+='<button class="ht'+(hl?' on':'')+'" data-t="list">'+w.list+'</button><button class="ht'+(hl?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span>';
   h+='<span class="seg"><span class="label">I am</span><span class="sb">'+types.map(function(t){return '<button data-ty="'+t[0]+'" class="'+(HT[SC]===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</span></span>';
-  if(SC===3)h+='<select id="hbCo" aria-label="Company">'+Object.keys(PK).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>'+esc(partyName(k))+'</option>'}).join('')+'</select>';
-  h+='<span class="pw">'+(SC===2?'Illustrative host platform · Powered by VeriPura':'Illustrative host platform · VeriPura Core™ inside')+'</span>';
+    h+='<span class="pw">'+(SC===2?'Illustrative host platform · Powered by VeriPura':'Illustrative host platform · VeriPura Core™ inside')+'</span>';
   hb.innerHTML=h;
   $('#hbBack').onclick=function(){$('#scenSel').value='1';setScenario(1)};
   hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(curId())}});
   hb.querySelectorAll('[data-ty]').forEach(function(b){b.onclick=function(){HT[SC]=b.dataset.ty;if(document.body.classList.contains('hl'))showHost();else openFromHost(curId())}});
-  var co=$('#hbCo');if(co)co.onchange=function(){loadPack(this.value,-1);if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)};
-}
+  }
 function showHost(){
   pause();API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
   var w=W(),h='';
   if(SC===2){
     h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a '+(HT[2]==='ff'?'forwarder':'broker')+' platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }else{
-    var cur=curId();
-    h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' for '+esc(partyName(cur))+'. The Compliance tab is provided by VeriPura Core™ inside this platform. Illustrative mock of a trade platform. Use the company list above to show another company.</div><table><thead><tr><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody><tr class="lnk" data-p="'+cur+'"><td><b>'+esc(startDoc(cur).t)+'</b></td><td>'+esc(PK[cur].name)+'</td><td>'+cnHTML(packCounts(cur))+'</td><td>Open</td></tr></tbody></table>';
+    h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' across the companies on this platform. The Compliance tab is provided by VeriPura Core\u2122 inside it. Illustrative mock of a trade platform.</div><table><thead><tr><th>Company</th><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(partyName(k))+'</b></td><td>'+esc(startDoc(k).t)+'</td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }
   $('#host').innerHTML=h;
   document.querySelectorAll('#host tr.lnk').forEach(function(r){r.onclick=function(){openFromHost(r.dataset.p)}});
