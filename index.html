@@ -241,6 +241,9 @@ body.hosted main#view{max-width:none}
 .splg{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:11.5px;color:var(--mut);margin:6px 0}
 .splg .sp{font-weight:600}
 .stamp.s3.pq{}
+.vd{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--nc);border-radius:8px;padding:12px 14px;margin:12px 0}
+.vd.f{border-left-color:var(--mis)}.vd.p{border-left-color:var(--ok)}
+.vd .vh{font-weight:700;font-size:15px}.vd .vs{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:4px}.vd .vn{font-size:12px;color:var(--mut);margin-top:6px}
 .ckl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card2);border:1px solid var(--line);margin:8px 0}
 .ckl th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
 .ckl td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -360,7 +363,7 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
 <div class="drawer" id="drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle"><div class="dhead"><div><div class="label" id="drawerSub"></div><h2 id="drawerTitle"></h2></div><button class="btn" id="drawerClose">Close</button></div><div id="drawerBody"></div></div>
 <script>
 var C={bl:'MEDUR3178106'};var NP=11,CUR=null,PK={};
-var LBL={ok:'Matched',rev:'Review',mis:'Mismatch',nc:'Not checked'};
+var LBL={ok:'Pass',rev:'Flag',mis:'Flag',nc:'Not checked'};
 var NS='Not supplied with this consignment';
 var P=[
 {n:'Pre-contract and establishment eligibility',loc:'Brazil',
@@ -450,7 +453,7 @@ var P=[
   {a:'Cross-Doc Guard',p:'Packing list vs EHC net weight',s:'ok',d:'18,247.460 kg on both. Net and gross weights also match the B/L and the customs declaration.',r:'EHC Part I vs packing list',k:['pw','gw']},
   {a:'Cross-Doc Guard',p:'Carton count',s:'ok',d:'704 cartons on the packing list, EHC, B/L, CHED and CDS.',r:'EHC Part I',k:['ct']},
   {a:'Cross-Doc Guard',p:'Invoice vs packing list',s:'nc',d:'The invoice was not supplied, so value and quantity could not be compared.',r:'Document set',k:['inv']},
-  {a:'Seal Guard',p:'Seals on the B/L vs the EHC',s:'rev',d:'The B/L lists two seals, FJ25368005 and the SIF seal 0003540SIF745. The EHC lists only the SIF seal. Confirm both are intact at the identity check.',r:'B/L vs EHC Part I',k:['seal']},
+  {a:'Seal Guard',p:'Seals on the B/L vs the EHC',s:'mis',d:'The B/L lists two seals, FJ25368005 and the SIF seal 0003540SIF745. The EHC lists only the SIF seal. Confirm both are intact at the identity check.',r:'B/L vs EHC Part I',k:['seal']},
   {a:'Cold Chain Agent',p:'Set temperature',s:'ok',d:'The B/L shows -18 °C, which matches the frozen regime on the EHC.',r:'B/L, EHC',k:['tset']},
   {a:'Cold Chain Agent',p:'Reefer log vs -18 °C regime',s:'nc',d:'No temperature log was supplied, so the voyage readings could not be checked.',r:'Frozen storage requirement',k:['tmp']}
  ],
@@ -466,8 +469,8 @@ var P=[
   {a:'CHED Guard',p:'CHED against the customs declaration',s:'ok',d:'Reference 7681938 on the CHED matches the CHD entry GBCHD2026.7681938 on the CDS.',r:'IPAFFS vs CDS',k:['ched']},
   {a:'CHED Guard',p:'Certificate reference vs EHC',s:'mis',d:'The EHC prints I0-00230400/CC-STS/26, starting with the letter I. The CHED prints 10-00230400/CC-STS/26, starting with the digit 1. The first character differs between the two documents.',r:'IPAFFS vs EHC',k:['cdoc','ehc']},
   {a:'CHED Guard',p:'Consignment details vs EHC',s:'ok',d:'Packages, weights, container and plant 745 match the EHC.',r:'EHC Part I',k:['cm']},
-  {a:'Seal Guard',p:'Seal on the CHED',s:'rev',d:'The CHED lists FJ25368005 only. The EHC lists 0003540SIF745 only, and the B/L lists both. No one document shows both seals.',r:'CHED vs EHC vs B/L',k:['seal']},
-  {a:'Timing Guard',p:'Prior notification vs vessel arrival',s:'rev',d:'The CHED prior notification box shows 22 May 2026 00:01. The MSC arrival notice gives a vessel ETA of 21 May 2026 22:00. Confirm what this box represents.',r:'CHED vs MSC arrival notice',k:['sub']},
+  {a:'Seal Guard',p:'Seal on the CHED',s:'mis',d:'The CHED lists FJ25368005 only. The EHC lists 0003540SIF745 only, and the B/L lists both. No one document shows both seals.',r:'CHED vs EHC vs B/L',k:['seal']},
+  {a:'Timing Guard',p:'Prior notification vs vessel arrival',s:'mis',d:'The CHED prior notification box shows 22 May 2026 00:01. The MSC arrival notice gives a vessel ETA of 21 May 2026 22:00. Confirm what this box represents.',r:'CHED vs MSC arrival notice',k:['sub']},
   {a:'Licence Guard',p:'TRQ licence',s:'nc',d:'No licence information was supplied, so whether a quota applies was not checked.',r:'Rural Payments Agency',k:['trq']}
  ],
  twin:{h:'Pre-arrival status visible to agencies',li:['Port health and APHA see a consignment expected, with pre-checks completed.','Open findings on the reference, the seals and the notification time are shown with the record.'],ev:'TWIN-DEMO-0001 · event: prenotification.seen',tag:'prop'}},
@@ -481,7 +484,7 @@ var P=[
   {a:'Weight Guard',p:'Declared mass vs packing list',s:'ok',d:'Net 18,247.46 kg and gross 18,937.38 kg match the packing list.',r:'Packing list vs CDS',k:['dw','gw']},
   {a:'CHED Guard',p:'CHED reference present',s:'ok',d:'The reference matches the CHED. The certificate reference finding is open in phase 07.',r:'CDS vs CHED',k:['ched']},
   {a:'Party Guard',p:'Importer EORI',s:'ok',d:'The EORI matches the VAT number on the certificate of origin.',r:'Certificate of origin',k:['eori']},
-  {a:'Description Guard',p:'Goods description',s:'rev',d:'The CDS describes the goods as ADDR BEEF CUTS. The B/L and certificate of origin describe cooked seasoned beef silverside and topside. Confirm the description is acceptable for the declaration.',r:'CDS vs B/L and certificate of origin',k:['desc']},
+  {a:'Description Guard',p:'Goods description',s:'mis',d:'The CDS describes the goods as ADDR BEEF CUTS. The B/L and certificate of origin describe cooked seasoned beef silverside and topside. Confirm the description is acceptable for the declaration.',r:'CDS vs B/L and certificate of origin',k:['desc']},
   {a:'Value Guard',p:'Customs value',s:'nc',d:'The invoice total is not shown on this copy and the invoice was not supplied, so value could not be checked.',r:'CDS',k:['val']}
  ],
  twin:{h:'Customs status linked',li:['Declaration reference and status logged for importer and buyer records.'],ev:'TWIN-DEMO-0001 · event: customs.declared',tag:'prop'}},
@@ -492,11 +495,11 @@ var P=[
   {t:'CHED-P, Part II controls',ref:'CHEDP.GB.2026.7681938 · PAGE 3',real:1,rows:[['Documentary check','Not recorded','oc'],['Identity check','Not recorded','oc'],['Physical check','Not recorded','phys'],['Laboratory tests','Not recorded','lab'],['Acceptable for internal market','Human consumption (ticked)','ii12'],['BCP','London Gateway · GBLGP1','bcp'],['Certifying officer name and signature','Blank','oc']],note:'Part II as supplied.'}
  ],
  checks:[
-  {a:'Signal Agent',p:'Findings sent to the border post',s:'rev',d:'The signal carries the open findings on seals, the certificate reference mismatch, the prior notification time and the goods description, so the border team can plan its checks.',r:'Consignment findings'},
+  {a:'Signal Agent',p:'Findings sent to the border post',s:'mis',d:'The signal carries the open findings on seals, the certificate reference mismatch, the prior notification time and the goods description, so the border team can plan its checks.',r:'Consignment findings'},
   {a:'Arrival Guard',p:'Vessel, B/L and container',s:'ok',d:'MSC Leila, B/L MEDUR3178106 and container CRLU1288269 match on the arrival notice, CHED and CDS.',r:'Arrival notice, CHED, CDS',k:['arr']},
   {a:'Port Guard',p:'Discharge terminal vs border post',s:'ok',d:'London Gateway is the terminal on the arrival notice and the BCP on the CHED and the EHC.',r:'Arrival notice, CHED, EHC',k:['bcp']},
   {a:'Weight Guard',p:'Arrival notice weight',s:'ok',d:'18,937.38 kg matches the gross weight on the B/L and CDS.',r:'B/L, CDS',k:['aw']},
-  {a:'Status Guard',p:'Internal market box',s:'rev',d:'The box acceptable for internal market is ticked, while no check outcome, officer name or signature is recorded. Confirm whether this is a pre-populated default.',r:'CHED Part II',k:['ii12']},
+  {a:'Status Guard',p:'Internal market box',s:'mis',d:'The box acceptable for internal market is ticked, while no check outcome, officer name or signature is recorded. Confirm whether this is a pre-populated default.',r:'CHED Part II',k:['ii12']},
   {a:'Outcome Reader',p:'BCP check outcomes',s:'nc',d:'Documentary and identity check outcomes are not recorded on this copy, so this check could not run.',r:'IPAFFS',k:['oc']},
   {a:'Lab Result Guard',p:'Physical and lab results',s:'nc',d:'No physical or laboratory results are recorded. Nothing to compare with thresholds yet.',r:'BCP sampling',k:['phys','lab']}
  ],
@@ -510,7 +513,7 @@ var P=[
  checks:[
   {a:'Completion Guard',p:'CHED-P Part III',s:'nc',d:'Follow-up is not recorded on this copy, so this check could not run.',r:'IPAFFS',k:['p3']},
   {a:'Evidence Agent',p:'Evidence bundle',s:'ok',d:'Seven documents are indexed with references for audit.',r:'Evidence index',k:['idx']},
-  {a:'Completeness Guard',p:'Records not in the set',s:'rev',d:'Five record types were not supplied: purchase order, invoice, DU-E, reefer log and farm records. Independent validation can retrieve some of them.',r:'Evidence index',k:['gap']}
+  {a:'Completeness Guard',p:'Records not in the set',s:'mis',d:'Five record types were not supplied: purchase order, invoice, DU-E, reefer log and farm records. Independent validation can retrieve some of them.',r:'Evidence index',k:['gap']}
  ],
  twin:{h:'Findings and hashes committed',li:['Findings and verified document hashes committed on IOTA Rebased as a Verifiable Credential.','Sponsored transactions: no token needed by importer or exporter.'],ev:'TWIN-DEMO-0001 · hash 4be1…c90d (illustrative)',tag:'prop'}},
 {n:'Environmental and social compliance',loc:'UK, ongoing',
@@ -645,7 +648,8 @@ function mark(i){
 }
 function findHTML(c,i,x,isNew){return '<div class="find '+c.s+(isNew?' new':'')+'" data-i="'+x+'" tabindex="0" role="button" aria-label="Show in document"><div class="h"><span class="p">'+esc(c.p)+'</span><span class="tg '+c.s+'">'+LBL[c.s]+'</span></div><div class="a">'+esc(c.a.toUpperCase())+'</div><div class="d">'+esc(c.d)+'</div><div class="r">Rule and source: '+esc(c.r)+'</div></div>'}
 function twinHTML(t){return '<div class="twin"><div class="sec-title"><span class="label">Visibility layer (TWIN)</span><span class="tg '+t.tag+'">Proposed model</span></div><h4>'+esc(t.h)+'</h4><ul>'+t.li.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul><div class="ev">'+esc(t.ev)+'</div></div>'}
-function sum(i){var c=P[i].checks,m=c.filter(function(x){return x.s==='mis'}).length,r=c.filter(function(x){return x.s==='rev'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Review: '+m+' mismatch'+(m===1?'':'es')+', '+r+' flag'+(r===1?'':'s')+', '+n+' not checked.'}
+function vdHTML(ok,fl,nc){var tot=ok+fl+nc;if(!tot)return '<div class="vd"><div class="vh">Verdict: no checks have run yet</div><div class="vn">The verdict is built only from check results.</div></div>';var f=fl>0,h=f?'Verdict: flags to resolve':nc>0?'Verdict: no flags, some checks not made':'Verdict: no flags';return '<div class="vd '+(f?'f':!nc?'p':'')+'"><div class="vh">'+h+'</div><div class="vs">Score: '+ok+' of '+tot+' checks passed · '+fl+' flag'+(fl===1?'':'s')+' · '+nc+' not checked</div><div class="vn">Built only from the check results. Your team makes the decision.</div></div>'}
+function sum(i){var c=P[i].checks,p=c.filter(function(x){return x.s==='ok'}).length,m=c.filter(function(x){return x.s!=='ok'&&x.s!=='nc'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Result: '+p+' pass, '+m+' flag'+(m===1?'':'s')+', '+n+' not checked.'}
 /* ---------- navigation ---------- */
 function nav(){
   var rb=$('#resBtn');rb.dataset.go=NP;rb.querySelector('.n').textContent=pad(NP+1);
@@ -786,7 +790,7 @@ function overview(v){
   v.innerHTML='<h2>'+esc(CUR.h2)+'</h2><p class="lede">'+esc(CUR.lede)+'</p>'
   +'<div class="stats"><button class="stat" data-act="phase"><span class="label">Phases</span><b>'+NP+'</b><span class="hint">Open phase 01</span></button><button class="stat" data-act="docs"><span class="label">Documents shown</span><b>'+nd+'</b><span class="hint">View all documents</span></button><button class="stat" data-act="report"><span class="label">Checks</span><b>'+nc+'</b><span class="hint">Open the report</span></button><button class="stat" data-act="report"><span class="label">Phases complete</span><b>'+dn+'</b><span class="hint">Open the report</span></button></div>'
   +'<div class="grid2"><div class="card"><h3>The consignment</h3><dl class="kv">'+CUR.meta.map(function(m){return '<dt>'+esc(m[0])+'</dt><dd>'+esc(m[1])+'</dd>'}).join('')+'</dl></div>'
-  +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Matched</span><span><i class="dot rev"></i>Review</span><span><i class="dot mis"></i>Mismatch</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Mismatch, Review and Not checked finding goes to a person. A check that could not run is listed as Not checked.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
+  +'<div class="card"><h3>How to use this demo</h3><p style="color:var(--ink2);margin-bottom:10px">Use the player at the bottom to play, pause, and step back or forward one check at a time. Select any finding to see the document field it relates to. Select a status box in the report to see only the documents behind it.</p><div class="legend"><span><i class="dot ok"></i>Pass</span><span><i class="dot mis"></i>Flag</span><span><i class="dot nc"></i>Not checked</span></div><p class="cap" style="margin-top:12px">Every Flag and every Not checked finding goes to a person. A check that could not run, or a register that could not be reached, is listed as Not checked. Core does not guess.</p><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="start">Start at phase 01</button><button class="btn" id="playall">Play the full walkthrough</button></div></div></div>'
   +'<div class="card" style="margin-top:16px"><h3>Need to know, by role</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Not every party sees every document. Use View as at the top to see the demo as the importer, exporter, customs agent, port health, carrier or insurer. A finding is shown to a role only if that role can see every document the finding draws on.</p><button class="btn" id="mtx">Show who sees what</button><p class="cap" style="margin-top:10px">Working hypothesis for discussion. The roles and what each sees are a proposed model, not fixed ownership.</p></div>'
   +'<div class="card" style="margin-top:16px"><h3>Three layers, one workflow</h3><div class="grid3"><div><span class="tg prop" style="background:var(--tint);color:var(--blue)">Compliance layer · VeriPura Core™</span><p style="margin-top:8px;color:var(--ink2)">Reads the documents, applies the rules, shows each finding with its reasoning and source.</p></div><div><span class="tg prop">Visibility layer · TWIN</span><p style="margin-top:8px;color:var(--ink2)">Working hypothesis for discussion. Records events and gives permissioned stakeholders access. Roles are a proposed model, not fixed ownership.</p></div><div>'+CUR.layer3+'</div></div></div>';
   $('#start').onclick=function(){go(0)};$('#mtx').onclick=openMatrix;$('#playall').onclick=function(){play()};
@@ -801,9 +805,9 @@ function report(v){
   var trail=all.map(function(x){return '<tr><td class="mono">'+pad(x.i+1)+'</td><td>'+esc(x.c.a)+'</td><td>'+esc(x.c.p)+'</td><td><span class="tg '+x.c.s+'">'+LBL[x.c.s]+'</span></td></tr>'}).join('');
   var n=all.length;
   v.innerHTML='<h2>Findings report and audit trail</h2><p class="lede">'+(n?('Phases complete: '+dn+' of '+NP+'.'):'No checks have run yet. Play the walkthrough or run the checks in a phase to build this report.')+' This report lists what to review and fix. It does not approve or clear a consignment.</p>'
-  +'<div class="stats"><button class="stat ok" data-cat="ok"><span class="label">Matched</span><b>'+t.ok+'</b><span class="hint">View documents</span></button><button class="stat rev" data-cat="rev"><span class="label">Review</span><b>'+t.rev+'</b><span class="hint">View documents</span></button><button class="stat mis" data-cat="mis"><span class="label">Mismatch</span><b>'+t.mis+'</b><span class="hint">View documents</span></button><button class="stat nc" data-cat="nc"><span class="label">Not checked</span><b>'+t.nc+'</b><span class="hint">View documents</span></button></div>'
+  +vdHTML(t.ok,t.mis+t.rev,t.nc)+'<div class="stats"><button class="stat ok" data-cat="ok"><span class="label">Pass</span><b>'+t.ok+'</b><span class="hint">View documents</span></button><button class="stat mis" data-cat="mis"><span class="label">Flag</span><b>'+t.mis+'</b><span class="hint">View documents</span></button><button class="stat nc" data-cat="nc"><span class="label">Not checked</span><b>'+t.nc+'</b><span class="hint">View documents</span></button></div>'
   +(n?'<div class="card"><h3>What to review and fix</h3><table class="t"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'')
-  +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Mismatch, Review and Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
+  +ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Flag and every Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
   +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">'+esc(CUR.trailNote)+'</div></div>':'')
   +'<div class="pager"><button class="btn" id="back">Back to phase '+pad(NP)+'</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
   document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
@@ -932,7 +936,7 @@ var PH=[
   {t:'GB approved establishments list',ref:'NOT SUPPLIED',real:3,rows:[['Document','GB list of approved establishments for meat products','list'],['Status',NSF,'list']]}
  ],
  checks:[
-  {a:'Establishment Guard',p:'Plant approval number on the EHC and the CHED',s:'rev',d:'The EHC names plant 02194009, ROLPEK 2, in Strzegom. The CHED box I.15 shows Not Found on the List, type Not Specified, for all three commodity lines. The two documents do not agree on whether the plant is a known establishment.',r:'EHC boxes I.11 and I.13; CHED box I.15',k:['est']},
+  {a:'Establishment Guard',p:'Plant approval number on the EHC and the CHED',s:'mis',d:'The EHC names plant 02194009, ROLPEK 2, in Strzegom. The CHED box I.15 shows Not Found on the List, type Not Specified, for all three commodity lines. The two documents do not agree on whether the plant is a known establishment.',r:'EHC boxes I.11 and I.13; CHED box I.15',k:['est']},
   {a:'Establishment Guard',p:'Plant against the GB approved establishments list',s:'nc',d:'The GB list was not supplied, so the plant could not be checked against it.',r:'GB list of approved establishments',k:['list']},
   {a:'Establishment Guard',p:'Slaughterhouses named on the EHC',s:'nc',d:'The EHC names 14 slaughterhouses in five countries. Checking each against the list needs the list, which was not supplied.',r:'EHC box I.28',k:['slh1']},
   {a:'Alert Watch',p:'Animal disease and food alerts',s:'nc',d:'Live alert feeds were not queried for this demonstration.',r:'APHA, RASFF'}
@@ -951,10 +955,10 @@ var PH=[
   {a:'Product Guard',p:'Beef weight against the despatch record',s:'ok',d:'Topside 4,963.6 kg and silverside 2,728.9 kg on the despatch record, plus 408.8 kg of beef on the mixed pallet (worksheet), give 8,101.3 kg. That is the beef weight on the EHC and the CHED.',r:'Despatch record, worksheet',k:['beef','beef2']},
   {a:'Product Guard',p:'Chicken weight against the despatch record',s:'ok',d:'Roast thighs 1,656.2 kg plus 186.2 kg on the mixed pallets give 1,842.4 kg, the chicken weight on the EHC and the CHED.',r:'Despatch record, worksheet',k:['unit','chk']},
   {a:'Product Guard',p:'One species per mixed pallet',s:'ok',d:'Each of the seven mixed pallets holds one species only, according to the worksheet SKUs. That fits a certificate that lists one species per commodity line.',r:'Worksheet, EHC part II (single species)',k:['sp']},
-  {a:'Product Guard',p:'Units column on the delivery note',s:'rev',d:'The Units column reads KG, but the values are piece counts. Roast thighs on pallet 3262606452 show 341, which is the 341 pieces on the despatch record. The weight of that pallet is 832.8 kg.',r:'Delivery note, despatch record',k:['unit']},
-  {a:'Product Guard',p:'Item code on the Mixed Leakers lines',s:'rev',d:'Seven pallets, 347 pieces, carry item code 12345678. That is not a commodity code. The worksheet splits these pallets across several SKUs.',r:'Delivery note, worksheet',k:['mix']},
-  {a:'Product Guard',p:'Expiry dates on the delivery note',s:'rev',d:'The Expiry Date column shows 25 and 26 June 2026, which are the cook dates on the despatch record. Both are before the despatch date of 29 June 2026. The column may hold production dates.',r:'Delivery note, despatch record',k:['exp','cook']},
-  {a:'Party Guard',p:'Company names on the delivery note header',s:'rev',d:'The header names Forza Foods Ltd and Sapphire Foods. The CHED and the CDS name Forza Foods Ltd. Your team should confirm which company is the importer of record.',r:'Delivery note, CHED box I.6, CDS box 8',k:['hdr']}
+  {a:'Product Guard',p:'Units column on the delivery note',s:'mis',d:'The Units column reads KG, but the values are piece counts. Roast thighs on pallet 3262606452 show 341, which is the 341 pieces on the despatch record. The weight of that pallet is 832.8 kg.',r:'Delivery note, despatch record',k:['unit']},
+  {a:'Product Guard',p:'Item code on the Mixed Leakers lines',s:'mis',d:'Seven pallets, 347 pieces, carry item code 12345678. That is not a commodity code. The worksheet splits these pallets across several SKUs.',r:'Delivery note, worksheet',k:['mix']},
+  {a:'Product Guard',p:'Expiry dates on the delivery note',s:'mis',d:'The Expiry Date column shows 25 and 26 June 2026, which are the cook dates on the despatch record. Both are before the despatch date of 29 June 2026. The column may hold production dates.',r:'Delivery note, despatch record',k:['exp','cook']},
+  {a:'Party Guard',p:'Company names on the delivery note header',s:'mis',d:'The header names Forza Foods Ltd and Sapphire Foods. The CHED and the CDS name Forza Foods Ltd. Your team should confirm which company is the importer of record.',r:'Delivery note, CHED box I.6, CDS box 8',k:['hdr']}
  ],
  twin:{h:'Despatch record linked to the consignment',li:['Pallet numbers, cook dates and weights recorded against one consignment.','Available to importer and port health on request.'],ev:'TWIN-DEMO-0102 · event: production.recorded',tag:'prop'}},
 /* 3 */
@@ -984,10 +988,10 @@ var PH=[
  checks:[
   {a:'Customs Guard',p:'Export MRN on the logistics envelope',s:'ok',d:'The envelope lists the SDS 26PL412020001FROB4, the MRN of the export declaration.',r:'ELO, export declaration',k:['mrn']},
   {a:'Customs Guard',p:'Gross mass and invoice value, export against import',s:'ok',d:'Gross mass 22,120 kg and invoice total 131,353.96 GBP match the CDS and the valuation worksheet.',r:'Export declaration, CDS box 22 and 35, worksheet',k:['val','wt']},
-  {a:'Customs Guard',p:'SPS goods flag on the logistics envelope',s:'rev',d:'The envelope says SPS goods Non. The load is meat products with a health certificate. The declarant should confirm what this flag is meant to show.',r:'ELO, EHC',k:['sps']},
-  {a:'Customs Guard',p:'Description of item 1',s:'rev',d:'Item 1 reads processed chicken offal. The delivery note and worksheet list roast chicken thighs, pizza chicken and rotis style chicken. The CDS says chicken and products.',r:'Export declaration, delivery note, CDS',k:['d1']},
-  {a:'Customs Guard',p:'Packages and gross mass by item',s:'rev',d:'All 38 packages and the full gross mass sit on item 2. The CDS puts the 38 packages on item 1. The totals agree.',r:'Export declaration, CDS boxes 31 and 35',k:['d1','d2','d3']},
-  {a:'Customs Guard',p:'Exporter named on the export declaration',s:'rev',d:'The exporter is Forza Foods Limited in Cleckheaton. The EHC and the CHED name ROLPEK 2 as consignor. Your team should confirm who is the exporter of record.',r:'Export declaration, EHC box I.1, CHED box I.1',k:['exp']}
+  {a:'Customs Guard',p:'SPS goods flag on the logistics envelope',s:'mis',d:'The envelope says SPS goods Non. The load is meat products with a health certificate. The declarant should confirm what this flag is meant to show.',r:'ELO, EHC',k:['sps']},
+  {a:'Customs Guard',p:'Description of item 1',s:'mis',d:'Item 1 reads processed chicken offal. The delivery note and worksheet list roast chicken thighs, pizza chicken and rotis style chicken. The CDS says chicken and products.',r:'Export declaration, delivery note, CDS',k:['d1']},
+  {a:'Customs Guard',p:'Packages and gross mass by item',s:'mis',d:'All 38 packages and the full gross mass sit on item 2. The CDS puts the 38 packages on item 1. The totals agree.',r:'Export declaration, CDS boxes 31 and 35',k:['d1','d2','d3']},
+  {a:'Customs Guard',p:'Exporter named on the export declaration',s:'mis',d:'The exporter is Forza Foods Limited in Cleckheaton. The EHC and the CHED name ROLPEK 2 as consignor. Your team should confirm who is the exporter of record.',r:'Export declaration, EHC box I.1, CHED box I.1',k:['exp']}
  ],
  twin:{h:'Export event recorded',li:['Export MRN and exit office linked to the consignment.','Exit through Calais can be added when the declaration is closed. Proposed.'],ev:'TWIN-DEMO-0104 · event: export.declared',tag:'prop'}},
 /* 5 */
@@ -1019,10 +1023,10 @@ var PH=[
   {a:'Pre-notification Guard',p:'EHC reference on the CHED',s:'ok',d:'CHED box I.9 gives EXPORT.EU.PL.2026.0041450, issued 29.06.2026. That is the reference and the signing date on the EHC.',r:'CHED box I.9, EHC box I.2',k:['ehc']},
   {a:'Pre-notification Guard',p:'Notice before arrival',s:'ok',d:'The CHED Part I was signed on Monday 29 June at 08:53 and arrival is planned for Tuesday 30 June, at least one working day ahead.',r:'CHED box I.10 and I.35, BTOM pre-notification',k:['pn','sig']},
   {a:'Pre-notification Guard',p:'Totals on the CHED',s:'ok',d:'22, 5 and 11 pallets add up to 38. The net weights add up to 20,063.4 kg.',r:'CHED boxes I.31 to I.34',k:['t1','t2','t3']},
-  {a:'Pre-notification Guard',p:'Arrival time on the CHED and the S&S declaration',s:'rev',d:'The CHED gives 30 June 17:00 BST. The S&S declaration gives arrival at the first office on 30 June at 12:00. The two are five hours apart.',r:'CHED box I.10, S&S declaration',k:['pn','eta']},
-  {a:'Pre-notification Guard',p:'Consignor on the CHED and the S&S declaration',s:'rev',d:'The CHED names ROLPEK 2. The S&S declaration names Forza Foods Ltd at the Rolpek address in Strzegom. The export declaration names Forza Foods Limited in Cleckheaton and the CDS names Forza Foods Ltd in Normanton.',r:'CHED box I.1, S&S declaration, export declaration, CDS',k:['cons']},
+  {a:'Pre-notification Guard',p:'Arrival time on the CHED and the S&S declaration',s:'mis',d:'The CHED gives 30 June 17:00 BST. The S&S declaration gives arrival at the first office on 30 June at 12:00. The two are five hours apart.',r:'CHED box I.10, S&S declaration',k:['pn','eta']},
+  {a:'Pre-notification Guard',p:'Consignor on the CHED and the S&S declaration',s:'mis',d:'The CHED names ROLPEK 2. The S&S declaration names Forza Foods Ltd at the Rolpek address in Strzegom. The export declaration names Forza Foods Limited in Cleckheaton and the CDS names Forza Foods Ltd in Normanton.',r:'CHED box I.1, S&S declaration, export declaration, CDS',k:['cons']},
   {a:'Movement Guard',p:'GMR vehicle and route',s:'ok',d:'The GMR shows WGM6423M and trailer WZ849AF, as on the CHED. Calais to Dover matches the S&S places of loading and unloading.',r:'GMR, CHED box I.13, S&S declaration',k:['veh','route']},
-  {a:'Establishment Guard',p:'Establishment of origin on the CHED',s:'rev',d:'Box I.15 reads Not Found on the List for the plant. Part II of the same CHED records the documentary check as satisfactory following official intervention.',r:'CHED boxes I.15 and II.3',k:['est']}
+  {a:'Establishment Guard',p:'Establishment of origin on the CHED',s:'mis',d:'Box I.15 reads Not Found on the List for the plant. Part II of the same CHED records the documentary check as satisfactory following official intervention.',r:'CHED boxes I.15 and II.3',k:['est']}
  ],
  twin:{h:'Pre-notification recorded',li:['CHED reference, S&S MRN and GMR linked to one consignment record.','Port health, agent and carrier see the same references.'],ev:'TWIN-DEMO-0106 · event: prenotification.recorded',tag:'prop'}},
 /* 7 */
@@ -1038,9 +1042,9 @@ var PH=[
   {a:'Customs Guard',p:'Item prices against the invoice total',s:'ok',d:'The item prices add up to 131,353.96 GBP, the invoice total on the CDS, the worksheet and the export declaration.',r:'CDS boxes 22 and 42, worksheet',k:['i1','i2','i3']},
   {a:'Customs Guard',p:'Statistical values',s:'ok',d:'The three statistical values add up to 135,336.80 GBP. That is the invoice total plus EUR 4,318.00 at the estimate of 1.155 EUR to the pound, plus GBP 244.32, within rounding.',r:'CDS boxes 45 and 46',k:['i1','i2','i3']},
   {a:'Customs Guard',p:'Preference code and origin proof',s:'nc',d:'Preference 300 is claimed on all items with duty at 0.00. No statement on origin was supplied. The EHC shows pork from Denmark, Germany and Spain and poultry from the Netherlands, so the origin rules decide whether Polish origin applies.',r:'CDS box 36, EHC species table, UK-EU TCA origin rules',k:['pref','org']},
-  {a:'Customs Guard',p:'Packages by item',s:'rev',d:'The CDS puts all 38 packages on item 1 and 0 on items 2 and 3. The total is right. The export declaration puts them on item 2.',r:'CDS box 31, export declaration',k:['i1','i2','i3']},
-  {a:'Customs Guard',p:'Exporter and importer on the CDS',s:'rev',d:'The same company, Forza Foods Ltd, is both exporter (Normanton) and importer (Leeds). The goods were consigned from Poland by ROLPEK 2 and the CHED names the consignee at Devilliers Way, Normanton.',r:'CDS boxes 2 and 8, CHED boxes I.1 and I.6',k:['imp','exp']},
-  {a:'Customs Guard',p:'Border transport mode',s:'rev',d:'The CDS shows border transport mode 6. The S&S declaration shows 10. The two forms may use different code lists. The declarant should confirm.',r:'CDS box 25, S&S declaration',k:['mode']}
+  {a:'Customs Guard',p:'Packages by item',s:'mis',d:'The CDS puts all 38 packages on item 1 and 0 on items 2 and 3. The total is right. The export declaration puts them on item 2.',r:'CDS box 31, export declaration',k:['i1','i2','i3']},
+  {a:'Customs Guard',p:'Exporter and importer on the CDS',s:'mis',d:'The same company, Forza Foods Ltd, is both exporter (Normanton) and importer (Leeds). The goods were consigned from Poland by ROLPEK 2 and the CHED names the consignee at Devilliers Way, Normanton.',r:'CDS boxes 2 and 8, CHED boxes I.1 and I.6',k:['imp','exp']},
+  {a:'Customs Guard',p:'Border transport mode',s:'mis',d:'The CDS shows border transport mode 6. The S&S declaration shows 10. The two forms may use different code lists. The declarant should confirm.',r:'CDS box 25, S&S declaration',k:['mode']}
  ],
  twin:{h:'Declaration linked',li:['CDS MRN, CHED and GMR linked to one record.','Release status shared with the haulier and the consignee.'],ev:'TWIN-DEMO-0107 · event: declaration.linked',tag:'prop'}},
 /* 8 */
@@ -1052,10 +1056,10 @@ var PH=[
  ],
  checks:[
   {a:'Border Guard',p:'Decision recorded in Part II',s:'ok',d:'The document gives the decision acceptable for the internal market, human consumption, with the post, the officer and a signature date.',r:'CHED boxes II.12, II.20, II.21',k:['dec']},
-  {a:'Border Guard',p:'Documentary check outcome',s:'rev',d:'The documentary check is recorded as satisfactory following official intervention. The document does not say what was changed. Your team may want the intervention note.',r:'CHED box II.3',k:['doc']},
-  {a:'Border Guard',p:'Timing of the decision',s:'rev',d:'Part II was signed on 29 June at 09:48 BST, about 54 minutes after Part I was signed and before the planned arrival on 30 June. The decision rests on a documentary check only.',r:'CHED boxes I.35, II.21',k:['when']},
+  {a:'Border Guard',p:'Documentary check outcome',s:'mis',d:'The documentary check is recorded as satisfactory following official intervention. The document does not say what was changed. Your team may want the intervention note.',r:'CHED box II.3',k:['doc']},
+  {a:'Border Guard',p:'Timing of the decision',s:'mis',d:'Part II was signed on 29 June at 09:48 BST, about 54 minutes after Part I was signed and before the planned arrival on 30 June. The decision rests on a documentary check only.',r:'CHED boxes I.35, II.21',k:['when']},
   {a:'Border Guard',p:'Identity, physical and laboratory checks',s:'nc',d:'All three are recorded as No. Whether that fits the risk category and the post’s sampling cannot be checked, because the documents do not give the category.',r:'CHED boxes II.4 to II.6',k:['idc']},
-  {a:'Customs Guard',p:'Customs document reference in Part II',s:'rev',d:'Box II.23 is blank, although the CDS was accepted on 29 June (MRN 26GB748TLUWEA74AR3).',r:'CHED box II.23, CDS',k:['cdr']},
+  {a:'Customs Guard',p:'Customs document reference in Part II',s:'mis',d:'Box II.23 is blank, although the CDS was accepted on 29 June (MRN 26GB748TLUWEA74AR3).',r:'CHED box II.23, CDS',k:['cdr']},
   {a:'Border Guard',p:'Follow-up in Part III',s:'nc',d:'The supplied copy has no arrival or compliance record in Part III.',r:'CHED Part III',k:['p3']}
  ],
  twin:{h:'Control decision recorded',li:['Decision and BCP reference 879756 recorded against the consignment.','Importer, agent and carrier see the outcome. Proposed.'],ev:'TWIN-DEMO-0108 · event: border.decision',tag:'prop'}},
@@ -1069,7 +1073,7 @@ var PH=[
  checks:[
   {a:'Traceability Agent',p:'Pallet labels across documents',s:'ok',d:'All 28 pallet labels on the delivery note appear on the despatch record sheet, and its total of 4,542 pieces and 20,063.4 kg matches the delivery note.',r:'Delivery note, despatch record',k:['lpn']},
   {a:'Traceability Agent',p:'Batch and cook date per pallet',s:'ok',d:'Each Dolav on the despatch record has a batch number and a cook date of 25 or 26 June 2026.',r:'Despatch record',k:['bat']},
-  {a:'Recall Readiness',p:'Link from pallet to slaughterhouse',s:'rev',d:'The EHC names 14 slaughterhouses but nothing supplied links a pallet or batch to one of them. A recall would need that link.',r:'EHC box I.28, despatch record',k:['slh','bat']},
+  {a:'Recall Readiness',p:'Link from pallet to slaughterhouse',s:'mis',d:'The EHC names 14 slaughterhouses but nothing supplied links a pallet or batch to one of them. A recall would need that link.',r:'EHC box I.28, despatch record',k:['slh','bat']},
   {a:'Traceability Agent',p:'Delivery confirmation',s:'nc',d:'Box 24 on the CMR is blank and no signed delivery note was supplied, so delivery could not be confirmed.',r:'CMR box 24',k:['rec','pod']}
  ],
  twin:{h:'Trace record to pallet level',li:['28 pallets linked to batch, cook date and consignment.','A recall query could start from a pallet number and return the consignment and its documents. Proposed model.'],ev:'TWIN-DEMO-0109 · event: delivery.pending',tag:'prop'}}
@@ -1141,7 +1145,7 @@ var PH=[
   {a:'Customs Guard',p:'Invoice totals against the line sheet',s:'ok',d:'The total of each of the 71 invoices equals the sheet total for that invoice, to the penny. Together they come to GBP 62,595.92.',r:'Invoices, line sheet',k:['val','val2','inv']},
   {a:'Customs Guard',p:'Gross mass against net mass',s:'ok',d:'Gross mass is not below net mass on any of the 4,146 lines. Totals are 18,268.917 kg gross and 16,728.189 kg net.',r:'Line sheet',k:['mass']},
   {a:'Customs Guard',p:'Procedure code',s:'ok',d:'Every line carries procedure code 4000000, as expected for one import release.',r:'Line sheet',k:['cpc']},
-  {a:'Customs Guard',p:'Quantity times unit price',s:'rev',d:'On 108 lines the quantity times the unit price differs from the line value by more than 5p. On line 1, 20 times 5.73 is 114.60 and the line value is 114.76. The unit prices look rounded.',r:'Line sheet',k:['up']},
+  {a:'Customs Guard',p:'Quantity times unit price',s:'mis',d:'On 108 lines the quantity times the unit price differs from the line value by more than 5p. On line 1, 20 times 5.73 is 114.60 and the line value is 114.76. The unit prices look rounded.',r:'Line sheet',k:['up']},
   {a:'Customs Guard',p:'VAT rate flag',s:'nc',d:'The sheet marks 3,881 lines Z and 265 lines S. The VAT rules for each commodity were not applied in this demonstration.',r:'Line sheet',k:['vat']}
  ],
  twin:{h:'Reconciliation recorded',li:['Invoice totals and line totals recorded as agreeing.','Lines with a price rounding difference listed for the agent.'],ev:'TWIN-DEMO-0202 · event: lines.reconciled',tag:'prop'}},
@@ -1156,7 +1160,7 @@ var PH=[
  checks:[
   {a:'Certificate Guard',p:'One certificate per medium-risk CHED',s:'ok',d:'Each of the eight medium-risk CHEDs links to one EHC model and one TRACES certificate number. None is shared and none is missing.',r:'Certificate and CHED map',k:['c1','c2','c3','c4','c5','c6','c7','c8','cert']},
   {a:'Certificate Guard',p:'Commodity families against certificate models',s:'ok',d:'Each model matches its GOV.UK title: GBHC300 bovine fresh meat (0201), GBHC310 porcine fresh meat (0203, 0209), GBHC330 poultry meat (0207), GBHC350 meat preparations (raw sausages, 1601), GBHC352 meat products (cooked and cured, 1601, 1602, 0210), GBHC401 fishery products (1604, 0305), GBHC412 dairy products (0401), GBHC420 eggs (0407).',r:'GOV.UK model health certificates',k:['c1','c2','c3','c4','c5','c6','c7','c8']},
-  {a:'Certificate Guard',p:'Raw products under the meat products certificate',s:'rev',d:'Four lines of raw smoked frankfurters (surowe wędzone, 1601 00 99 11) sit under GBHC352 meat products. The ten raw sausage lines under GBHC350 are meat preparations. Your team should confirm which certificate fits the frankfurters.',r:'GOV.UK model health certificates, line sheet',k:['c4','c5']},
+  {a:'Certificate Guard',p:'Raw products under the meat products certificate',s:'mis',d:'Four lines of raw smoked frankfurters (surowe wędzone, 1601 00 99 11) sit under GBHC352 meat products. The ten raw sausage lines under GBHC350 are meat preparations. Your team should confirm which certificate fits the frankfurters.',r:'GOV.UK model health certificates, line sheet',k:['c4','c5']},
   {a:'Certificate Guard',p:'Weights per certificate',s:'nc',d:'The map gives a net mass for each certificate, for example 5,285.216 kg for GBHC352. The EHCs were not supplied, so the weights could not be compared.',r:'EHCs, certificate map',k:['ehc']},
   {a:'Pre-notification Guard',p:'CHED documents',s:'nc',d:'The nine CHEDs were not supplied. Only their references appear in the map, so notice periods and parties could not be checked.',r:'CHED documents',k:['chd']}
  ],
@@ -1170,8 +1174,8 @@ var PH=[
  ],
  checks:[
   {a:'Risk Guard',p:'Lines without a CHED',s:'ok',d:'None of the 843 lines is in chapter 02, 03, 04 or 16. They are ambient groceries, drinks, sweets and similar goods.',r:'Line sheet',k:['n0']},
-  {a:'Risk Guard',p:'Meat products on the low-risk CHED',s:'rev',d:'175 lines in chapter 16 sit on the low-risk CHED with no EHC. Shelf-stable products can be low risk, but the documents give no storage conditions. Your team should confirm each product is ambient and shelf stable.',r:'BTOM risk categories, low-risk CHED lines',k:['m16']},
-  {a:'Risk Guard',p:'Dairy on the low-risk CHED',s:'rev',d:'463 dairy lines sit on the low-risk CHED. The data give no heat treatment or storage conditions, so the risk category could not be confirmed.',r:'BTOM risk categories, low-risk CHED lines',k:['m04']}
+  {a:'Risk Guard',p:'Meat products on the low-risk CHED',s:'mis',d:'175 lines in chapter 16 sit on the low-risk CHED with no EHC. Shelf-stable products can be low risk, but the documents give no storage conditions. Your team should confirm each product is ambient and shelf stable.',r:'BTOM risk categories, low-risk CHED lines',k:['m16']},
+  {a:'Risk Guard',p:'Dairy on the low-risk CHED',s:'mis',d:'463 dairy lines sit on the low-risk CHED. The data give no heat treatment or storage conditions, so the risk category could not be confirmed.',r:'BTOM risk categories, low-risk CHED lines',k:['m04']}
  ],
  twin:{h:'Risk grouping recorded',li:['Each line assigned to a medium-risk CHED, the low-risk CHED or no CHED.','Port health sees the SPS groups only. Proposed.'],ev:'TWIN-DEMO-0204 · event: risk.grouped',tag:'prop'}},
 /* 5 */
@@ -1184,8 +1188,8 @@ var PH=[
  ],
  checks:[
   {a:'Origin Guard',p:'Non-EU origin and preference code',s:'ok',d:'All 152 lines of non-EU origin carry preference 100. None claims preference 300.',r:'Line sheet, UK-EU TCA origin rules',k:['ne']},
-  {a:'Origin Guard',p:'EU origin lines with preference 100',s:'rev',d:'52 lines of EU origin carry preference 100, meaning no preference, while 3,942 EU lines carry 300. The goods may be non-EU origin packed in Poland. Your team should confirm origin for these lines.',r:'Line sheet',k:['eu100']},
-  {a:'Catch Certificate Guard',p:'Catch certificates on fish lines',s:'rev',d:'175 of the 180 fish lines under GBHC401 carry a catch certificate. Five lines of smoked halibut from the Faroe Islands do not.',r:'Catch certificate summary, GB catch certificate rules',k:['hal']},
+  {a:'Origin Guard',p:'EU origin lines with preference 100',s:'mis',d:'52 lines of EU origin carry preference 100, meaning no preference, while 3,942 EU lines carry 300. The goods may be non-EU origin packed in Poland. Your team should confirm origin for these lines.',r:'Line sheet',k:['eu100']},
+  {a:'Catch Certificate Guard',p:'Catch certificates on fish lines',s:'mis',d:'175 of the 180 fish lines under GBHC401 carry a catch certificate. Five lines of smoked halibut from the Faroe Islands do not.',r:'Catch certificate summary, GB catch certificate rules',k:['hal']},
   {a:'Catch Certificate Guard',p:'Catch certificate contents',s:'nc',d:'Only the certificate numbers appear in the declaration data. The certificates were not supplied, so species, vessel and quantity could not be checked.',r:'Catch certificates',k:['cc']}
  ],
  twin:{h:'Origin and catch records linked',li:['Preference code and catch certificate numbers recorded per line.','Gaps listed for the importer before arrival.'],ev:'TWIN-DEMO-0205 · event: origin.recorded',tag:'prop'}},
@@ -1199,8 +1203,8 @@ var PH=[
  ],
  checks:[
   {a:'Transport Guard',p:'CMR and vehicle across the load',s:'ok',d:'The CMR date, the vehicle and the trailer are the same on all 71 documents.',r:'CMR and delivery references',k:['cmr','veh']},
-  {a:'Transport Guard',p:'Delivery place against receiver',s:'rev',d:'The Incoterms say DAP Glasgow on every invoice, but the receiver is MASPO LTD in Sheffield. The documents do not say where the goods are delivered. The place of destination on each CHED should match.',r:'Invoices, CHED box I.7',k:['inc','rcv']},
-  {a:'Transport Guard',p:'Delivery dates on one CMR',s:'rev',d:'One CMR is dated 10 February. Delivery dates are 12 February on 37 invoices and 13 February on 34. Two dates on one truck could mean two drops or an entry error.',r:'Invoices',k:['dd']},
+  {a:'Transport Guard',p:'Delivery place against receiver',s:'mis',d:'The Incoterms say DAP Glasgow on every invoice, but the receiver is MASPO LTD in Sheffield. The documents do not say where the goods are delivered. The place of destination on each CHED should match.',r:'Invoices, CHED box I.7',k:['inc','rcv']},
+  {a:'Transport Guard',p:'Delivery dates on one CMR',s:'mis',d:'One CMR is dated 10 February. Delivery dates are 12 February on 37 invoices and 13 February on 34. Two dates on one truck could mean two drops or an entry error.',r:'Invoices',k:['dd']},
   {a:'Transport Guard',p:'CMR document',s:'nc',d:'The CMR was not supplied, so weights, parties and seals could not be compared with the invoices.',r:'CMR',k:['cmr2']},
   {a:'Cold Chain Agent',p:'Temperature records',s:'nc',d:'The load holds meat, dairy, fish and ambient goods. The sheet gives no storage temperature per line and no records were supplied.',r:'Temperature records',k:['tmp']}
  ],
@@ -1283,7 +1287,7 @@ var PH=[
   {a:'Certificate Guard',p:'Lots on the reports and the certificate',s:'ok',d:'Lots TUR-26-118 and CUM-26-072 appear on both the laboratory reports and the certificate.',r:'Laboratory reports, certificate',k:['t1','c1','cl']},
   {a:'Laboratory Agent',p:'Ethylene oxide results',s:'ok',d:'All three reports show ethylene oxide not detected. It is not permitted in the UK.',r:'Laboratory reports, FSA controls on Indian spices',k:['t1','c1','k1']},
   {a:'Certificate Guard',p:'Quantities on the certificate against the invoice',s:'ok',d:'8,000 kg turmeric and 6,000 kg cumin match the invoice lines.',r:'Certificate, commercial invoice',k:['cl']},
-  {a:'Certificate Guard',p:'Original certificate',s:'rev',d:'Only a scan is attached. The original must travel with the consignment and be presented at the border post. It was sent by courier.',r:'HRFNAO Annex II, original certificate with the consignment',k:['orig']},
+  {a:'Certificate Guard',p:'Original certificate',s:'mis',d:'Only a scan is attached. The original must travel with the consignment and be presented at the border post. It was sent by courier.',r:'HRFNAO Annex II, original certificate with the consignment',k:['orig']},
   {a:'Certificate Guard',p:'Cardamom outside the certificate',s:'ok',d:'Cardamom is Annex I, so it needs no certificate. Its report is held on file.',r:'HRFNAO Annex I, 1 January 2026 changes',k:['card','k1']},
   {a:'Laboratory Agent',p:'Laboratory accreditation',s:'nc',d:'No accreditation certificate is attached, so the laboratory’s status could not be checked.',r:'Laboratory accreditation',k:['acc']}
  ],
@@ -1299,7 +1303,7 @@ var PH=[
  checks:[
   {a:'Transport Guard',p:'Container and seal across documents',s:'ok',d:'DEMU1234567 and seal DEM00457 are the same on the packing list and the bill of lading.',r:'Packing list, bill of lading',k:['ctr']},
   {a:'Transport Guard',p:'Package count',s:'ok',d:'400, 300 and 50 bags add up to 750, the number on the bill of lading.',r:'Packing list, bill of lading',k:['pk']},
-  {a:'Transport Guard',p:'Gross weight',s:'rev',d:'The packing list shows 15,402.5 kg gross and the bill of lading shows 15,520 kg. The 117.5 kg difference should be explained before the declaration.',r:'Packing list, bill of lading',k:['gw']},
+  {a:'Transport Guard',p:'Gross weight',s:'mis',d:'The packing list shows 15,402.5 kg gross and the bill of lading shows 15,520 kg. The 117.5 kg difference should be explained before the declaration.',r:'Packing list, bill of lading',k:['gw']},
   {a:'Customs Guard',p:'Net weight on the shipping bill',s:'ok',d:'15,250 kg matches the packing list.',r:'Shipping bill, packing list',k:['nw']},
   {a:'Transport Guard',p:'Certificate issued before shipment',s:'ok',d:'The certificate (29 September) and the shipping bill (30 September) both precede shipment on board on 4 October.',r:'Certificate, shipping bill, bill of lading',k:['eta']}
  ],
@@ -1314,7 +1318,7 @@ var PH=[
   {a:'Pre-notification Guard',p:'CHED type',s:'ok',d:'A CHED-D is the right document for high-risk food not of animal origin.',r:'IPAFFS, HRFNAO',k:['oc']},
   {a:'Pre-notification Guard',p:'Notice before arrival',s:'ok',d:'Notified on 27 October for arrival on 30 October, more than one working day ahead.',r:'BTOM pre-notification',k:['pn']},
   {a:'Pre-notification Guard',p:'Certificate reference',s:'ok',d:'SB/OC/2026/0457 is the reference on the official certificate.',r:'CHED-D, certificate',k:['oc']},
-  {a:'Rules Agent',p:'Annex shown for cardamom',s:'rev',d:'The CHED-D shows green cardamom as Annex II. From 1 January 2026 it is Annex I at 50%, with no certificate. The importer should correct the entry.',r:'HRFNAO Annex I, 1 January 2026 changes',k:['d3']},
+  {a:'Rules Agent',p:'Annex shown for cardamom',s:'mis',d:'The CHED-D shows green cardamom as Annex II. From 1 January 2026 it is Annex I at 50%, with no certificate. The importer should correct the entry.',r:'HRFNAO Annex I, 1 January 2026 changes',k:['d3']},
   {a:'Pre-notification Guard',p:'Net weights against the invoice',s:'ok',d:'8,000, 6,000 and 1,250 kg match the invoice.',r:'CHED-D, commercial invoice',k:['d1','d2','d3']},
   {a:'Pre-notification Guard',p:'Container and seal',s:'ok',d:'DEMU1234567 and seal DEM00457 match the bill of lading.',r:'CHED-D, bill of lading',k:['ctr']}
  ],
@@ -1340,7 +1344,7 @@ var PH=[
   {t:'CHED-D, Part II controls',ref:'ILLUSTRATIVE · CHEDD.GB.2026.0000457',real:0,rows:[['Documentary check','Satisfactory','dc'],['Original certificate presented','Yes','oc'],['Identity and physical check','Selected for sampling, turmeric lot TUR-26-118','sam'],['Laboratory test','Sample taken 30 October 2026, result pending','lab'],['Decision','Pending the laboratory result','dec']],note:'Illustrative.'}
  ],
  checks:[
-  {a:'Border Guard',p:'Documentary check against earlier findings',s:'rev',d:'The documentary check is recorded as satisfactory. Earlier checks found a cumin laboratory report older than 6 months and an origin declaration reference that does not match. These should be reviewed before release.',r:'CHED-D Part II, phases 03 and 06',k:['dc']},
+  {a:'Border Guard',p:'Documentary check against earlier findings',s:'mis',d:'The documentary check is recorded as satisfactory. Earlier checks found a cumin laboratory report older than 6 months and an origin declaration reference that does not match. These should be reviewed before release.',r:'CHED-D Part II, phases 03 and 06',k:['dc']},
   {a:'Border Guard',p:'Original certificate presented',s:'ok',d:'Recorded as presented, which resolves the scan-only note from phase 03.',r:'CHED-D Part II',k:['oc']},
   {a:'Border Guard',p:'Laboratory sampling',s:'nc',d:'A turmeric sample was taken and the result is pending. The decision cannot be checked until it arrives.',r:'CHED-D Part II',k:['sam','lab','dec']}
  ],
@@ -1418,7 +1422,7 @@ var PH=[
  ],
  checks:[
   {a:'Certificate Guard',p:'Species on the certificate',s:'ok',d:'The certificate names Vaccinium corymbosum and Rubus idaeus, the species of the blueberries and raspberries on the invoice.',r:'Phytosanitary certificate, invoice',k:['p1','p2']},
-  {a:'Certificate Guard',p:'Raspberry quantity against the invoice',s:'rev',d:'The certificate states 1,320 kg of raspberries. The invoice and the packing list show 1,200 kg. The 120 kg difference should be explained.',r:'Phytosanitary certificate, commercial invoice',k:['p2']},
+  {a:'Certificate Guard',p:'Raspberry quantity against the invoice',s:'mis',d:'The certificate states 1,320 kg of raspberries. The invoice and the packing list show 1,200 kg. The 120 kg difference should be explained.',r:'Phytosanitary certificate, commercial invoice',k:['p2']},
   {a:'Certificate Guard',p:'Certificate date against departure',s:'ok',d:'Issued on 11 November 2026, one day before the flight on 12 November. The limit is 13 days either side.',r:'GB plant health import rules, 13 days',k:['cd']},
   {a:'Certificate Guard',p:'Issuing body',s:'nc',d:'The certificate names ONSSA. Whether ONSSA is the right body and the certificate form is current was not confirmed.',r:'Moroccan authority',k:['iss']},
   {a:'Laboratory Agent',p:'Pesticide residue results',s:'nc',d:'No residue report was supplied. Limits are set by HSE CRD and contaminant limits by the FSA, so the lots could not be checked.',r:'Laboratory residue report',k:['lab']}
@@ -1433,7 +1437,7 @@ var PH=[
  ],
  checks:[
   {a:'Transport Guard',p:'Pallets and cartons',s:'ok',d:'12 pallets and 1,360 cartons match the packing list (960 plus 400 cartons).',r:'Air waybill, packing list',k:['pl']},
-  {a:'Transport Guard',p:'Gross weight',s:'rev',d:'The air waybill shows 6,810 kg and the packing list shows 6,740 kg. The 70 kg difference should be explained.',r:'Air waybill, packing list',k:['gw']},
+  {a:'Transport Guard',p:'Gross weight',s:'mis',d:'The air waybill shows 6,810 kg and the packing list shows 6,740 kg. The 70 kg difference should be explained.',r:'Air waybill, packing list',k:['gw']},
   {a:'Transport Guard',p:'Description of the goods',s:'ok',d:'Fresh blueberries and raspberries, keep chilled, fits the invoice and the phytosanitary certificate.',r:'Air waybill, invoice',k:['nat']},
   {a:'Cold Chain Agent',p:'Temperature record',s:'nc',d:'No logger record was supplied, so the cold chain from packing to the airport could not be checked.',r:'Temperature record',k:['tmp']}
  ],
@@ -1462,7 +1466,7 @@ var PH=[
  ],
  checks:[
   {a:'Border Guard',p:'Documentary check fee',s:'ok',d:'GBP 5.25 per phytosanitary certificate is the documentary check fee in England.',r:'GB plant health import rules, check fees',k:['fee']},
-  {a:'Border Guard',p:'Documentary check against earlier findings',s:'rev',d:'The documentary check is recorded as satisfactory. Earlier checks found a late notification (3 hours 20 minutes before landing) and a raspberry quantity of 1,320 kg on the certificate against 1,200 kg on the invoice. These should be reviewed.',r:'CHED-PP Part II, phases 03 and 05',k:['dc']},
+  {a:'Border Guard',p:'Documentary check against earlier findings',s:'mis',d:'The documentary check is recorded as satisfactory. Earlier checks found a late notification (3 hours 20 minutes before landing) and a raspberry quantity of 1,320 kg on the certificate against 1,200 kg on the invoice. These should be reviewed.',r:'CHED-PP Part II, phases 03 and 05',k:['dc']},
   {a:'Border Guard',p:'Identity and physical check',s:'nc',d:'The consignment was not selected. The selection rate for these crops was not supplied, so it could not be checked.',r:'CHED-PP Part II',k:['idc']},
   {a:'Border Guard',p:'Release decision',s:'ok',d:'The decision is recorded as released to the importer’s control point.',r:'CHED-PP Part II',k:['dec']}
  ],
@@ -1515,7 +1519,7 @@ function loadPack(id,startCur){
 /* ---------- Core scenarios: API exchange ---------- */
 var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls'};
 var API_BASE='https://api.veripura.com/v1';
-var STAT={ok:'matched',rev:'review',mis:'mismatch',nc:'not_checked'};
+var STAT={ok:'pass',rev:'flag',mis:'flag',nc:'not_checked'};
 function snake(x){return String(x).toLowerCase().replace(/&amp;/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')}
 function curId(){return Object.keys(PK).filter(function(k){return PK[k]===CUR})[0]}
 function cnsId(){return 'cns_'+curId()}
@@ -1567,7 +1571,7 @@ function origin(src,keys){src=src||CTX.src;keys=keys||CTX.keys;var ids=keys.map(
 function spill(k){var m={w:['w','Waiting'],q:['q','Requested'],r:['r','Received'],d:['d','Derived by Core'],n:['n','Not supplied']}[k];return '<span class="sp '+m[0]+'"><i></i>'+m[1]+'</span>'}
 function splegend(ks){return '<div class="splg"><span>Document status:</span>'+ks.map(spill).join('')+'</div>'}
 function findingObj(c,i,x,rx){var st=rx?effStat(c,rx):c.s,t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[st],area:c.a,title:c.p,detail:st===c.s?c.d:'Waiting for the documents needed to cross-check this item.',rule_and_source:c.r,documents:t}}
-function findingsBody(i,rx,trig){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x,rx)}),sm={matched:0,review:0,mismatch:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});var o={consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm};if(trig&&trig.length)o.triggered_by=trig;o.findings=fs;o.decision='Findings only. The decision rests with your team.';return o}
+function findingsBody(i,rx,trig){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x,rx)}),sm={pass:0,flag:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});var o={consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm};if(trig&&trig.length)o.triggered_by=trig;o.findings=fs;o.decision='Findings only. The decision rests with your team.';return o}
 function fixTarget(){var best=null,any=null,ks=[refKey()].concat(pushedKeys()).filter(Boolean);docsOf(ks).forEach(function(x){if(!any)any={i:x.i,d:x.d,k:x.k};var dk=docKeys(x.d);if(!best&&P[x.i].checks.some(function(c){return (c.s==='rev'||c.s==='mis')&&(c.k||[]).some(function(k){return dk.indexOf(k)>-1})}))best={i:x.i,d:x.d,k:x.k}});return best||any}
 function firstFile(){var ks=pushedKeys().concat([refKey()]).filter(Boolean),l=docsOf(ks);return l.filter(function(x){return x.d.real===1})[0]||l[0]}
 function missingDocs(rx){rx=rx||[];var o=[];allDocs().forEach(function(x){if(rx.indexOf(x.k)<0&&!isDerived(x.d))o.push({phase:x.i+1,document_type:x.d.t})});return o}
@@ -1621,7 +1625,8 @@ function hostHTML(){
   P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){tot[effStat(c,st.frx[i],m,tt)]++})}});
   if(!st.req)return h+'<div class="hsub">Consignment created. Asking for the requirements.</div>'+foot;
   h+='<div class="hsub">'+got+' of '+need.length+' documents received'+(any?' · findings arriving':'')+'</div>';
-  if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' matched</span><span class="rev">'+tot.rev+' review</span>'+(tot.mis?'<span class="mis">'+tot.mis+' mismatch</span>':'')+'<span class="nc">'+tot.nc+' not checked</span></div>';
+  if(any)h+=vdHTML(tot.ok,tot.mis+tot.rev,tot.nc);
+  if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' pass</span><span class="mis">'+(tot.mis+tot.rev)+' flag'+((tot.mis+tot.rev)===1?'':'s')+'</span><span class="nc">'+tot.nc+' not checked</span></div>';
   var tk=Object.keys(API.tick).sort(function(a,b){var x=a.split(':'),y=b.split(':');return x[0]-y[0]||x[1]-y[1]});
   h+='<div class="store"><div class="hlab">Document store</div><div class="hsub">'+esc(partyName(id))+' / '+esc(CUR.name)+'</div>';
   var files=docsOf(rx.filter(function(k){return !isDerived(docAt(k))})).concat(docsOf(tk));
@@ -1629,7 +1634,7 @@ function hostHTML(){
   h+='<div class="sbtns"><label>Arrives by <select id="pushSrc"'+(rest?'':' disabled')+'>'+SRC_PUSH.map(function(k){return '<option value="'+k+'"'+(API.src===k?' selected':'')+'>'+esc(srcLabel(k))+'</option>'}).join('')+'</select></label><button class="btn gold" id="pushGo"'+(rest&&tk.length?'':' disabled')+'>Push '+tk.length+' to Core</button>'+(got>1&&!st.shared?'<button class="btn" id="shareGo"'+(rest?'':' disabled')+'>Share with parties</button>':'')+'</div></div>';
   h+='<div class="hlab">Checklist from VeriPura Core</div><div class="hsub">Tick the documents that have arrived in the store, then push them to Core.</div>'+splegend(['w','q','r','d'])+'<table class="ckl"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Status</th><th></th></tr></thead><tbody>';
   P.forEach(function(p,i){if(!p.docs.length)return;
-    var pc='';if(st.found[i]){var cnt={ok:0,rev:0,mis:0,nc:0},m=keyCt(st.frx[i]);p.checks.forEach(function(c){cnt[effStat(c,st.frx[i],m,tt)]++});pc='<span class="cn"><span class="ok">'+cnt.ok+'</span><span class="rev">'+cnt.rev+'</span>'+(cnt.mis?'<span class="mis">'+cnt.mis+'</span>':'')+'<span class="nc">'+cnt.nc+'</span></span>'}
+    var pc='';if(st.found[i]){var cnt={ok:0,rev:0,mis:0,nc:0},m=keyCt(st.frx[i]);p.checks.forEach(function(c){cnt[effStat(c,st.frx[i],m,tt)]++});pc='<span class="cn"><span class="ok">'+cnt.ok+'</span><span class="mis">'+(cnt.mis+cnt.rev)+'</span><span class="nc">'+cnt.nc+'</span></span>'}
     h+='<tr class="ph"><td colspan="4">'+pad(i+1)+' '+esc(p.n)+'</td><td>'+pc+'</td></tr>';
     p.docs.forEach(function(d,j){var k=i+':'+j,gt=rx.indexOf(k)>-1,dv=isDerived(d),tick=!dv&&d.real!==3&&!gt;
       var stt=spill(dv?'d':gt?'r':st.chased[k]?'q':'w');
@@ -1637,7 +1642,7 @@ function hostHTML(){
   });
   h+='</tbody></table>';
   if(st.lastChase){var cd=chaseDraft(st.lastChase);h+='<div class="msg"><div class="hlab">Message to '+esc(cd.to)+' (sent by the host)</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'</div>'}
-  var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push((e==='mis'?'Mismatch: ':'Review: ')+c.p)})}});
+  var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push('Flag: '+c.p)})}});
   if(items.length)h+='<div class="hlab">'+(SC===2?'For the client file':'For your team')+'</div><ul>'+items.slice(0,6).map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+(items.length>6?'<li>and '+(items.length-6)+' more</li>':'')+'</ul>';
   if(st.shared)h+='<div class="hlab">Documents the host can share</div><ul>'+ROLES.slice(1).map(function(r){var c=0;P.forEach(function(q){q.docs.forEach(function(d){if((DOCVIS[d.t]||[]).indexOf(r[0])>-1)c++})});return '<li>'+esc(r[3]||r[1])+': '+c+' documents</li>'}).join('')+'</ul>';
   return h+foot;
@@ -1719,7 +1724,7 @@ function callOf(st){
       c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: document.failed','X-VeriPura-Signature: sha256=<hmac>'],reqBody:{event:'document.failed',consignment_id:id,document_id:did,error:er,next_step:'Send a new file for this document.'},note:'CORE tells the host which document failed and why. No findings are produced from an unreadable file.'}:{out:1,method:'GET',path:'/consignments/'+id+'/documents/'+did,status:'200 OK',req:[auth],resBody:{document_id:did,status:'failed',error:er,next_step:'Send a new file for this document.'},note:'The host asks for the document status and finds that it failed. No findings are produced from an unreadable file.'}}
     else if(st.k==='dup')c={out:1,method:'POST',path:'/consignments/'+id+'/documents',status:'409 Conflict',req:[auth,js,'Idempotency-Key: <key>'],reqBody:{phase:fd.i+1,documents:[{document_type:fd.d.t,reference:fd.d.ref}]},resBody:{error:{code:'duplicate_document',message:'This document was already received.',existing_document_id:did}},note:'The same document sent twice is not processed twice, so the host can retry safely.'};
     else c={out:1,method:'GET',path:'/consignments/'+id+'/requirements?status=missing',status:'200 OK',req:[auth],resBody:{consignment_id:id,missing_count:missingDocs(st.rx).length,missing:missingDocs(st.rx)},note:'Required documents not yet received. Checks that depend on them stay not_checked.'}}
-  else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Review. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
+  else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Flag. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: rules.pending','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'rules.pending'},rb),note:'CORE watches the rules for this route. The in-house team does not have to. The host decides how to alert its users.'}:{out:1,method:'GET',path:'/consignments/'+id+'/rule-updates',status:'200 OK',req:[auth],resBody:{updates:[rb]},note:'CORE watches the rules for this route. The host asks for updates and decides how to alert its users.'}}
   else if(st.t==='chase'){var cdd=docAt(st.key),outs=[];
     P.forEach(function(p,i){p.docs.forEach(function(d,j){if(st.rx.indexOf(i+':'+j)<0&&!isDerived(d))outs.push({document_type:d.t,phase:i+1,typical_supplier:supplierOf(d)})})});
@@ -1827,7 +1832,7 @@ function reqHTML(cur){
   $('#faGo').onclick=function(){var n=0;o.querySelectorAll('input[data-fa]').forEach(function(c){if(c.checked){FARR[out[+c.dataset.fa].d.t]=1;n++}});if(!n)return;foodRebuild();reqHTML(cur)};
 }
 function packCounts(id){var c={ok:0,rev:0,mis:0,nc:0};PK[id].phases.forEach(function(p){p.checks.forEach(function(x){c[x.s]++})});return c}
-function cnHTML(c){return '<span class="cn"><span class="ok">'+c.ok+' matched</span><span class="rev">'+c.rev+' review</span>'+(c.mis?'<span class="mis">'+c.mis+' mismatch</span>':'')+'<span class="nc">'+c.nc+' not checked</span></span>'}
+function cnHTML(c){return '<span class="cn"><span class="ok">'+c.ok+' pass</span><span class="mis">'+(c.mis+c.rev)+' flag'+((c.mis+c.rev)===1?'':'s')+'</span><span class="nc">'+c.nc+' not checked</span></span>'}
 function impName(id){var x=PK[id].roles.filter(function(q){return q[0]==='imp'})[0];return x?x[1].replace(/^[^,]*,\s*/,''):''}
 
 var HT={2:'ff',3:'imp'};
