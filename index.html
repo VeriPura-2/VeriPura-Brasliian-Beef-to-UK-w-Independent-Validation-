@@ -2407,9 +2407,15 @@ $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if
 var PRS={on:false,sc:'ff',i:0,short:false,move:true,left:false,mini:false,win:null,hide:false};
 function prSetup(k){
   var sc=k==='ff'?2:1,pk=k==='ff'?'maspo':'beef';
-  if(SC!==sc)setScenario(sc);
-  if(curId()!==pk){$('#packSel').value=pk;$('#packSel').onchange()}
+  PRS.busy=true;
+  try{if(SC!==sc)setScenario(sc);
+  if(curId()!==pk){$('#packSel').value=pk;$('#packSel').onchange()}}finally{PRS.busy=false}
 }
+/* leaving the scripted demo by hand (Back to demo, another scenario or consignment) ends presenter mode */
+(function(){var ss=setScenario,po=$('#packSel').onchange;
+  setScenario=function(n){if(PRS.on&&!PRS.busy)prClose();return ss(n)};
+  $('#packSel').onchange=function(){if(PRS.on&&!PRS.busy)prClose();return po.apply(this,arguments)};
+})();
 function prHl(sels){setTimeout(function(){for(var n=0;n<sels.length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');reveal(e);return}}},300)}
 function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost('maspo')}
 function prAt(t){apiPause();var n=API.steps.length;if(t){var ix=-1;API.steps.forEach(function(s,k){if(ix<0&&s.t===t)ix=k});if(ix>=0)n=ix+1}if(API.pos<n){API.pos=n;apiPaint();apiPlayer()}}
