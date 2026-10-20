@@ -1510,7 +1510,6 @@ function cnsId(){return 'cns_'+curId()}
 function hookUrl(){return SC===2?'https://platform.forwarder.example/hooks/veripura':'https://orders.importer.example/hooks/veripura'}
 function docData(d){var f={};d.rows.forEach(function(r){f[snake(r[0])]=r[1]});var o={document_type:d.t,reference:d.ref,fields:f};if(d.tbl){var c=d.tbl.h.map(snake);o.lines=d.tbl.r.slice(0,3).map(function(r){var x={};c.forEach(function(k,i){x[k]=r[i]});return x});o.lines_total=d.tbl.r.length}return o}
 
-var SRC=['drive','erp','email','upload','batch'];
 function dtag(d){return ['Illustrative','Provided','From documents','Not supplied'][d.real||0]}
 function allDocs(){var o=[];P.forEach(function(p,i){p.docs.forEach(function(d,j){o.push({k:i+':'+j,i:i,j:j,d:d})})});return o}
 function erpTarget(){var ad=allDocs().filter(function(x){return x.d.real!==3&&!isDerived(x.d)}),f=null;
@@ -1528,8 +1527,8 @@ function affected(t){var dk=docKeys(t.d),o=[];P[t.i].checks.forEach(function(c,x
 function roleLong(r){if(r==='ff')return 'Freight forwarder (customs agent and carrier documents)';var x=ROLES.filter(function(q){return q[0]===r})[0];return x?x[1]:r}
 
 /* ---------- round based document flow ---------- */
-var CTX={src:'erp',keys:[]},SRC_REF=['erp','drive','dam','email','upload'],SRC_PUSH=['drive','dam','email','upload','batch'];
-function srcLabel(k){return {drive:'Google Drive folder',dam:'Digital asset manager',erp:SC===2?'Client ERP (PO or bill of lading)':'ERP order',email:'Email attachments',upload:'Manual upload',batch:'Batch from a system'}[k]}
+var CTX={src:'erp',keys:[]},SRC_REF=['erp','drive','dam','upload'],SRC_PUSH=['drive','dam','upload','batch'];
+function srcLabel(k){return {drive:'Google Drive folder',dam:'Digital asset manager',erp:SC===2?'Client ERP (PO or bill of lading)':'ERP order',upload:'Manual upload',batch:'Batch from a system'}[k]}
 function docAt(k){var a=k.split(':'),p=P[+a[0]];return p&&p.docs[+a[1]]}
 function docsOf(keys){return (keys||[]).map(function(k){var a=k.split(':');return {k:k,i:+a[0],j:+a[1],d:P[+a[0]].docs[+a[1]]}})}
 function isDerived(d){return d.real===2||/lookup/i.test(d.ref||'')||/lookup/i.test(d.t)}
@@ -1551,7 +1550,6 @@ function origin(src,keys){src=src||CTX.src;keys=keys||CTX.keys;var ids=keys.map(
   return {drive:{type:'google_drive',folder:'Trade files/'+f+'/'+curId(),file_ids:ids.map(function(x){return 'drv_'+x})},
     dam:{type:'dam',system:'host_dam',collection:curId(),asset_ids:ids.map(function(x){return 'ast_'+x})},
     erp:{type:'erp',system:'host_erp',order_reference:'ORD-'+curId().toUpperCase()},
-    email:{type:'email',message_id:'msg_example_001',from:'operations@supplier.example'},
     upload:{type:'manual_upload'},
     batch:{type:'batch_export',batch_id:'bat_example_001'}}[src]}
 function findingObj(c,i,x,rx){var st=rx?effStat(c,rx):c.s,t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[st],area:c.a,title:c.p,detail:st===c.s?c.d:'Waiting for the documents needed to cross-check this item.',rule_and_source:c.r,documents:t}}
@@ -1649,7 +1647,6 @@ function addView(v){
   if(API.rsrc==='erp')ph='<h3>'+(SC===3&&HT[3]==='exp'?'Sales orders':SC===3?'Purchase orders':'Incoming from the client’s ERP')+'</h3><div class="hsub">'+(SC===2?'The client’s system sends the purchase order or bill of lading it holds.':'The ERP holds the order and sends it on.')+'</div><table><thead><tr><th>Reference</th><th>Document</th><th>Route</th><th>Status</th></tr></thead><tbody><tr><td>'+(d?esc(d.ref):'')+'</td><td><b>'+(d?esc(d.t):'')+'</b></td><td>'+esc(CUR.name)+'</td><td>Ready to send</td></tr></tbody></table><div class="hnote">The order data is pushed as JSON.</div>';
   else if(API.rsrc==='drive')ph='<h3>Google Drive</h3><div class="hsub">Shared drives / Trade files / '+party+' / '+esc(CUR.name)+'</div>'+frows([t])+'<div class="hnote">The host reads the file from the folder and passes it to VeriPura Core.</div>';
   else if(API.rsrc==='dam')ph='<h3>Digital asset manager</h3><div class="hsub">Collection: '+party+' / '+esc(CUR.name)+'</div>'+frows([t])+'<div class="hnote">Documents are organised by consignment in the host’s own store.</div>';
-  else if(API.rsrc==='email')ph='<h3>Inbox</h3><div class="hsub">From: operations@supplier.example<br>To: documents@'+(SC===2?'forwarder':'importer')+'.example<br>Subject: Documents for '+esc(CUR.name)+'</div>'+frows([t]);
   else ph='<h3>Upload a document</h3><div class="drop">Drop a file here or choose a file</div>'+frows([t])+'<div class="hnote">Built-in sample for the demonstration. VeriPura is not reading a file you upload here.</div>';
   h+='<section class="hostp srcp">'+ph+'</section><div class="sbar"><button class="btn gold" id="goRun">Send reference document to VeriPura Core</button></div>';
   v.innerHTML=h;
