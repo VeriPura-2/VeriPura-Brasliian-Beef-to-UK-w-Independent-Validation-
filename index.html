@@ -8,6 +8,7 @@
 :root{
   --bg:#F2F5FA;--side:#E6ECF5;--card:#FFFFFF;--card2:#F6F8FC;--line:#D3DBE8;--ink:#0F2444;--ink2:#2B4066;--mut:#5B6C88;
   --gold:#B8861B;--gold-bg:#D9A93F;--gold-ink:#0F2444;--blue:#2E55C9;--tint:#E7ECF8;
+  --sw:#4A5568;--sw-bg:#EEF0F3;--sq:#1D5FA8;--sq-bg:#E3EEFA;--sr:#0F766E;--sr-bg:#DDF3F0;--sd:#6B46A8;--sd-bg:#EDE6F8;
   --ok:#2B8A3E;--ok-bg:#E6F4EA;--rev:#A8660F;--rev-bg:#FBF0DD;--mis:#A8352A;--mis-bg:#F8E4E1;--nc:#44546B;--nc-bg:#E9EDF3;
   --paper:#FBFAF6;--paper-ink:#1C2433;--paper-line:#D9D5C8;
   --serif:'DM Serif Display','Playfair Display',Georgia,'Times New Roman',serif;
@@ -17,6 +18,7 @@
 :root[data-theme="dark"]{
   --bg:#0F2444;--side:#0C1D3A;--card:#1A3260;--card2:#152B54;--line:#2D4574;--ink:#E9EFF8;--ink2:#CBD6E6;--mut:#9FB0CC;
   --gold:#E2B64E;--gold-bg:#D9A93F;--gold-ink:#0F2444;--blue:#8AA8FF;--tint:#1E3A70;
+  --sw:#B7C0CE;--sw-bg:#2A3140;--sq:#8CB8F0;--sq-bg:#1B2F4D;--sr:#5EEAD4;--sr-bg:#0F3A36;--sd:#C4A8F0;--sd-bg:#2E2248;
   --ok:#69DB7C;--ok-bg:#173B22;--rev:#F2B566;--rev-bg:#3A2A12;--mis:#F29488;--mis-bg:#3C1B18;--nc:#B2BFD2;--nc-bg:#22375C;
 }
 *{box-sizing:border-box;margin:0;padding:0}
@@ -229,6 +231,16 @@ body.hosted main#view{max-width:none}
 .hinfo .hsrc{font-size:12px;color:var(--mut)}
 .hinfo a{color:inherit}
 .apigrid{grid-template-columns:minmax(0,6fr) minmax(0,5fr)}
+.sp{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;font-weight:600;padding:2px 9px 2px 7px;border-radius:999px;white-space:nowrap}
+.sp i{width:9px;height:9px;border-radius:50%;display:inline-block;box-sizing:border-box;flex:none}
+.sp.w{background:var(--sw-bg);color:var(--sw)}.sp.w i{border:1.5px solid var(--sw)}
+.sp.q{background:var(--sq-bg);color:var(--sq)}.sp.q i{border:1.5px solid var(--sq);background:linear-gradient(90deg,var(--sq) 50%,transparent 50%)}
+.sp.r{background:var(--sr-bg);color:var(--sr)}.sp.r i{background:var(--sr)}
+.sp.d{background:var(--sd-bg);color:var(--sd)}.sp.d i{border:1.5px dashed var(--sd)}
+.sp.n{background:var(--sw-bg);color:var(--sw);text-decoration:line-through}.sp.n i{background:linear-gradient(var(--sw),var(--sw)) center/100% 1.5px no-repeat;border:1.5px solid var(--sw)}
+.splg{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;font-size:11.5px;color:var(--mut);margin:6px 0}
+.splg .sp{font-weight:600}
+.stamp.s3.pq{}
 .ckl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card2);border:1px solid var(--line);margin:8px 0}
 .ckl th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
 .ckl td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
@@ -1552,6 +1564,8 @@ function origin(src,keys){src=src||CTX.src;keys=keys||CTX.keys;var ids=keys.map(
     erp:{type:'erp',system:'host_erp',order_reference:'ORD-'+curId().toUpperCase()},
     upload:{type:'manual_upload'},
     batch:{type:'batch_export',batch_id:'bat_example_001'}}[src]}
+function spill(k){var m={w:['w','Waiting'],q:['q','Requested'],r:['r','Received'],d:['d','Derived by Core'],n:['n','Not supplied']}[k];return '<span class="sp '+m[0]+'"><i></i>'+m[1]+'</span>'}
+function splegend(ks){return '<div class="splg"><span>Document status:</span>'+ks.map(spill).join('')+'</div>'}
 function findingObj(c,i,x,rx){var st=rx?effStat(c,rx):c.s,t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[st],area:c.a,title:c.p,detail:st===c.s?c.d:'Waiting for the documents needed to cross-check this item.',rule_and_source:c.r,documents:t}}
 function findingsBody(i,rx,trig){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x,rx)}),sm={matched:0,review:0,mismatch:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});var o={consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm};if(trig&&trig.length)o.triggered_by=trig;o.findings=fs;o.decision='Findings only. The decision rests with your team.';return o}
 function fixTarget(){var best=null,any=null,ks=[refKey()].concat(pushedKeys()).filter(Boolean);docsOf(ks).forEach(function(x){if(!any)any={i:x.i,d:x.d,k:x.k};var dk=docKeys(x.d);if(!best&&P[x.i].checks.some(function(c){return (c.s==='rev'||c.s==='mis')&&(c.k||[]).some(function(k){return dk.indexOf(k)>-1})}))best={i:x.i,d:x.d,k:x.k}});return best||any}
@@ -1613,12 +1627,12 @@ function hostHTML(){
   var files=docsOf(rx.filter(function(k){return !isDerived(docAt(k))})).concat(docsOf(tk));
   h+=files.length?'<div class="sfiles">'+files.map(function(x){return '<span class="sf'+(rx.indexOf(x.k)>-1?' in':'')+'">'+esc(snake(x.d.t))+'.pdf</span>'}).join('')+'</div>':'';
   h+='<div class="sbtns"><label>Arrives by <select id="pushSrc"'+(rest?'':' disabled')+'>'+SRC_PUSH.map(function(k){return '<option value="'+k+'"'+(API.src===k?' selected':'')+'>'+esc(srcLabel(k))+'</option>'}).join('')+'</select></label><button class="btn gold" id="pushGo"'+(rest&&tk.length?'':' disabled')+'>Push '+tk.length+' to Core</button>'+(got>1&&!st.shared?'<button class="btn" id="shareGo"'+(rest?'':' disabled')+'>Share with parties</button>':'')+'</div></div>';
-  h+='<div class="hlab">Checklist from VeriPura Core</div><div class="hsub">Tick the documents that have arrived in the store, then push them to Core.</div><table class="ckl"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Status</th><th></th></tr></thead><tbody>';
+  h+='<div class="hlab">Checklist from VeriPura Core</div><div class="hsub">Tick the documents that have arrived in the store, then push them to Core.</div>'+splegend(['w','q','r','d'])+'<table class="ckl"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Status</th><th></th></tr></thead><tbody>';
   P.forEach(function(p,i){if(!p.docs.length)return;
     var pc='';if(st.found[i]){var cnt={ok:0,rev:0,mis:0,nc:0},m=keyCt(st.frx[i]);p.checks.forEach(function(c){cnt[effStat(c,st.frx[i],m,tt)]++});pc='<span class="cn"><span class="ok">'+cnt.ok+'</span><span class="rev">'+cnt.rev+'</span>'+(cnt.mis?'<span class="mis">'+cnt.mis+'</span>':'')+'<span class="nc">'+cnt.nc+'</span></span>'}
     h+='<tr class="ph"><td colspan="4">'+pad(i+1)+' '+esc(p.n)+'</td><td>'+pc+'</td></tr>';
     p.docs.forEach(function(d,j){var k=i+':'+j,gt=rx.indexOf(k)>-1,dv=isDerived(d),tick=!dv&&d.real!==3&&!gt;
-      var stt=dv?'Derived by Core':gt?'Received':st.chased[k]?'Requested':'Waiting';
+      var stt=spill(dv?'d':gt?'r':st.chased[k]?'q':'w');
       h+='<tr><td>'+(tick?'<input type="checkbox" data-t="'+k+'"'+(API.tick[k]?' checked':'')+(rest?'':' disabled')+' aria-label="Received '+esc(d.t)+'">':'')+'</td><td>'+esc(d.t)+'</td><td>'+esc(supplierOf(d))+'</td><td>'+stt+'</td><td>'+(!gt&&!dv?'<button class="chs" data-c="'+k+'"'+(rest?'':' disabled')+'>Chase</button>':'')+'</td></tr>'});
   });
   h+='</tbody></table>';
@@ -1805,8 +1819,8 @@ function reqHTML(cur){
   o.innerHTML='<div class="card"><h3>Requirements for this shipment</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">'+nd+' documents across '+PALL.length+' phases, with '+nc+' checks. The list comes from the rules for this route and the documents in the sample. Your team makes the decision on every finding.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th>#</th><th>Phase</th><th>Documents needed</th><th>Shared with</th><th>Checks</th></tr></thead><tbody>'+rows+'</tbody></table></div><div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap"><button class="btn gold" id="goVal">Validate before shipment</button><button class="btn" id="goMtx">Show who sees what</button></div></div>';
   var st=startDoc(cur),out=[];
   PALL.forEach(function(p,i){p.docs.forEach(function(d){if(isDerived(d))return;if(st&&d.t===st.t)return;out.push({i:i,d:d})})});
-  var orows=out.map(function(x,n){var got=!!FARR[x.d.t],avail=x.d.real!==3;return '<tr><td>'+(avail&&!got?'<input type="checkbox" data-fa="'+n+'" aria-label="Received '+esc(x.d.t)+'">':'')+'</td><td>'+esc(x.d.t)+'</td><td>'+esc(supplierOf(x.d))+'</td><td class="mono">'+pad(x.i+1)+'</td><td>'+(got?'Received':'Waiting')+'</td><td>'+(got?'':'<button class="btn" data-fc="'+n+'">Draft message</button>')+'</td></tr><tr class="fcm" id="fcm'+n+'" style="display:none"><td colspan="6"><b>Document needed: '+esc(x.d.t)+'</b><br>Please send the '+esc(x.d.t)+' for '+esc(PK[cur].name)+'. It is needed for phase '+pad(x.i+1)+', '+esc(PALL[x.i].n)+'. Reply to this message or add it to the shared folder.<div class="cap" style="margin-top:6px">To: '+esc(supplierOf(x.d))+'. Sample text for the demonstration.</div></td></tr>'}).join('');
-  o.innerHTML+='<div class="card" style="margin-top:16px"><h3>Outstanding documents</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Only the document you started with is held. VeriPura Food alerts your team about the others and can send a message to the party that supplies each one. Tick documents as they arrive. The phases then show them, and the checks that need them can run. The supplier shown is a typical one for the document type.</p><div style="overflow-x:auto"><table class="t"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Phase</th><th>Status</th><th></th></tr></thead><tbody>'+orows+'</tbody></table></div><div style="margin-top:12px"><button class="btn" id="faAll">Tick all available</button> <button class="btn gold" id="faGo">Mark ticked as received</button></div></div>';
+  var orows=out.map(function(x,n){var got=!!FARR[x.d.t],avail=x.d.real!==3;return '<tr><td>'+(avail&&!got?'<input type="checkbox" data-fa="'+n+'" aria-label="Received '+esc(x.d.t)+'">':'')+'</td><td>'+esc(x.d.t)+'</td><td>'+esc(supplierOf(x.d))+'</td><td class="mono">'+pad(x.i+1)+'</td><td>'+spill(got?'r':avail?'w':'n')+'</td><td>'+(got?'':'<button class="btn" data-fc="'+n+'">Draft message</button>')+'</td></tr><tr class="fcm" id="fcm'+n+'" style="display:none"><td colspan="6"><b>Document needed: '+esc(x.d.t)+'</b><br>Please send the '+esc(x.d.t)+' for '+esc(PK[cur].name)+'. It is needed for phase '+pad(x.i+1)+', '+esc(PALL[x.i].n)+'. Reply to this message or add it to the shared folder.<div class="cap" style="margin-top:6px">To: '+esc(supplierOf(x.d))+'. Sample text for the demonstration.</div></td></tr>'}).join('');
+  o.innerHTML+='<div class="card" style="margin-top:16px"><h3>Outstanding documents</h3><p style="color:var(--ink2);margin:6px 0 12px;max-width:80ch">Only the document you started with is held. VeriPura Food alerts your team about the others and can send a message to the party that supplies each one. Tick documents as they arrive. The phases then show them, and the checks that need them can run. The supplier shown is a typical one for the document type.</p>'+splegend(['w','r','n'])+'<div style="overflow-x:auto"><table class="t"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Phase</th><th>Status</th><th></th></tr></thead><tbody>'+orows+'</tbody></table></div><div style="margin-top:12px"><button class="btn" id="faAll">Tick all available</button> <button class="btn gold" id="faGo">Mark ticked as received</button></div></div>';
   $('#goVal').onclick=function(){go(0)};$('#goMtx').onclick=openMatrix;
   o.querySelectorAll('[data-fc]').forEach(function(b){b.onclick=function(){var r=$('#fcm'+b.dataset.fc);r.style.display=r.style.display==='none'?'table-row':'none'}});
   $('#faAll').onclick=function(){o.querySelectorAll('input[data-fa]').forEach(function(c){c.checked=true})};
