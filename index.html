@@ -340,16 +340,22 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
 @media (max-width:860px){.player{left:0;padding:10px 18px}.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
 @media print{aside,.top,.banner,.pager,.btn,.player,.drawer,.dov{display:none!important}body{background:#fff}main{max-width:none}}
 
-#prTab{position:fixed;right:0;top:44%;z-index:40;writing-mode:vertical-rl;font:inherit;font-size:12px;letter-spacing:.06em;padding:10px 5px;border:1px solid var(--line);border-right:0;background:var(--card);color:var(--mut);border-radius:8px 0 0 8px;cursor:pointer;opacity:.55}
-#prTab:hover,#prTab:focus-visible{opacity:1}
+#prTab{position:fixed;right:0;top:40%;z-index:60;writing-mode:vertical-rl;font:inherit;font-size:13px;font-weight:700;letter-spacing:.08em;padding:14px 8px;border:0;background:var(--gold-bg);color:var(--gold-ink);border-radius:10px 0 0 10px;cursor:pointer;box-shadow:-2px 2px 10px rgba(0,0,0,.35);opacity:.9}
+#prTab:hover,#prTab:focus-visible{opacity:1;padding-right:12px}
 body.pron #prTab,body.prhide #pres,body.prhide #prTab{display:none!important}
 #pres{display:none;position:fixed;left:290px;right:18px;bottom:84px;z-index:45;background:var(--card);color:var(--ink);border:1.5px solid var(--gold-bg);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28);padding:10px 16px}
 #pres.on{display:block}
 body.hosted #pres{left:18px}
 #pres.up{bottom:auto;top:76px}
-body.pron main#view,body.pron #hostp{scroll-padding-bottom:170px}
-body.pron:not(.hosted) #view::after{content:'';display:block;height:280px}
-body.pron #hostp::after,body.pron #apip::after{content:'';display:block;height:180px}
+body.pron:not(.hosted) #view::after{content:'';display:block;height:70vh}
+body.pron:not(.hosted) .top .pill{display:none}
+body.pron.api:not(.adding):not(.prset) #view>:not(.apigrid){display:none}
+body.pron.api .apigrid{padding-bottom:0;margin-top:10px}
+body.pron.api .apigrid .hostp,body.pron.api .apigrid .apip{top:calc(var(--hh,66px) + 10px);max-height:calc(100vh - var(--hh,66px) - var(--prh,250px) - 10px)}
+body.pron.api #view{padding-top:0}
+body.pron:not(.prplayer) .player{display:none}
+body.pron:not(.prplayer) #pres{bottom:12px}
+body.pron.api #hostBar .pw{display:none}
 #pres .pgrid{display:grid;grid-template-columns:1fr auto;gap:6px 22px;align-items:center}
 #pres .phd{display:flex;align-items:center;gap:6px;margin-bottom:2px}
 #pres .pct{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
@@ -2417,7 +2423,22 @@ function prSetup(k){
   setScenario=function(n){if(PRS.on&&!PRS.busy)prClose();return ss(n)};
   $('#packSel').onchange=function(){if(PRS.on&&!PRS.busy)prClose();return po.apply(this,arguments)};
 })();
-function prHl(sels){setTimeout(function(){for(var n=0;n<sels.length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');e.scrollIntoView({behavior:'smooth',block:'center'});return}}},300)}
+function prVis(sels){for(var n=0;n<(sels||[]).length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null)return e}return null}
+function prVars(){var c=$('#pres'),hb=$('#hostBar'),r=document.documentElement.style;
+  r.setProperty('--prh',((c&&c.classList.contains('on')?c.offsetHeight:0)+(document.body.classList.contains('prplayer')?84:12)+14)+'px');
+  r.setProperty('--hh',(hb&&hb.offsetParent!==null?hb.offsetHeight:($('.top')?$('.top').offsetHeight:66))+'px')}
+function prFood(s,hh,card,again){var at=prVis(s.at);if(at&&s.card)at=at.closest('.card')||at;
+  if(at){var d=at.getBoundingClientRect().top-hh-12;if(!again||Math.abs(d)>40)window.scrollBy({top:d,behavior:'smooth'})}else if(!again)window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(function(){var hl=prVis(s.hl);if(!hl)return;if(again){hl.classList.remove('pulse');void hl.offsetWidth;hl.classList.add('pulse')}
+    var r=hl.getBoundingClientRect(),cr=card.getBoundingClientRect();if(r.top<hh||r.bottom>cr.top-8)window.scrollBy({top:r.top-Math.round(window.innerHeight*0.3),behavior:'smooth'})},again?1000:900)}
+function prAll(){if(SC!==1)return;var t=totals();if(t.ok+t.mis+t.rev+t.nc===0){pause();ST.pos=STEPS.length;calc();nav()}}
+/* put what is being demonstrated at the top of the screen and clear of the card */
+function prShow(s){setTimeout(function(){
+  prVars();var core=document.body.classList.contains('api')&&API.on&&!document.body.classList.contains('hl'),hl=prVis(s.hl),hh=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||66,card=$('#pres');
+  if(core){var g=$('.apigrid');if(g)window.scrollTo({top:Math.max(0,window.scrollY+g.getBoundingClientRect().top-hh-10),behavior:'smooth'});
+    var pane=hl&&hl.closest('#hostp,#apip');if(pane){var pr=pane.getBoundingClientRect(),er=hl.getBoundingClientRect();pane.scrollTo({top:pane.scrollTop+er.top-pr.top-14,behavior:'smooth'})}}
+  else{prFood(s,hh,card,false);setTimeout(function(){prFood(s,hh,card,true)},1500)}
+  if(hl){hl.classList.remove('pulse');void hl.offsetWidth;hl.classList.add('pulse')}},300)}
 function prPk(){return PRS.sc==='ff'?'maspo':'beef'}
 function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost(prPk())}
 function prAt(t){apiPause();var n=API.steps.length;if(t){var ix=-1;API.steps.forEach(function(s,k){if(ix<0&&s.t===t)ix=k});if(ix>=0)n=ix+1}if(API.pos<n){API.pos=n;apiPaint();apiPlayer()}}
@@ -2444,7 +2465,7 @@ ff:{name:'Forwarder (Core)',stops:[
 {s:1,lead:'Core shows the evidence. Your team decides.',
  w:['Pass, Flag or Not checked on every check','A source behind each one','Not supplied is stated openly'],
  n:'Open one flag and read its source aloud.',
- go:function(){prRun();prAt(null)},hl:['#hostp .cn','#hostp']},
+ go:function(){prRun();prAt(null)},hl:['#hostp h3','#hostp']},
 {s:1,lead:'Gaps close themselves.',
  w:['A chase goes to the right party by the chosen channel','A single-use upload link','Expiry alerts before a certificate lapses'],
  n:'Chase one missing document, then show the expiry alert settings.',
@@ -2474,11 +2495,11 @@ imc:{name:'Importer (Core)',stops:[
 {s:1,lead:'Your supplier’s documents are read and checked as they arrive.',
  w:['The platform’s store holds what has arrived','Each document is read, placed and checked on arrival','A new document can change earlier findings'],
  n:'Next ticks the documents that have arrived and pushes them to Core.',
- go:function(){prRun('req');prTickPush()},hl:['#hostp .cn','#hostp']},
+ go:function(){prRun('req');prTickPush()},hl:['#hostp h3','#hostp']},
 {s:1,lead:'Every check shows its evidence. Your team decides.',
  w:['Pass, Flag or Not checked on every check','A source behind each one','Not supplied is stated openly'],
  n:'Open one flag and read its source aloud.',
- go:function(){prRun('req');prTickPush();prAt(null)},hl:['#hostp .cn','#hostp']},
+ go:function(){prRun('req');prTickPush();prAt(null)},hl:['#hostp h3','#hostp']},
 {s:1,lead:'You and your exporter work on the same file.',
  w:['A chase goes to the exporter by the chosen channel','The exporter replies from the Inbox with a single-use link','The reply waits for the importer to accept it'],
  n:'Chase one missing document with the secure link. Switch I am to Exporter, open Inbox, upload, switch back and press Accept.',
@@ -2508,7 +2529,7 @@ imp:{name:'Importer (Food)',stops:[
 {s:1,lead:'Documents are read by content, and gaps are chased.',
  w:['Tick what has arrived','Outstanding documents are listed with their supplier','A message can go to the supplier'],
  n:'Tick the documents, then press Validate before shipment.',
- go:function(){prSetup('imp');go(-2)},hl:['#faAll','#faGo','#goVal','#genReq']},
+ go:function(){prSetup('imp');go(-2);setTimeout(function(){if(!REQ){var g=$('#genReq');if(g)g.click()}},400)},hl:['#faAll','#faGo','#goVal','#genReq']},
 {s:1,lead:'Every check shows its source. Core does not guess.',
  w:['All checks of the phase appear at once','Pass, Flag or Not checked','Select a finding to see the document field'],
  n:'Press Run on the phase, then open one finding.',
@@ -2524,12 +2545,14 @@ imp:{name:'Importer (Food)',stops:[
 {s:1,lead:'Seal the Passport and any later change shows.',
  w:['Sealed as version 1','A change after sealing is flagged','The earlier seal stays on record'],
  n:'Change one item, then reseal.',
- go:function(){prSetup('imp');prRes()},hl:['#ppFood','#finds','.stats']},
+ go:function(){prSetup('imp');prAll();prRes()},hl:['#ppFood','#finds','.stats']},
 {s:1,lead:'The trail is yours, permanent and exportable.',
  w:['The importer owns the trail','The tamper check shows where a chain breaks','Export as JSON, CSV or PDF'],
  n:'Run the tamper test, then export.',
- go:function(){prSetup('imp');prRes()},hl:['#trVer','#trAnch','#trBd']}
+ go:function(){prSetup('imp');prAll();prRes()},hl:['#trVer','#trAnch','#trBd']}
 ]}};
+(function(){var A=[[],['#genReq'],['#faAll','#faGo'],['.phase-head'],['.phase-head'],['#altBtn'],['#ppFood','.stats'],['#trVer']];
+  PRSCR.imp.stops.forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1})})();
 function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return !PRS.short||s.s})}
 function prPlace(){var c=$('#pres');if(!c)return;c.classList.toggle('up',PRS.left);c.classList.toggle('mini',PRS.mini)}
 function prPaint(){
@@ -2542,6 +2565,8 @@ function prPaint(){
    +'<div class="pr"><div class="pft"><button id="prBack"'+(PRS.i===0?' disabled':'')+'>Back</button><button class="gold" id="prNext"'+(PRS.i>=L.length-1?' disabled':'')+'>Next</button><button id="prGo">Take me there</button></div>'
    +'<div class="popt"><label><input type="checkbox" id="prMove"'+(PRS.move?' checked':'')+'> Next moves the screen</label>'
    +'<label><input type="checkbox" id="prShort"'+(PRS.short?' checked':'')+'> Short version</label>'
+   +'<label><input type="checkbox" id="prPl"'+(document.body.classList.contains('prplayer')?' checked':'')+'> Show player</label>'
+   +(document.body.classList.contains('api')?'<label><input type="checkbox" id="prSet"'+(document.body.classList.contains('prset')?' checked':'')+'> Show settings</label>':'')
    +'<span class="pbt"><button id="prSide" title="Move the card to the top or the bottom">Top/bottom</button><button id="prNotes">Notes</button><button id="prHide" title="Hide the card for a clean recording. Press P to bring it back">Hide</button></span></div></div></div>';
   c.innerHTML=h;prPlace();
   $('#prMini').onclick=function(){PRS.mini=!PRS.mini;prPaint()};
@@ -2551,12 +2576,14 @@ function prPaint(){
   $('#prGo').onclick=function(){prMove()};
   $('#prMove').onchange=function(){PRS.move=this.checked};
   $('#prShort').onchange=function(){var cur=prList()[PRS.i];PRS.short=this.checked;var L2=prList(),k=L2.indexOf(cur);PRS.i=k>-1?k:Math.min(PRS.i,L2.length-1);prPaint();prNotes()};
+  var pp=$('#prPl');if(pp)pp.onchange=function(){document.body.classList.toggle('prplayer',this.checked);prVars();prShow(prList()[PRS.i])};
+  var ps=$('#prSet');if(ps)ps.onchange=function(){document.body.classList.toggle('prset',this.checked);prShow(prList()[PRS.i])};
   $('#prSide').onclick=function(){PRS.left=!PRS.left;prPlace()};
   $('#prNotes').onclick=function(){prNotesOpen()};
   $('#prHide').onclick=function(){prHideSet(true)};
-  prNotes();
+  prVars();prNotes();
 }
-function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prHl(s.hl||[])}catch(e){}}
+function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prShow(s)}catch(e){}}
 function prStep(d){var L=prList(),n=PRS.i+d;if(n<0||n>=L.length)return;PRS.i=n;prPaint();if(PRS.move)prMove()}
 function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h)}
 function prStart(k){/* each script starts from a fresh page, so nothing from an earlier run carries over */
@@ -2564,7 +2591,7 @@ function prStart(k){/* each script starts from a fresh page, so nothing from an 
   if(ok){location.reload();return}
   prGo(k)}
 function prGo(k){PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
-function prClose(){PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
+function prClose(){document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
 function prPick(){
   var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
   c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
@@ -2586,6 +2613,7 @@ function prNotes(){
   var c=document.createElement('div');c.id='pres';c.setAttribute('role','region');c.setAttribute('aria-label','Presenter card');document.body.appendChild(c);
   var t=document.createElement('button');t.id='prTab';t.textContent='Presenter';t.setAttribute('aria-label','Open presenter mode');document.body.appendChild(t);
   t.onclick=function(){if(!PRS.on)prPick()};
+  window.addEventListener('resize',function(){if(PRS.on)prVars()});
   document.addEventListener('keydown',function(e){
     if(e.target.closest&&e.target.closest('button,select,input,summary,textarea,[role="button"]'))return;
     var k=e.key.toLowerCase();
