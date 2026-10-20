@@ -657,7 +657,7 @@ function mark(i){
 }
 function findHTML(c,i,x,isNew){return '<div class="find '+c.s+(isNew?' new':'')+'" data-i="'+x+'" tabindex="0" role="button" aria-label="Show in document"><div class="h"><span class="p">'+esc(c.p)+'</span><span class="tg '+c.s+'">'+LBL[c.s]+'</span></div><div class="a">'+esc(c.a.toUpperCase())+'</div><div class="d">'+esc(c.d)+'</div><div class="r">Rule and source: '+esc(c.r)+'</div></div>'}
 function twinHTML(t){return '<div class="twin"><div class="sec-title"><span class="label">Visibility layer (TWIN)</span><span class="tg '+t.tag+'">Proposed model</span></div><h4>'+esc(t.h)+'</h4><ul>'+t.li.map(function(l){return '<li>'+esc(l)+'</li>'}).join('')+'</ul><div class="ev">'+esc(t.ev)+'</div></div>'}
-function vdHTML(ok,fl,nc){var tot=ok+fl+nc;if(!tot)return '<div class="vd"><div class="vh">Verdict: no checks have run yet</div><div class="vn">The verdict is built only from check results.</div></div>';var f=fl>0,h=f?'Verdict: flags to resolve':nc>0?'Verdict: no flags, some checks not made':'Verdict: no flags';return '<div class="vd '+(f?'f':!nc?'p':'')+'"><div class="vh">'+h+'</div><div class="vs">Score: '+ok+' of '+tot+' checks passed · '+fl+' flag'+(fl===1?'':'s')+' · '+nc+' not checked</div><div class="vn">Built only from the check results. Your team makes the decision.</div></div>'}
+function vdHTML(ok,fl,nc,ak){var tot=ok+fl+nc;if(!tot)return '<div class="vd"><div class="vh">Verdict: no checks have run yet</div><div class="vn">The verdict is built only from check results.</div></div>';var f=fl>0,h=f?'Verdict: flags to resolve':nc>0?'Verdict: no flags, some checks not made':'Verdict: no flags';return '<div class="vd '+(f?'f':!nc?'p':'')+'"><div class="vh">'+h+'</div><div class="vs">Score: '+ok+' of '+tot+' checks passed · '+fl+' flag'+(fl===1?'':'s')+(ak!==undefined&&fl>0?' ('+ak+' acknowledged)':'')+' · '+nc+' not checked</div><div class="vn">Built only from the check results. Your team makes the decision.</div></div>'}
 function sum(i){var c=P[i].checks,p=c.filter(function(x){return x.s==='ok'}).length,m=c.filter(function(x){return x.s!=='ok'&&x.s!=='nc'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Result: '+p+' pass, '+m+' flag'+(m===1?'':'s')+', '+n+' not checked.'}
 /* ---------- navigation ---------- */
 function nav(){
@@ -1526,8 +1526,9 @@ function loadPack(id,startCur){
 
 
 /* ---------- Core scenarios: API exchange ---------- */
-var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls',chan:'email',key:'',fplace:'match',funrec:false};
-var CH={},STASH={},HV='list';
+var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls',chan:'email',key:'',fplace:'match',funrec:false,ackN:0};
+var ACKL={};
+var CH={},STASH={},HV='list',HFL=[];
 var CHAN={email:{t:'email',s:'Email'},register:{t:'public register search',s:'Register search'},whatsapp:{t:'WhatsApp',s:'WhatsApp'},line:{t:'LINE',s:'LINE'},sms:{t:'SMS',s:'SMS'}};
 var API_BASE='https://api.veripura.com/v1';
 var STAT={ok:'pass',rev:'flag',mis:'flag',nc:'not_checked'};
@@ -1594,6 +1595,15 @@ function foldTarget(ks){var f=allDocs().filter(function(x){return x.d.real!==3&&
 function foldInfo(){var ks=foldKeys(),files=ks.map(function(k,n){return {name:FNAMES[n],doc:docAt(k).t,k:k,phase:+k.split(':')[0]+1}}),anchor=null,kinds=[[/bill of lading/i,'bill_of_lading'],[/invoice/i,'invoice'],[/purchase order|sales order/i,'purchase_order']];
   kinds.forEach(function(q){if(!anchor){var f=files.filter(function(x){return q[0].test(x.doc)})[0];if(f)anchor={f:f,kind:q[1]}}});if(!anchor)anchor={f:files[0],kind:'purchase_order'};
   var tg=API.funrec?foldTarget(ks):null;return {ks:ks,files:files,anchor:anchor,un:tg?{name:FNAMES[6],key:tg}:null,place:API.fplace}}
+function acksMap(){var m={};(ACKL[chKey()]||[]).forEach(function(e){if(e.void)return;if(e.kind==='ack')m[e.fid]={role:e.role,reason:e.reason};else delete m[e.fid]});return m}
+function fidOf(c){return 'fnd_'+snake(c.a)+'_'+snake(c.p)}
+function ownerRole(d){var l=supplierOf(d),m=SC===3?{'Exporter':'exp','Importer or agent':'imp'}:{'Carrier':'ff','Customs agent':'agt'};return m[l]||null}
+function flagOwners(i,c){var o=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1})){var l=supplierOf(d);if(o.indexOf(l)<0)o.push(l)}});return o}
+function flagRoles(i,c){var r=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1})){var q=ownerRole(d);if(q&&r.indexOf(q)<0)r.push(q)}});return r}
+var ACKR=['Natural weight loss from drying','Within the agreed tolerance','Corrected document to follow','Other, written below'];
+function ackDrawer(f,rev){var h='<div class="ibx" style="max-width:none"><b>'+esc(f.c.p)+'</b><div class="ibm">'+esc(f.c.d)+'</div></div>'+(rev?'<p class="hsub">Reverse the acknowledgement. The reason is kept in the audit trail and the finding returns to open.</p>':'<p class="hsub">Acknowledging records who accepted this finding and why. The finding stays a Flag and the decision rests with your team.</p>')+'<div class="chsel" style="flex-direction:column;align-items:flex-start"><label>Reason <select id="ackR">'+(rev?'<option>Acknowledged by mistake</option><option>New information</option><option>Other, written below</option>':ACKR.map(function(r){return '<option>'+esc(r)+'</option>'}).join(''))+'</select></label><textarea id="ackT" rows="2" style="width:100%;font:inherit;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px" placeholder="Optional detail"></textarea><button class="btn gold" id="ackOk">'+(rev?'Reverse acknowledgement':'Acknowledge as '+esc(roleLabel(HT[SC])))+'</button><span class="cap">Sample reasons for the demonstration.</span></div>';
+  openDrawer(rev?'Reverse acknowledgement':'Acknowledge finding','Recorded with the role, the reason and the time.',h);
+  document.getElementById('ackOk').onclick=function(){var rs=document.getElementById('ackR').value,tx=document.getElementById('ackT').value.trim(),reason=rs+(tx?': '+tx:''),k=SC+':'+curId(),ev={kind:rev?'unack':'ack',fid:f.fid,title:f.c.p,role:HT[SC],reason:reason};(ACKL[k]=ACKL[k]||[]).push(ev);API.ackN=ACKL[k].length;closeDrawer();roundGo({t:ev.kind,fid:f.fid,title:f.c.p,role:HT[SC],reason:reason})}}
 function chKey(){return SC+':'+curId()}
 function chOf(t){var m=CH[chKey()];return m&&m[t]}
 function recipRole(d){var l=supplierOf(d),m=SC===3?{'Exporter':'exp','Importer or agent':'imp'}:{'Customs agent':'agt'},r=m[l]||null;return r===HT[SC]?null:r}
@@ -1601,8 +1611,8 @@ function roleLabel(r){return {imp:'Importer',exp:'Exporter',ff:'Forwarder',agt:'
 function setChase(k,chan){var d=docAt(k),m=CH[chKey()]=CH[chKey()]||{};m[d.t]={chan:chan,to:supplierOf(d),role:chan==='register'?null:recipRole(d),fromRole:HT[SC],from:SC===3?partyName(curId()):roleLabel(HT[SC]),cons:CUR.name,cid:curId(),phase:+k.split(':')[0]+1,pname:P[+k.split(':')[0]].n,status:'requested',seen:true,draft:chaseDraft(k)}}
 function keyOfTitle(t){var f=allDocs().filter(function(x){return x.d.t===t})[0];return f&&f.k}
 function expTarget(rx){return allDocs().filter(function(x){return (rx||[]).indexOf(x.k)>-1&&x.d.real!==3&&!isDerived(x.d)&&/certificate|licen|permit|attestation/i.test(x.d.t)})[0]}
-function stashApi(){if(!API.key||API.stage!=='run')return;clearTimeout(API.timer);API.playing=false;var o={};['pos','mode','upd','stage','src','rsrc','cs','tab','chan','fplace','funrec'].forEach(function(f){o[f]=API[f]});o.rounds=API.rounds.slice();o.tick=Object.assign({},API.tick);STASH[API.key]=o}
-function clearExchange(cid){delete CH[SC+':'+cid];Object.keys(STASH).forEach(function(k){var a=k.split(':');if(a[0]===String(SC)&&a[2]===cid)delete STASH[k]})}
+function stashApi(){if(!API.key||API.stage!=='run')return;clearTimeout(API.timer);API.playing=false;var o={};['pos','mode','upd','stage','src','rsrc','cs','tab','chan','fplace','funrec','ackN'].forEach(function(f){o[f]=API[f]});o.rounds=API.rounds.slice();o.tick=Object.assign({},API.tick);STASH[API.key]=o}
+function clearExchange(cid){var m=CH[SC+':'+cid];if(m)Object.keys(m).forEach(function(t){if(m[t].fromRole===HT[SC])delete m[t]});delete STASH[SC+':'+HT[SC]+':'+cid];(ACKL[SC+':'+cid]||[]).forEach(function(e){if(e.role===HT[SC])e.void=1});API.ackN=(ACKL[SC+':'+cid]||[]).length}
 function apiSteps(){
   var cs=API.cs,s=[],rk=refKey();
   if(cs==='token')return [{t:'err',k:'token',rx:[],c:1}];
@@ -1625,6 +1635,7 @@ function apiSteps(){
     else if(r.t==='chase')s.push({t:'chase',key:r.key,chan:r.chan||'email',rx:rx.slice()});
     else if(r.t==='reply')s.push({t:'reply',key:r.key,rx:rx.slice()});
     else if(r.t==='reject')s.push({t:'reject',key:r.key,rx:rx.slice()});
+    else if(r.t==='ack'||r.t==='unack'){s.push({t:r.t,fid:r.fid,title:r.title,role:r.role,reason:r.reason,rx:rx.slice()});if(r.t==='ack'&&upd==='cb')s.push({t:'ackc',fid:r.fid,title:r.title,role:r.role,reason:r.reason,rx:rx.slice()})}
     else if(r.t==='expiry'){[30,14,7].forEach(function(dd){s.push({t:'exp',key:r.key,days:dd,rx:rx.slice()})})}
     else if(r.t==='share')s.push({t:'share',rx:rx.slice()});
   });
@@ -1634,7 +1645,7 @@ function apiSteps(){
   if(cs==='rule')s.push({t:'rule',rx:rx.slice(),c:1});
   return s}
 function hostState(){
-  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},replied:{},lastChase:null,lastChan:'email',exp:0,shared:false};
+  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},replied:{},acks:{},lastChase:null,lastChan:'email',exp:0,shared:false};
   for(var k=0;k<n;k++){var x=S[k];if(x.rx)o.rx=x.rx;
     if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;
     else if(x.t==='cb'||x.t==='poll'){o.found[x.i]=true;o.frx[x.i]=x.rx}
@@ -1642,6 +1653,8 @@ function hostState(){
     else if(x.t==='reply'){o.replied[x.key]=true;o.chased[x.key]=true}
     else if(x.t==='accept'||x.t==='reject'){delete o.replied[x.key]}
     else if(x.t==='exp'){o.exp=x.days;o.expKey=x.key}
+    else if(x.t==='ack')o.acks[x.fid]={role:x.role,reason:x.reason};
+    else if(x.t==='unack')delete o.acks[x.fid];
     else if(x.t==='ing'){o.created=true;o.fold=true}
     else if(x.t==='cls'){o.cls=true}
     else if(x.t==='teach'){o.taught=true}
@@ -1666,7 +1679,7 @@ function hostHTML(){
   if(st.fold)h+=foldHost(st);
   if(!st.req)return h+'<div class="hsub">'+(st.fold?'Folder received. Core is reading the files.':'Consignment created. Asking for the requirements.')+'</div>'+foot;
   h+='<div class="hsub">'+got+' of '+need.length+' documents received'+(any?' · findings arriving':'')+'</div>';
-  if(any)h+=vdHTML(tot.ok,tot.mis+tot.rev,tot.nc);
+  if(any)h+=vdHTML(tot.ok,tot.mis+tot.rev,tot.nc,Object.keys(acksMap()).length);
   if(any)h+='<div class="cn"><span class="ok">'+tot.ok+' pass</span><span class="mis">'+(tot.mis+tot.rev)+' flag'+((tot.mis+tot.rev)===1?'':'s')+'</span><span class="nc">'+tot.nc+' not checked</span></div>';
   var tk=Object.keys(API.tick).sort(function(a,b){var x=a.split(':'),y=b.split(':');return x[0]-y[0]||x[1]-y[1]});
   h+='<div class="store"><div class="hlab">Document store</div><div class="hsub">'+esc(partyName(id))+' / '+esc(CUR.name)+'</div>';
@@ -1686,8 +1699,9 @@ function hostHTML(){
     if(st.lastChan==='register')h+='<div class="msg"><div class="hlab">Register search run by VeriPura Core</div>Core searched the public registers for <b>'+esc(cdoc.t)+'</b> and found a possible match. It goes to a person for review before it counts. Sample result for the demonstration.</div>';
     else h+='<div class="msg"><div class="hlab">Sent by VeriPura Core by '+esc(cl.t)+' to '+esc(cd.to)+'</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'<div class="cap" style="margin-top:6px">Sample text for the demonstration. Core sends it; the host does not.</div>'+(pend?'<div class="ibf" style="margin-top:8px">'+(rr?'<button class="btn" data-ib="role">Open the '+esc(roleLabel(rr))+' inbox</button>':'<button class="btn" data-ib="prev">Preview as supplier ('+esc(cd.to)+')</button>')+'<span class="cap">See what the recipient sees and send the document back.</span></div>':'')+'</div>'}
   if(st.exp){var et=st.expKey&&docAt(st.expKey);h+='<div class="hinfo"><b>Certificate expiring (example): '+esc(et?et.t:'')+'</b><br>Core alerts at 30, 14 and 7 days and starts a chase for the renewed certificate. Latest alert: '+st.exp+' days. Any reply goes to review before it counts.</div>'}
-  var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push('Flag: '+c.p)})}});
-  if(items.length)h+='<div class="hlab">'+(SC===2?'For the client file':'For your team')+'</div><ul>'+items.slice(0,6).map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+(items.length>6?'<li>and '+(items.length-6)+' more</li>':'')+'</ul>';
+  var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push({i:i,c:c,fid:fidOf(c)})})}});
+  HFL=items;var AK=acksMap();
+  if(items.length){h+='<div class="hlab">'+(SC===2?'For the client file':'For your team')+'</div><table class="ckl"><thead><tr><th>Flag</th><th>Concerns</th><th></th></tr></thead><tbody>'+items.slice(0,12).map(function(f,n){var ak=AK[f.fid],ow=flagOwners(f.i,f.c),can=flagRoles(f.i,f.c).indexOf(HT[SC])>-1,act=ak?'<span class="sp r"><i></i>Acknowledged by '+esc(roleLabel(ak.role))+'</span><div class="cap">'+esc(ak.reason)+'</div>'+(ak.role===HT[SC]?'<button class="chs" data-uk="'+n+'"'+(rest?'':' disabled')+'>Reverse</button>':''):can?'<button class="chs" data-ak="'+n+'"'+(rest?'':' disabled')+'>Acknowledge</button>':'<span class="cap">'+(ow.length&&ow.join()!=='Derived by Core'?'Only the '+esc(ow.join(', ').toLowerCase())+' can acknowledge':'No document owner on this platform. Your team reviews it')+'</span>';return '<tr><td>'+esc(f.c.p)+'</td><td>'+esc(ow.join(', ')||'Registry or partner check')+'</td><td>'+act+'</td></tr>'}).join('')+'</tbody></table>'+(items.length>12?'<div class="cap">and '+(items.length-12)+' more</div>':'')}
   if(st.shared)h+='<div class="hlab">Documents the host can share</div><ul>'+ROLES.slice(1).map(function(r){var c=0;P.forEach(function(q){q.docs.forEach(function(d){if((DOCVIS[d.t]||[]).indexOf(r[0])>-1)c++})});return '<li>'+esc(r[3]||r[1])+': '+c+' documents</li>'}).join('')+'</ul>';
   return h+foot;
 }
@@ -1704,6 +1718,8 @@ function bindHost(hp){
   hp.querySelectorAll('button[data-ac]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.ac),e=chOf(d.t);if(e)e.status='accepted';roundGo({t:'accept',key:b.dataset.ac})}});
   hp.querySelectorAll('button[data-rj]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.rj),e=chOf(d.t);if(e){e.status='requested';delete e.file}roundGo({t:'reject',key:b.dataset.rj})}});
   var cc=hp.querySelector('#chasChan');if(cc)cc.onchange=function(){API.chan=cc.value};
+  hp.querySelectorAll('button[data-ak]').forEach(function(b){b.onclick=function(){ackDrawer(HFL[+b.dataset.ak],false)}});
+  hp.querySelectorAll('button[data-uk]').forEach(function(b){b.onclick=function(){ackDrawer(HFL[+b.dataset.uk],true)}});
   var tg=hp.querySelector('#teachGo');if(tg)tg.onclick=function(){var fi=foldInfo();if(fi.un)roundGo({t:'teach',key:fi.un.key})};
   var eg=hp.querySelector('#expGo');if(eg)eg.onclick=function(){var et=expTarget(hostState().rx);if(et)roundGo({t:'expiry',key:et.k})};
   var ib=hp.querySelector('[data-ib]');if(ib)ib.onclick=function(){var st=hostState(),d=docAt(st.lastChase);if(ib.dataset.ib==='role'){stashApi();HT[SC]=recipRole(d);showInbox()}else supplierPreview(d)};
@@ -1742,6 +1758,8 @@ function auditEntries(){
     else if(x.t==='ing')o.push({t:t,a:'Host',e:'ingestion.received',d:foldInfo().files.length+(API.funrec?1:0)+' files · folder drop · sha256:<example>'});
     else if(x.t==='cls'){var fi=foldInfo();o.push({t:t,a:'Core',e:'ingestion.classified',d:fi.files.length+' files read by content · '+(fi.place==='match'?'matched to existing consignment':'new consignment')+(fi.un?' · 1 file held, not recognised':'')})}
     else if(x.t==='teach')o.push({t:t,a:'Host',e:'document_type.taught',d:docAt(x.key).t+' · by admin'});
+    else if(x.t==='ack')o.push({t:t,a:'Host',e:'finding.acknowledged',d:x.title+' · by '+roleLabel(x.role)+' · '+x.reason});
+    else if(x.t==='unack')o.push({t:t,a:'Host',e:'finding.acknowledgement_reversed',d:x.title+' · by '+roleLabel(x.role)+' · '+x.reason});
     else if(x.t==='reply')o.push({t:t,a:'Core',e:'concierge.result.pending_review',d:docAt(x.key).t+' · waiting for a person to review'});
     else if(x.t==='accept')o.push({t:t,a:'Host',e:'review.accepted',d:docAt(x.key).t+' · reviewer decision recorded'});
     else if(x.t==='reject')o.push({t:t,a:'Host',e:'review.rejected',d:docAt(x.key).t+' · request stays open'});
@@ -1775,7 +1793,7 @@ function openFromHost(id){
   stashApi();var nk=SC+':'+HT[SC]+':'+curId(),sv=STASH[nk];HV='app';
   API.on=true;API.playing=false;API.key=nk;
   if(sv){Object.assign(API,sv);API.rounds=sv.rounds.slice();API.tick=Object.assign({},sv.tick)}
-  else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email';API.fplace='match';API.funrec=false}
+  else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email';API.fplace='match';API.funrec=false;API.ackN=0}
   API.steps=apiSteps();
   document.body.classList.add('api');ST.pos=0;ST.cur=-3;calc();nav();view();updPlayer();hostBar();window.scrollTo({top:0});
   if(sv)syncReplies();
@@ -1797,6 +1815,8 @@ function callOf(st){
     else c={out:1,method:'GET',path:'/consignments/'+id+'/requirements?status=missing',status:'200 OK',req:[auth],resBody:{consignment_id:id,missing_count:missingDocs(st.rx).length,missing:missingDocs(st.rx)},note:'Required documents not yet received. Checks that depend on them stay not_checked.'}}
   else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Flag. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: rules.pending','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'rules.pending'},rb),note:'CORE watches the rules for this route. The in-house team does not have to. The host decides how to alert its users.'}:{out:1,method:'GET',path:'/consignments/'+id+'/rule-updates',status:'200 OK',req:[auth],resBody:{updates:[rb]},note:'CORE watches the rules for this route. The host asks for updates and decides how to alert its users.'}}
+  else if(st.t==='ack'||st.t==='unack'){c={out:1,method:'PUT',path:'/consignments/'+id+'/findings/'+st.fid+'/acknowledgement',status:'200 OK',req:[auth,js],reqBody:{action:st.t==='ack'?'acknowledge':'withdraw',role:{imp:'importer',exp:'exporter',ff:'freight_forwarder',agt:'customs_broker'}[st.role]||st.role,acknowledged_by:'host_user_example',reason:st.reason},resBody:{finding_id:st.fid,status:'flag',acknowledgement:st.t==='ack'?{role:st.role,reason:st.reason,recorded:true}:null,effect:'The finding stays a flag. The decision rests with your team.'},note:st.t==='ack'?'The party responsible records why it accepts the finding. It is kept in the Passport and the audit trail. Only the owner of the document can do it.':'The acknowledgement is withdrawn. The earlier entry stays in the audit trail.'}}
+  else if(st.t==='ackc'){c={out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: finding.acknowledged','X-VeriPura-Signature: sha256=<hmac>'],reqBody:{event:'finding.acknowledged',consignment_id:id,finding_id:st.fid,role:st.role,reason:st.reason},note:'Core confirms the acknowledgement to the host. The host decides how to show it to its other users.'}}
   else if(st.t==='ing'){var fi0=foldInfo();c={out:1,method:'POST',path:'/ingestions',status:'202 Accepted',req:[auth,'Content-Type: multipart/form-data; boundary=----vp'],reqText:'origin = '+JSON.stringify(origin('folder',[]))+'\n'+fi0.files.map(function(f){return 'files[]  filename="'+f.name+'"  type=application/pdf'}).concat(fi0.un?['files[]  filename="'+fi0.un.name+'"  type=application/pdf']:[]).join('\n'),resBody:{ingestion_id:'ing_example_001',files_received:fi0.files.length+(fi0.un?1:0),status:'classifying'},note:'One drop is one shipment. Core reads each file by its content, never its file name, and then decides where the whole batch belongs.'}}
   else if(st.t==='cls'){var fi1=foldInfo(),nid=fi1.place==='match'?id:'cns_new_example',cb1={event:'ingestion.classified',ingestion_id:'ing_example_001',files:fi1.files.map(function(f){return {filename:f.name,recognised_as:f.doc,phase:f.phase}}),unrecognised:fi1.un?[{filename:fi1.un.name,status:'held',reason:'document_type_not_recognised'}]:[],placement:fi1.place==='match'?{decision:'matched_existing_consignment',consignment_id:nid,matched_on:['seller_name','buyer_name'],seller:expName(curId()),buyer:impName(curId())}:{decision:'new_consignment',consignment_id:nid,built_around:fi1.anchor.kind,anchor_file:fi1.anchor.f.name}};
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: ingestion.classified','X-VeriPura-Signature: sha256=<hmac>'],reqBody:cb1,note:'CORE tells the host what each file is and where the batch belongs. Files it does not recognise are held for a person, not dropped.'}:{out:1,method:'GET',path:'/ingestions/ing_example_001',status:'200 OK',req:[auth],resBody:cb1,note:'The host asks about the drop. Files that are not recognised are held for a person, not dropped.'}}
