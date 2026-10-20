@@ -607,7 +607,7 @@ function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')}
 function pad(n){return (n<10?'0':'')+n}
 /* ---------- steps and derived state ---------- */
 var STEPS=[],ENTER=[],END=[],SH=[],TW=[];
-function build(){STEPS=[];ENTER=[];END=[];P.forEach(function(p,i){ENTER[i]=STEPS.length;STEPS.push({i:i,t:'enter'});p.checks.forEach(function(c,x){STEPS.push({i:i,t:'check',x:x})});STEPS.push({i:i,t:'twin'});END[i]=STEPS.length});STEPS.push({t:'report'})}
+function build(){STEPS=[];ENTER=[];END=[];P.forEach(function(p,i){ENTER[i]=STEPS.length;STEPS.push({i:i,t:'enter'});if(p.checks.length)STEPS.push({i:i,t:'check',x:p.checks.length-1});STEPS.push({i:i,t:'twin'});END[i]=STEPS.length});STEPS.push({t:'report'})}
 build();
 var DELAY={slow:{enter:3200,check:4200,twin:3600},normal:{enter:2200,check:2600,twin:2200},fast:{enter:1000,check:1200,twin:1000}};
 function calc(){SH=P.map(function(){return 0});TW=P.map(function(){return false});for(var k=0;k<ST.pos;k++){var s=STEPS[k];if(s.t==='check')SH[s.i]=s.x+1;else if(s.t==='twin')TW[s.i]=true}}
@@ -750,7 +750,7 @@ function applyPos(np){
   np=Math.max(0,Math.min(STEPS.length,np));var prev=ST.pos;ST.pos=np;calc();
   var s=np>0?STEPS[np-1]:null,target=np===0?-1:(s.t==='report'?NP:s.i),fwd=np>prev;
   if(ST.cur!==target||np===0||s.t==='enter'||s.t==='report'){go(target)}
-  else{nav();paintPhase(ST.cur,(s.t==='check'&&fwd)?s.x:null);if(s.t==='check'&&fwd)focusFind(ST.cur,s.x,true)}
+  else{nav();paintPhase(ST.cur,null)}
   updPlayer();
 }
 function schedule(ms){
@@ -784,7 +784,7 @@ function updPlayer(){
   b.textContent=ST.playing?'Pause':'Play';b.setAttribute('aria-label',ST.playing?'Pause walkthrough':'Play walkthrough');
   $('#pBack').disabled=ST.pos===0;$('#pFwd').disabled=ST.pos>=STEPS.length;
   var s=ST.pos>0?STEPS[ST.pos-1]:null,txt='Not started';
-  if(s){if(s.t==='report')txt='Findings report';else{var pre='Phase '+pad(s.i+1)+' of '+NP+' · ';txt=pre+(s.t==='enter'?'documents':s.t==='twin'?'visibility layer':'check '+(s.x+1)+' of '+P[s.i].checks.length)}}
+  if(s){if(s.t==='report')txt='Findings report';else{var pre='Phase '+pad(s.i+1)+' of '+NP+' · ';txt=pre+(s.t==='enter'?'documents':s.t==='twin'?'visibility layer':'checks ('+P[s.i].checks.length+')')}}
   $('#pInfo').textContent=txt;
   $('#pFill').style.width=(ST.pos/STEPS.length*100)+'%';
   $('#pSpeed').value=ST.speed;
@@ -938,7 +938,7 @@ function setRole(r){
   var old=STEPS,oldPos=ST.pos,oSH=SH.slice(),oTW=TW.slice(),s=oldPos>0?old[oldPos-1]:null;
   ROLE=r;buildP(r);build();ST.tab={};ST.ovOpen={};
   var np=0;
-  if(s){if(s.t==='report')np=STEPS.length;else{var c=s.i;np=oTW[c]?END[c]:ENTER[c]+1+Math.min(oSH[c],P[c].checks.length)}}
+  if(s){if(s.t==='report')np=STEPS.length;else{var c=s.i;np=oTW[c]?END[c]:ENTER[c]+1+(oSH[c]>0&&P[c].checks.length?1:0)}}
   ST.cur=-99;updRoleBar();applyPos(np);
 }
 function openMatrix(){
