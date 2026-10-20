@@ -2352,7 +2352,7 @@ function hostBar(){
   var h='<button class="bk" id="hbBack">← Back to demo</button><span class="hb">'+(SC===2?w.brand:(hl?'Trade platform':esc(partyName(cur))+' · '+w.brand))+'</span>';
   var ibn=inboxCount();h+='<button class="ht'+(hl&&HV!=='inbox'?' on':'')+'" data-t="list">'+w.list+'</button><button class="ht'+(hl?'':' on')+'" data-t="app">Compliance</button><button class="ht'+(hl&&HV==='inbox'?' on':'')+'" data-t="inbox">Inbox'+(ibn?'<span class="bdg">'+ibn+'</span>':'')+'</button><span class="sp"></span>';
   h+='<span class="seg"><span class="label">I am</span><span class="sb">'+types.map(function(t){return '<button data-ty="'+t[0]+'" class="'+(HT[SC]===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</span></span>';
-    h+='<span class="pw">'+(SC===2?'Illustrative host platform · Powered by VeriPura':'Illustrative host platform · VeriPura Core™ inside')+'</span>';
+    h+='<span class="pw">'+'Illustrative host platform · connected to VeriPura Core through its API'+'</span>';
   hb.innerHTML=h;
   $('#hbBack').onclick=function(){$('#scenSel').value='1';setScenario(1)};
   hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(b.dataset.t==='inbox')showInbox();else if(document.body.classList.contains('hl'))openFromHost(curId())}});
@@ -2385,7 +2385,7 @@ function showHost(){
   if(SC===2){
     h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a '+(HT[2]==='ff'?'forwarder':'broker')+' platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }else{
-    h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' across the companies on this platform. The Compliance tab is provided by VeriPura Core\u2122 inside it. Illustrative mock of a trade platform.</div><table><thead><tr><th>Company</th><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(partyName(k))+'</b></td><td>'+esc(startDoc(k).t)+'</td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
+    h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' across the companies on this platform. The Compliance tab is built by the platform from the data VeriPura Core returns through its API. Illustrative mock of a trade platform.</div><table><thead><tr><th>Company</th><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(partyName(k))+'</b></td><td>'+esc(startDoc(k).t)+'</td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }
   $('#host').innerHTML=h;
   document.querySelectorAll('#host tr.lnk').forEach(function(r){r.onclick=function(){openFromHost(r.dataset.p)}});
@@ -2407,9 +2407,9 @@ $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if
 /* ---------- presenter mode ---------- */
 var PRS={on:false,sc:'ff',i:0,short:false,move:true,left:false,mini:false,win:null,hide:false};
 function prSetup(k){
-  var sc=k==='ff'?2:1,pk=k==='ff'?'maspo':'beef';
+  var sc=k==='ff'?2:k==='imc'?3:1,pk=k==='ff'?'maspo':'beef';
   PRS.busy=true;
-  try{if(SC!==sc)setScenario(sc);
+  try{if(SC!==sc)setScenario(sc);if(k==='imc'&&HT[3]!=='imp'){stashApi();HT[3]='imp'}
   if(curId()!==pk){$('#packSel').value=pk;$('#packSel').onchange()}}finally{PRS.busy=false}
 }
 /* leaving the scripted demo by hand (Back to demo, another scenario or consignment) ends presenter mode */
@@ -2418,21 +2418,25 @@ function prSetup(k){
   $('#packSel').onchange=function(){if(PRS.on&&!PRS.busy)prClose();return po.apply(this,arguments)};
 })();
 function prHl(sels){setTimeout(function(){for(var n=0;n<sels.length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');e.scrollIntoView({behavior:'smooth',block:'center'});return}}},300)}
-function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost('maspo')}
+function prPk(){return PRS.sc==='ff'?'maspo':'beef'}
+function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost(prPk())}
 function prAt(t){apiPause();var n=API.steps.length;if(t){var ix=-1;API.steps.forEach(function(s,k){if(ix<0&&s.t===t)ix=k});if(ix>=0)n=ix+1}if(API.pos<n){API.pos=n;apiPaint();apiPlayer()}}
-function prRun(t){prOpen();if(API.stage==='ref'){API.rsrc='folder';view();var g=$('#goRun');if(g)g.click()}prAt(t)}
+function prRun(t){prOpen();if(API.stage==='ref'){if(PRS.sc==='ff')API.rsrc='folder';view();var g=$('#goRun');if(g)g.click()}prAt(t)}
+function prTickPush(){prAt('req');var hp=$('#hostp');if(!hp||Object.keys(hostState().found).length)return;hostPaint();
+  hp.querySelectorAll('input[data-t]:not(:disabled)').forEach(function(c){API.tick[c.dataset.t]=1});hostPaint();
+  var b=$('#pushGo');if(b&&!b.disabled){b.click();prAt(null)}}
 function prFlagPh(){var f=0;for(var i=0;i<P.length;i++){if(P[i].checks.some(function(c){return c.s==='mis'||c.s==='rev'})){f=i;break}}return f}
 function prRes(){var b=$('#resBtn');if(b)b.click()}
 var PRSCR={
 ff:{name:'Forwarder (Core)',stops:[
 {s:1,lead:'One shipment, many rules, many parties. Core turns it into one checked file.',
- w:['The forwarder’s list of client files','Open Compliance to enter a file','Every party works from the same file'],
- n:'Set the scene in 30 seconds. Maspo groupage from Poland is a real consignment.',
+ w:['The platform pushes the document to Core through the API','Compliance is the platform’s own tab, built from what Core returns','Every party works from the same file'],
+ n:'Set the scene in 30 seconds. Maspo groupage from Poland is a real consignment. Core never sits inside the platform. It interacts with it through the API.',
  go:function(){prSetup('ff');showHost()},hl:['#hostBar .ht[data-t="app"]']},
 {s:1,lead:'The requirements come from the shipment, not from a checklist.',
  w:['Built from route, commodity and origin','Grouped by phase','Each line names who normally supplies it'],
  n:'Next sends the folder and stops once the requirements are back.',
- go:function(){prRun('req')},hl:['.ckl','#hostp']},
+ go:function(){prRun('req')},hl:['#hostp h3','#hostp']},
 {s:1,lead:'Core reads documents by content, not by file name.',
  w:['Each file recognised by its content','The batch placed by seller and buyer names','One drop is one shipment'],
  n:'Point at the box that says the folder was read by content.',
@@ -2457,6 +2461,40 @@ ff:{name:'Forwarder (Core)',stops:[
  w:['A permanent trail for this consignment','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
  n:'Close on the export.',
  go:function(){prRun();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
+]},
+imc:{name:'Importer (Core)',stops:[
+{s:1,lead:'Your platform pushes the order to Core. Core returns one checked file.',
+ w:['The importer’s own purchasing platform','The platform pushes the purchase order to Core through the API','Compliance is the platform’s own tab, built from what Core returns'],
+ n:'Set the scene in 30 seconds. Brazil beef is a real consignment. Core never sits inside the platform. It interacts with it through the API.',
+ go:function(){prSetup('imc');showHost()},hl:['#hostBar .ht[data-t="app"]']},
+{s:1,lead:'The purchase order starts the file, and the requirements come from it.',
+ w:['The platform sends the purchase order','Core returns what the route needs, by phase','Each line names who normally supplies it'],
+ n:'Next sends the purchase order and stops once the requirements are back.',
+ go:function(){prRun('req')},hl:['#hostp h3','#hostp']},
+{s:1,lead:'Your supplier’s documents are read and checked as they arrive.',
+ w:['The platform’s store holds what has arrived','Each document is read, placed and checked on arrival','A new document can change earlier findings'],
+ n:'Next ticks the documents that have arrived and pushes them to Core.',
+ go:function(){prRun('req');prTickPush()},hl:['#hostp .cn','#hostp']},
+{s:1,lead:'Every check shows its evidence. Your team decides.',
+ w:['Pass, Flag or Not checked on every check','A source behind each one','Not supplied is stated openly'],
+ n:'Open one flag and read its source aloud.',
+ go:function(){prRun('req');prTickPush();prAt(null)},hl:['#hostp .cn','#hostp']},
+{s:1,lead:'You and your exporter work on the same file.',
+ w:['A chase goes to the exporter by the chosen channel','The exporter replies from the Inbox with a single-use link','The reply waits for the importer to accept it'],
+ n:'Chase one missing document with the secure link. Switch I am to Exporter, open Inbox, upload, switch back and press Accept.',
+ go:function(){prRun('req');prTickPush();prAt(null)},hl:['#hostp .ckl .chs','#hostp .ckl']},
+{s:0,lead:'Rules change while the cargo moves.',
+ w:['The Rule update notice sits on the live file','It names the rule and its source','Your team decides what to change'],
+ n:'Skip this one in the short version.',
+ go:function(){prRun('req');prTickPush();prAt(null);var b=document.querySelector('.apihead button[data-k="cs"][data-v="rule"]');if(b&&!b.classList.contains('on'))b.click();prAt(null)},hl:['#hostp .hinfo']},
+{s:1,lead:'Seal the Passport and any later change shows.',
+ w:['Sealed as version 1','A change after sealing is flagged','The earlier seal stays on record'],
+ n:'Press Consignment Passport, then Seal. Tick Change something and verify as a border post.',
+ go:function(){prRun('req');prTickPush();prAt(null)},hl:['#ppGo']},
+{s:1,lead:'The record is yours, and it runs through an API.',
+ w:['The importer started the process, so the importer owns the trail','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
+ n:'Verify the trail, then show the downloads.',
+ go:function(){prRun('req');prTickPush();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
 ]},
 imp:{name:'Importer (Food)',stops:[
 {s:1,lead:'You carry the liability. Core gives you the evidence.',
@@ -2529,9 +2567,9 @@ function prGo(k){PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.class
 function prClose(){PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
 function prPick(){
   var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
-  c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
+  c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
   $('#prX').onclick=prClose;$('#prShort0').onchange=function(){PRS.short=this.checked};
-  $('#prF').onclick=function(){prStart('ff')};$('#prI').onclick=function(){prStart('imp')};
+  $('#prF').onclick=function(){prStart('ff')};$('#prI').onclick=function(){prStart('imp')};$('#prC').onclick=function(){prStart('imc')};
 }
 function prNotesOpen(){
   if(PRS.win&&!PRS.win.closed){PRS.win.focus();prNotes();return}
