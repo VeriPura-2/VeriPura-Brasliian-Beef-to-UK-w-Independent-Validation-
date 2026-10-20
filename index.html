@@ -244,8 +244,17 @@ body.hosted main#view{max-width:none}
 .vd{background:var(--card2);border:1px solid var(--line);border-left:4px solid var(--nc);border-radius:8px;padding:12px 14px;margin:12px 0}
 .vd.f{border-left-color:var(--mis)}.vd.p{border-left-color:var(--ok)}
 .vd .vh{font-weight:700;font-size:15px}.vd .vs{font-family:var(--mono);font-size:12px;color:var(--ink2);margin-top:4px}.vd .vn{font-size:12px;color:var(--mut);margin-top:6px}
+.sp.v{background:var(--rev-bg);color:var(--rev)}.sp.v i{border-radius:2px;background:var(--rev)}
+.chb{display:inline-block;font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:2px 7px;border-radius:4px;background:var(--sq-bg);color:var(--sq);margin-right:6px}
+.ibx{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:12px 0;max-width:760px}
+.ibx .ibm{font-size:12px;color:var(--mut);margin:4px 0 8px}.ibx .ibb{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13.5px}
+.ibx .ibf{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.chsel{display:flex;gap:8px;align-items:center;font-size:12px;color:var(--mut);margin:6px 0;flex-wrap:wrap}
+.chsel select{font:inherit;font-size:12px}
+.ht .bdg{display:inline-block;min-width:16px;padding:0 5px;margin-left:6px;border-radius:9px;background:var(--gold,#D4A53A);color:#1a1a1a;font-size:11px;font-weight:700;text-align:center}
 .ckl{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--card2);border:1px solid var(--line);margin:8px 0}
 .ckl th{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);text-align:left;padding:6px 8px;border-bottom:1px solid var(--line)}
+.ckl td:last-child{white-space:nowrap}
 .ckl td{padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:middle}
 .ckl tr.ph td{background:var(--bg);font-weight:600;font-size:12px}
 .ckl input{width:16px;height:16px}
@@ -1517,7 +1526,9 @@ function loadPack(id,startCur){
 
 
 /* ---------- Core scenarios: API exchange ---------- */
-var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls'};
+var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls',chan:'email',key:''};
+var CH={},STASH={},HV='list';
+var CHAN={email:{t:'email',s:'Email'},register:{t:'public register search',s:'Register search'},whatsapp:{t:'WhatsApp',s:'WhatsApp'},line:{t:'LINE',s:'LINE'},sms:{t:'SMS',s:'SMS'}};
 var API_BASE='https://api.veripura.com/v1';
 var STAT={ok:'pass',rev:'flag',mis:'flag',nc:'not_checked'};
 function snake(x){return String(x).toLowerCase().replace(/&amp;/g,'and').replace(/[^a-z0-9]+/g,'_').replace(/^_+|_+$/g,'')}
@@ -1568,7 +1579,7 @@ function origin(src,keys){src=src||CTX.src;keys=keys||CTX.keys;var ids=keys.map(
     erp:{type:'erp',system:'host_erp',order_reference:'ORD-'+curId().toUpperCase()},
     upload:{type:'manual_upload'},
     batch:{type:'batch_export',batch_id:'bat_example_001'}}[src]}
-function spill(k){var m={w:['w','Waiting'],q:['q','Requested'],r:['r','Received'],d:['d','Derived by Core'],n:['n','Not supplied']}[k];return '<span class="sp '+m[0]+'"><i></i>'+m[1]+'</span>'}
+function spill(k){var m={w:['w','Waiting'],q:['q','Requested'],r:['r','Received'],d:['d','Derived by Core'],n:['n','Not supplied'],v:['v','For review']}[k];return '<span class="sp '+m[0]+'"><i></i>'+m[1]+'</span>'}
 function splegend(ks){return '<div class="splg"><span>Document status:</span>'+ks.map(spill).join('')+'</div>'}
 function findingObj(c,i,x,rx){var st=rx?effStat(c,rx):c.s,t=[];P[i].docs.forEach(function(d){var dk=docKeys(d);if((c.k||[]).some(function(k){return dk.indexOf(k)>-1}))t.push(d.t)});return {id:'fnd_'+pad(i+1)+'_'+pad(x+1),status:STAT[st],area:c.a,title:c.p,detail:st===c.s?c.d:'Waiting for the documents needed to cross-check this item.',rule_and_source:c.r,documents:t}}
 function findingsBody(i,rx,trig){var fs=P[i].checks.map(function(c,x){return findingObj(c,i,x,rx)}),sm={pass:0,flag:0,not_checked:0};fs.forEach(function(f){sm[f.status]++});var o={consignment_id:cnsId(),phase:{number:i+1,name:P[i].n},summary:sm};if(trig&&trig.length)o.triggered_by=trig;o.findings=fs;o.decision='Findings only. The decision rests with your team.';return o}
@@ -1576,6 +1587,15 @@ function fixTarget(){var best=null,any=null,ks=[refKey()].concat(pushedKeys()).f
 function firstFile(){var ks=pushedKeys().concat([refKey()]).filter(Boolean),l=docsOf(ks);return l.filter(function(x){return x.d.real===1})[0]||l[0]}
 function missingDocs(rx){rx=rx||[];var o=[];allDocs().forEach(function(x){if(rx.indexOf(x.k)<0&&!isDerived(x.d))o.push({phase:x.i+1,document_type:x.d.t})});return o}
 function derivedKeys(){return allDocs().filter(function(x){return isDerived(x.d)&&x.d.real!==3}).map(function(x){return x.k})}
+function chKey(){return SC+':'+curId()}
+function chOf(t){var m=CH[chKey()];return m&&m[t]}
+function recipRole(d){var l=supplierOf(d),m=SC===3?{'Exporter':'exp','Importer or agent':'imp'}:{'Customs agent':'agt'},r=m[l]||null;return r===HT[SC]?null:r}
+function roleLabel(r){return {imp:'Importer',exp:'Exporter',ff:'Forwarder',agt:'Broker'}[r]||r}
+function setChase(k,chan){var d=docAt(k),m=CH[chKey()]=CH[chKey()]||{};m[d.t]={chan:chan,to:supplierOf(d),role:chan==='register'?null:recipRole(d),fromRole:HT[SC],from:SC===3?partyName(curId()):roleLabel(HT[SC]),cons:CUR.name,cid:curId(),phase:+k.split(':')[0]+1,pname:P[+k.split(':')[0]].n,status:'requested',seen:true,draft:chaseDraft(k)}}
+function keyOfTitle(t){var f=allDocs().filter(function(x){return x.d.t===t})[0];return f&&f.k}
+function expTarget(rx){return allDocs().filter(function(x){return (rx||[]).indexOf(x.k)>-1&&x.d.real!==3&&!isDerived(x.d)&&/certificate|licen|permit|attestation/i.test(x.d.t)})[0]}
+function stashApi(){if(!API.key||API.stage!=='run')return;clearTimeout(API.timer);API.playing=false;var o={};['pos','mode','upd','stage','src','rsrc','cs','tab','chan'].forEach(function(f){o[f]=API[f]});o.rounds=API.rounds.slice();o.tick=Object.assign({},API.tick);STASH[API.key]=o}
+function clearExchange(cid){delete CH[SC+':'+cid];Object.keys(STASH).forEach(function(k){var a=k.split(':');if(a[0]===String(SC)&&a[2]===cid)delete STASH[k]})}
 function apiSteps(){
   var cs=API.cs,s=[],rk=refKey();
   if(cs==='token')return [{t:'err',k:'token',rx:[],c:1}];
@@ -1583,6 +1603,7 @@ function apiSteps(){
   s.push({t:'create',rx:rx.slice(),src:API.rsrc,keys:[rk]},{t:'req',rx:rx.slice()});
   var done=false,after=function(r){if(!done){done=true;if(cs==='bad'||cs==='dup')s.push({t:'err',k:cs,rx:rx.slice(),c:1})}},upd=API.upd==='callback'?'cb':'poll';
   API.rounds.forEach(function(r){
+    if(r.t==='accept'){s.push({t:'accept',key:r.key,rx:rx.slice()});r={t:'docs',keys:[r.key],src:'upload'}}
     if(r.t==='docs'){
       var prev=rx.slice(),m0=keyCt(prev),t0=keyTot();
       rx=rx.concat(r.keys);derivedKeys().forEach(function(k){if(rx.indexOf(k)<0)rx.push(k)});
@@ -1591,7 +1612,10 @@ function apiSteps(){
       else{var ph={};r.keys.forEach(function(k){var i=+k.split(':')[0];(ph[i]=ph[i]||[]).push(k)});Object.keys(ph).sort(function(a,b){return a-b}).forEach(function(i){s.push({t:'docs',i:+i,keys:ph[i],src:r.src,rx:rx.slice()});after()})}
       P.forEach(function(p,i){if(!p.checks.length)return;var hasKey=r.keys.some(function(k){return +k.split(':')[0]===i}),ch=p.checks.some(function(c){return effStat(c,prev,m0,t0)!==effStat(c,rx,m1,t0)});if(hasKey||ch)s.push({t:upd,i:i,rx:rx.slice(),trig:trig})})
     }
-    else if(r.t==='chase')s.push({t:'chase',key:r.key,rx:rx.slice()});
+    else if(r.t==='chase')s.push({t:'chase',key:r.key,chan:r.chan||'email',rx:rx.slice()});
+    else if(r.t==='reply')s.push({t:'reply',key:r.key,rx:rx.slice()});
+    else if(r.t==='reject')s.push({t:'reject',key:r.key,rx:rx.slice()});
+    else if(r.t==='expiry'){[30,14,7].forEach(function(dd){s.push({t:'exp',key:r.key,days:dd,rx:rx.slice()})})}
     else if(r.t==='share')s.push({t:'share',rx:rx.slice()});
   });
   API.rx=rx.slice();
@@ -1600,11 +1624,14 @@ function apiSteps(){
   if(cs==='rule')s.push({t:'rule',rx:rx.slice(),c:1});
   return s}
 function hostState(){
-  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},lastChase:null,shared:false};
+  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},replied:{},lastChase:null,lastChan:'email',exp:0,shared:false};
   for(var k=0;k<n;k++){var x=S[k];if(x.rx)o.rx=x.rx;
     if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;
     else if(x.t==='cb'||x.t==='poll'){o.found[x.i]=true;o.frx[x.i]=x.rx}
-    else if(x.t==='chase'){o.chased[x.key]=true;o.lastChase=x.key}
+    else if(x.t==='chase'){o.chased[x.key]=true;o.lastChase=x.key;o.lastChan=x.chan||'email'}
+    else if(x.t==='reply'){o.replied[x.key]=true;o.chased[x.key]=true}
+    else if(x.t==='accept'||x.t==='reject'){delete o.replied[x.key]}
+    else if(x.t==='exp'){o.exp=x.days;o.expKey=x.key}
     else if(x.t==='share')o.shared=true;
     else if(x.t==='err')o.err=x.k;else if(x.t==='fix')o.fix=true;else if(x.t==='rechk')o.rechk=true;else if(x.t==='rule')o.rule=true}
   return o;
@@ -1632,26 +1659,35 @@ function hostHTML(){
   var files=docsOf(rx.filter(function(k){return !isDerived(docAt(k))})).concat(docsOf(tk));
   h+=files.length?'<div class="sfiles">'+files.map(function(x){return '<span class="sf'+(rx.indexOf(x.k)>-1?' in':'')+'">'+esc(snake(x.d.t))+'.pdf</span>'}).join('')+'</div>':'';
   h+='<div class="sbtns"><label>Arrives by <select id="pushSrc"'+(rest?'':' disabled')+'>'+SRC_PUSH.map(function(k){return '<option value="'+k+'"'+(API.src===k?' selected':'')+'>'+esc(srcLabel(k))+'</option>'}).join('')+'</select></label><button class="btn gold" id="pushGo"'+(rest&&tk.length?'':' disabled')+'>Push '+tk.length+' to Core</button>'+(got>1&&!st.shared?'<button class="btn" id="shareGo"'+(rest?'':' disabled')+'>Share with parties</button>':'')+'</div></div>';
-  h+='<div class="hlab">Checklist from VeriPura Core</div><div class="hsub">Tick the documents that have arrived in the store, then push them to Core.</div>'+splegend(['w','q','r','d'])+'<table class="ckl"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Status</th><th></th></tr></thead><tbody>';
+  h+='<div class="hlab">Checklist from VeriPura Core</div><div class="hsub">Tick the documents that have arrived in the store, then push them to Core.</div>'+splegend(['w','q','v','r','d'])+chanBar(rest,st)+'<table class="ckl"><thead><tr><th></th><th>Document</th><th>Typical supplier</th><th>Status</th><th></th></tr></thead><tbody>';
   P.forEach(function(p,i){if(!p.docs.length)return;
     var pc='';if(st.found[i]){var cnt={ok:0,rev:0,mis:0,nc:0},m=keyCt(st.frx[i]);p.checks.forEach(function(c){cnt[effStat(c,st.frx[i],m,tt)]++});pc='<span class="cn"><span class="ok">'+cnt.ok+'</span><span class="mis">'+(cnt.mis+cnt.rev)+'</span><span class="nc">'+cnt.nc+'</span></span>'}
     h+='<tr class="ph"><td colspan="4">'+pad(i+1)+' '+esc(p.n)+'</td><td>'+pc+'</td></tr>';
     p.docs.forEach(function(d,j){var k=i+':'+j,gt=rx.indexOf(k)>-1,dv=isDerived(d),tick=!dv&&d.real!==3&&!gt;
-      var stt=spill(dv?'d':gt?'r':st.chased[k]?'q':'w');
-      h+='<tr><td>'+(tick?'<input type="checkbox" data-t="'+k+'"'+(API.tick[k]?' checked':'')+(rest?'':' disabled')+' aria-label="Received '+esc(d.t)+'">':'')+'</td><td>'+esc(d.t)+'</td><td>'+esc(supplierOf(d))+'</td><td>'+stt+'</td><td>'+(!gt&&!dv?'<button class="chs" data-c="'+k+'"'+(rest?'':' disabled')+'>Chase</button>':'')+'</td></tr>'});
+      var rp=!gt&&!dv&&st.replied[k],stt=spill(dv?'d':gt?'r':rp?'v':st.chased[k]?'q':'w');
+      h+='<tr><td>'+(tick?'<input type="checkbox" data-t="'+k+'"'+(API.tick[k]?' checked':'')+(rest?'':' disabled')+' aria-label="Received '+esc(d.t)+'">':'')+'</td><td>'+esc(d.t)+'</td><td>'+esc(supplierOf(d))+'</td><td>'+stt+'</td><td>'+(rp?'<button class="chs" data-ac="'+k+'"'+(rest?'':' disabled')+'>Accept</button> <button class="chs" data-rj="'+k+'"'+(rest?'':' disabled')+'>Reject</button>':!gt&&!dv?'<button class="chs" data-c="'+k+'"'+(rest?'':' disabled')+'>'+(st.chased[k]?'Chase again':'Chase')+'</button>':'')+'</td></tr>'});
   });
   h+='</tbody></table>';
-  if(st.lastChase){var cd=chaseDraft(st.lastChase);h+='<div class="msg"><div class="hlab">Message to '+esc(cd.to)+' (sent by the host)</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'</div>'}
+  if(st.lastChase){var cd=chaseDraft(st.lastChase),cdoc=docAt(st.lastChase),cl=CHAN[st.lastChan]||CHAN.email,rr=cdoc?recipRole(cdoc):null,ce=cdoc&&chOf(cdoc.t),pend=ce&&ce.status==='requested'&&st.lastChan!=='register';
+    if(st.lastChan==='register')h+='<div class="msg"><div class="hlab">Register search run by VeriPura Core</div>Core searched the public registers for <b>'+esc(cdoc.t)+'</b> and found a possible match. It goes to a person for review before it counts. Sample result for the demonstration.</div>';
+    else h+='<div class="msg"><div class="hlab">Sent by VeriPura Core by '+esc(cl.t)+' to '+esc(cd.to)+'</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'<div class="cap" style="margin-top:6px">Sample text for the demonstration. Core sends it; the host does not.</div>'+(pend?'<div class="ibf" style="margin-top:8px">'+(rr?'<button class="btn" data-ib="role">Open the '+esc(roleLabel(rr))+' inbox</button>':'<button class="btn" data-ib="prev">Preview as supplier ('+esc(cd.to)+')</button>')+'<span class="cap">See what the recipient sees and send the document back.</span></div>':'')+'</div>'}
+  if(st.exp){var et=st.expKey&&docAt(st.expKey);h+='<div class="hinfo"><b>Certificate expiring (example): '+esc(et?et.t:'')+'</b><br>Core alerts at 30, 14 and 7 days and starts a chase for the renewed certificate. Latest alert: '+st.exp+' days. Any reply goes to review before it counts.</div>'}
   var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push('Flag: '+c.p)})}});
   if(items.length)h+='<div class="hlab">'+(SC===2?'For the client file':'For your team')+'</div><ul>'+items.slice(0,6).map(function(t){return '<li>'+esc(t)+'</li>'}).join('')+(items.length>6?'<li>and '+(items.length-6)+' more</li>':'')+'</ul>';
   if(st.shared)h+='<div class="hlab">Documents the host can share</div><ul>'+ROLES.slice(1).map(function(r){var c=0;P.forEach(function(q){q.docs.forEach(function(d){if((DOCVIS[d.t]||[]).indexOf(r[0])>-1)c++})});return '<li>'+esc(r[3]||r[1])+': '+c+' documents</li>'}).join('')+'</ul>';
   return h+foot;
 }
+function chanBar(rest,st){var any=Object.keys(st.found).length,et=expTarget(st.rx);return '<div class="chsel"><label>Chase by <select id="chasChan"'+(rest?'':' disabled')+'>'+Object.keys(CHAN).map(function(k){return '<option value="'+k+'"'+(API.chan===k?' selected':'')+'>'+esc(CHAN[k].s)+'</option>'}).join('')+'</select></label><button class="btn" id="expGo"'+(rest&&et&&!st.exp?'':' disabled')+' title="'+(et?'':'Needs a received certificate')+'">Run expiry check</button></div>'}
 function hostPaint(){var hp=$('#hostp');if(!hp)return;var k=hp.scrollTop;hp.innerHTML=hostHTML();hp.scrollTop=k;bindHost(hp)}
-function roundGo(r){apiPause();var base=API.steps.filter(function(x){return !x.c}).length;API.pos=Math.min(API.pos,base);API.rounds.push(r);API.steps=apiSteps();apiPlay()}
+function roundGo(){apiPause();var base=API.steps.filter(function(x){return !x.c}).length;API.pos=Math.min(API.pos,base);for(var q=0;q<arguments.length;q++)API.rounds.push(arguments[q]);API.steps=apiSteps();apiPlay()}
 function bindHost(hp){
   hp.querySelectorAll('input[data-t]').forEach(function(c){c.onchange=function(){if(c.checked)API.tick[c.dataset.t]=1;else delete API.tick[c.dataset.t];hostPaint()}});
-  hp.querySelectorAll('button[data-c]').forEach(function(b){b.onclick=function(){roundGo({t:'chase',key:b.dataset.c})}});
+  hp.querySelectorAll('button[data-c]').forEach(function(b){b.onclick=function(){var ch=API.chan,k=b.dataset.c;setChase(k,ch);if(ch==='register'){var d=docAt(k);CH[chKey()][d.t].status='replied';CH[chKey()][d.t].file=snake(d.t)+'.pdf';roundGo({t:'chase',key:k,chan:ch},{t:'reply',key:k})}else roundGo({t:'chase',key:k,chan:ch})}});
+  hp.querySelectorAll('button[data-ac]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.ac),e=chOf(d.t);if(e)e.status='accepted';roundGo({t:'accept',key:b.dataset.ac})}});
+  hp.querySelectorAll('button[data-rj]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.rj),e=chOf(d.t);if(e){e.status='requested';delete e.file}roundGo({t:'reject',key:b.dataset.rj})}});
+  var cc=hp.querySelector('#chasChan');if(cc)cc.onchange=function(){API.chan=cc.value};
+  var eg=hp.querySelector('#expGo');if(eg)eg.onclick=function(){var et=expTarget(hostState().rx);if(et)roundGo({t:'expiry',key:et.k})};
+  var ib=hp.querySelector('[data-ib]');if(ib)ib.onclick=function(){var st=hostState(),d=docAt(st.lastChase);if(ib.dataset.ib==='role'){stashApi();HT[SC]=recipRole(d);showInbox()}else supplierPreview(d)};
   var pb=hp.querySelector('#pushGo');if(pb)pb.onclick=function(){var ks=Object.keys(API.tick).sort(function(a,b){var x=a.split(':'),y=b.split(':');return x[0]-y[0]||x[1]-y[1]});if(!ks.length)return;API.tick={};roundGo({t:'docs',keys:ks,src:API.src})};
   var sb=hp.querySelector('#shareGo');if(sb)sb.onclick=function(){roundGo({t:'share'})};
   var ps=hp.querySelector('#pushSrc');if(ps)ps.onchange=function(){API.src=ps.value;hostPaint()};
@@ -1670,7 +1706,7 @@ function addView(v){
   h+='<section class="hostp srcp">'+ph+'</section><div class="sbar"><button class="btn gold" id="goRun">Send reference document to VeriPura Core</button></div>';
   v.innerHTML=h;
   v.querySelectorAll('.src').forEach(function(b){b.onclick=function(){API.rsrc=b.dataset.s;view()}});
-  $('#goRun').onclick=function(){API.stage='run';API.rounds=[];API.tick={};API.pos=0;API.steps=apiSteps();view();updPlayer();window.scrollTo({top:0});apiPlay()};
+  $('#goRun').onclick=function(){clearExchange(curId());API.stage='run';API.rounds=[];API.tick={};API.pos=0;API.steps=apiSteps();view();updPlayer();window.scrollTo({top:0});apiPlay()};
 }
 function auditEntries(){
   var S=API.steps,o=[],q=function(k){return 't+'+pad(Math.floor(k*7/60))+':'+pad(k*7%60)};
@@ -1680,7 +1716,11 @@ function auditEntries(){
     else if(x.t==='req')o.push({t:t,a:'Core',e:'requirements.generated',d:td+' documents, '+tc+' checks'});
     else if(x.t==='docs'||x.t==='batch'){docsOf(x.keys).forEach(function(y){o.push({t:t,a:'Host',e:'document.received',d:y.d.t+' · version 1 · '+origin(x.src,[y.k]).type+' · sha256:<example>'})})}
     else if(x.t==='cb'||x.t==='poll')o.push({t:t,a:'Core',e:'findings.delivered',d:'Phase '+pad(x.i+1)+' · '+P[x.i].checks.length+' checks'+(x.trig&&x.trig.length?' · after '+x.trig.length+' new documents':'')});
-    else if(x.t==='chase'){o.push({t:t,a:'Core',e:'outstanding.listed',d:'Draft request for '+docAt(x.key).t})}
+    else if(x.t==='chase'){o.push({t:t,a:'Core',e:'concierge.chase.sent',d:docAt(x.key).t+' · '+(CHAN[x.chan]||CHAN.email).t})}
+    else if(x.t==='reply')o.push({t:t,a:'Core',e:'concierge.result.pending_review',d:docAt(x.key).t+' · waiting for a person to review'});
+    else if(x.t==='accept')o.push({t:t,a:'Host',e:'review.accepted',d:docAt(x.key).t+' · reviewer decision recorded'});
+    else if(x.t==='reject')o.push({t:t,a:'Host',e:'review.rejected',d:docAt(x.key).t+' · request stays open'});
+    else if(x.t==='exp')o.push({t:t,a:'Core',e:'certificate.expiry.alert',d:docAt(x.key).t+' · '+x.days+' days'});
     else if(x.t==='share')o.push({t:t,a:'Host',e:'sharing.read',d:'Document access by party'});
     else if(x.t==='fix'){var f=fixTarget();o.push({t:t,a:'Host',e:'document.replaced',d:f.d.t+' · version 2 · version 1 kept'})}
     else if(x.t==='rule'){o.push({t:t,a:'Core',e:'rules.pending',d:ruleOf().topic})}
@@ -1700,16 +1740,22 @@ function apiView(v){
   h+='<div class="apigrid"><section class="hostp" id="hostp"></section><section class="apip" id="apip"></section></div>';
   v.innerHTML=h;
   document.querySelectorAll('.apihead button[data-k]').forEach(function(b){b.onclick=function(){apiPause();API[b.dataset.k]=b.dataset.v;API.pos=0;view();updPlayer();window.scrollTo({top:0});apiPlay()}});
-  $('#chg').onclick=function(){apiPause();API.stage='ref';API.rounds=[];API.tick={};API.pos=0;view();window.scrollTo({top:0})};
+  $('#chg').onclick=function(){apiPause();clearExchange(curId());API.stage='ref';API.rounds=[];API.tick={};API.pos=0;view();window.scrollTo({top:0})};
   apiPaint();
 }
 function openFromHost(id){
   document.body.classList.remove('hl');
   if(PK[id]!==CUR)loadPack(id,-1);
   pause();var r=HT[SC];if(r==='ff')ensureFF();ROLE=r;buildP(r);NP=P.length;build();if(r!=='ff')rs.value=r;
-  API.on=true;API.pos=0;API.playing=false;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.steps=apiSteps();
+  stashApi();var nk=SC+':'+HT[SC]+':'+curId(),sv=STASH[nk];HV='app';
+  API.on=true;API.playing=false;API.key=nk;
+  if(sv){Object.assign(API,sv);API.rounds=sv.rounds.slice();API.tick=Object.assign({},sv.tick)}
+  else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email'}
+  API.steps=apiSteps();
   document.body.classList.add('api');ST.pos=0;ST.cur=-3;calc();nav();view();updPlayer();hostBar();window.scrollTo({top:0});
+  if(sv)syncReplies();
 }
+function syncReplies(){var m=CH[chKey()]||{},rs=[];Object.keys(m).forEach(function(t){var e=m[t];if(e.status==='replied'&&!e.seen){e.seen=true;var k=keyOfTitle(t);if(k)rs.push({t:'reply',key:k})}});if(rs.length)roundGo.apply(null,rs)}
 function callOf(st){
   var id=cnsId(),auth='Authorization: Bearer <token>',js='Content-Type: application/json',c={};
   CTX={src:st.src||API.rsrc,keys:st.keys||[refKey()]};
@@ -1726,9 +1772,12 @@ function callOf(st){
     else c={out:1,method:'GET',path:'/consignments/'+id+'/requirements?status=missing',status:'200 OK',req:[auth],resBody:{consignment_id:id,missing_count:missingDocs(st.rx).length,missing:missingDocs(st.rx)},note:'Required documents not yet received. Checks that depend on them stay not_checked.'}}
   else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Flag. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: rules.pending','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'rules.pending'},rb),note:'CORE watches the rules for this route. The in-house team does not have to. The host decides how to alert its users.'}:{out:1,method:'GET',path:'/consignments/'+id+'/rule-updates',status:'200 OK',req:[auth],resBody:{updates:[rb]},note:'CORE watches the rules for this route. The host asks for updates and decides how to alert its users.'}}
-  else if(st.t==='chase'){var cdd=docAt(st.key),outs=[];
-    P.forEach(function(p,i){p.docs.forEach(function(d,j){if(st.rx.indexOf(i+':'+j)<0&&!isDerived(d))outs.push({document_type:d.t,phase:i+1,typical_supplier:supplierOf(d)})})});
-    c={out:1,method:'GET',path:'/consignments/'+id+'/outstanding?draft='+snake(cdd.t),status:'200 OK',req:[auth],resBody:{consignment_id:id,outstanding_count:outs.length,outstanding:outs,draft:chaseDraft(st.key)},note:'Optional. CORE lists what is still outstanding and drafts a request. The host decides whether to use the text and sends it through its own messaging.'}}
+  else if(st.t==='chase'){var cdd=docAt(st.key),cch=st.chan||'email',cdr=chaseDraft(st.key),cdi='doc_'+snake(cdd.t);
+    c=cch==='register'?{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:{channel:'public_register',document_type:cdd.t},resBody:{chase_id:'chs_example_001',status:'searching',channel:'public_register',result_goes_to:'review'},note:'The host asks Core to look for the document. Core searches public registers itself. Whatever it finds goes to a person for review before it counts.'}:{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:{channel:cch,recipient:{party:cdr.to}},resBody:{chase_id:'chs_example_001',status:'sent',channel:cch,recipient:{party:cdr.to},message:{subject:cdr.subject,body:cdr.body},reminders:'Core follows up if there is no reply',result_goes_to:'review'},note:'The host asks Core to chase. Core (the Compliance Concierge) sends the request itself by '+(CHAN[cch]||CHAN.email).t+'. Message text is sample text.'}}
+  else if(st.t==='reply'){var rdd=docAt(st.key),rdi='doc_'+snake(rdd.t),rrb={event:'concierge.result.pending_review',consignment_id:id,chase_id:'chs_example_001',document_id:rdi,document_type:rdd.t,received_via:(chOf(rdd.t)||{chan:'public_register'}).chan==='register'?'public_register':((chOf(rdd.t)||{}).chan||'email'),status:'pending_review',action:'A person must accept or reject this before it counts.'};
+    c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: concierge.result.pending_review','X-VeriPura-Signature: sha256=<hmac>'],reqBody:rrb,note:'Core found or received something. It is held for review. The result is a sample.'}:{out:1,method:'GET',path:'/consignments/'+id+'/outstanding/'+rdi,status:'200 OK',req:[auth],resBody:rrb,note:'The host asks about the chase and finds a result waiting for review. The result is a sample.'}}
+  else if(st.t==='accept'||st.t==='reject'){var acd=docAt(st.key);c={out:1,method:'PUT',path:'/consignments/'+id+'/outstanding/doc_'+snake(acd.t)+'/review',status:'200 OK',req:[auth,js],reqBody:{decision:st.t==='accept'?'accepted':'rejected',reviewer:'host_user_example'},resBody:{document_id:'doc_'+snake(acd.t),decision:st.t==='accept'?'accepted':'rejected',status:st.t==='accept'?'received':'requested'},note:st.t==='accept'?'A person accepted it, so it now counts as received and the documents are sent to Core.':'A person rejected it. The request stays open.'}}
+  else if(st.t==='exp'){var xd=docAt(st.key);c={out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: certificate.expiring','X-VeriPura-Signature: sha256=<hmac>'],reqBody:{event:'certificate.expiring',consignment_id:id,document_type:xd.t,days_remaining:st.days,concierge_action:'chase_started'},note:'Core tracks the expiry and goes after the renewed certificate. Alerts come at 30, 14 and 7 days. The expiry date is not shown here because this is an example.'}}
   else if(st.t==='fix'){var ft=fixTarget(),fid='doc_'+snake(ft.d.t);
     c=API.mode==='data'?{out:1,method:'PUT',path:'/consignments/'+id+'/documents/'+fid,status:'200 OK',req:[auth,js],reqBody:{phase:ft.i+1,source:'extracted_data',origin:origin(),document:docData(ft.d)},resBody:{document_id:fid,version:2,previous_version:1,status:'processing'},note:'A corrected version replaces the earlier one. The earlier version stays in the audit trail.'}:{out:1,method:'PUT',path:'/consignments/'+id+'/documents/'+fid,status:'200 OK',req:[auth,'Content-Type: multipart/form-data; boundary=----vp'],reqText:'file  filename="'+snake(ft.d.t)+'_corrected.pdf"  type=application/pdf\norigin = '+JSON.stringify(origin()),resBody:{document_id:fid,version:2,previous_version:1,status:'processing',extraction:'queued'},note:'A corrected file replaces the earlier one. The earlier version stays in the audit trail.'}}
   else if(st.t==='rechk'){var rt=fixTarget(),af=affected(rt),rb={consignment_id:id,phase:rt.i+1,document_id:'doc_'+snake(rt.d.t),version:2,checks_rerun:af,checks_unchanged:P.reduce(function(a,q){return a+q.checks.length},0)-af.length,decision:'Findings only. The decision rests with your team.'};
@@ -1847,16 +1896,30 @@ function hostBar(){
   var hb=$('#hostBar'),hl=document.body.classList.contains('hl'),cur=curId(),w=W();
   var types=SC===2?[['ff','Forwarder'],['agt','Broker']]:[['imp','Importer'],['exp','Exporter']];
   var h='<button class="bk" id="hbBack">← Back to demo</button><span class="hb">'+(SC===2?w.brand:(hl?'Trade platform':esc(partyName(cur))+' · '+w.brand))+'</span>';
-  h+='<button class="ht'+(hl?' on':'')+'" data-t="list">'+w.list+'</button><button class="ht'+(hl?'':' on')+'" data-t="app">Compliance</button><span class="sp"></span>';
+  var ibn=inboxCount();h+='<button class="ht'+(hl&&HV!=='inbox'?' on':'')+'" data-t="list">'+w.list+'</button><button class="ht'+(hl?'':' on')+'" data-t="app">Compliance</button><button class="ht'+(hl&&HV==='inbox'?' on':'')+'" data-t="inbox">Inbox'+(ibn?'<span class="bdg">'+ibn+'</span>':'')+'</button><span class="sp"></span>';
   h+='<span class="seg"><span class="label">I am</span><span class="sb">'+types.map(function(t){return '<button data-ty="'+t[0]+'" class="'+(HT[SC]===t[0]?'on':'')+'">'+t[1]+'</button>'}).join('')+'</span></span>';
     h+='<span class="pw">'+(SC===2?'Illustrative host platform · Powered by VeriPura':'Illustrative host platform · VeriPura Core™ inside')+'</span>';
   hb.innerHTML=h;
   $('#hbBack').onclick=function(){$('#scenSel').value='1';setScenario(1)};
-  hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(document.body.classList.contains('hl'))openFromHost(curId())}});
-  hb.querySelectorAll('[data-ty]').forEach(function(b){b.onclick=function(){HT[SC]=b.dataset.ty;if(document.body.classList.contains('hl'))showHost();else openFromHost(curId())}});
+  hb.querySelectorAll('.ht').forEach(function(b){b.onclick=function(){if(b.dataset.t==='list')showHost();else if(b.dataset.t==='inbox')showInbox();else if(document.body.classList.contains('hl'))openFromHost(curId())}});
+  hb.querySelectorAll('[data-ty]').forEach(function(b){b.onclick=function(){stashApi();HT[SC]=b.dataset.ty;if(document.body.classList.contains('hl'))(HV==='inbox'?showInbox():showHost());else openFromHost(curId())}});
   }
+function inboxItems(){var o=[];Object.keys(CH).forEach(function(k){if(k.split(':')[0]!==String(SC))return;Object.keys(CH[k]).forEach(function(t){var e=CH[k][t];if(e.role===HT[SC])o.push({t:t,e:e})})});return o}
+function inboxCount(){return inboxItems().filter(function(x){return x.e.status==='requested'}).length}
+function msgBox(e,t){var cl=CHAN[e.chan]||CHAN.email;return '<div class="ibx"><div class="ibh"><span class="chb">'+esc(cl.s)+'</span><b>'+esc(e.draft.subject)+'</b></div><div class="ibm">From '+esc(e.from)+' (sent by VeriPura Core on their behalf) · '+esc(e.cons)+' · needed for phase '+pad(e.phase)+', '+esc(e.pname)+'</div><div class="ibb">'+esc(e.draft.body)+'</div><div class="cap" style="margin-top:6px">Sample text for the demonstration.</div>'}
+function showInbox(){
+  pause();stashApi();HV='inbox';API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
+  var it=inboxItems(),h='<h2>Inbox</h2><div class="hn">Requests sent to the '+esc(roleLabel(HT[SC]))+' by other parties. Illustrative mock of a host platform. Messages are sample text.</div>';
+  if(!it.length)h+='<div class="hn" style="margin-top:14px">No requests yet. Chase a document as the other role and it arrives here.</div>';
+  it.forEach(function(x,n){var e=x.e;h+=msgBox(e,x.t)+'<div class="ibf">'+(e.status==='requested'?'<button class="btn gold" data-up="'+n+'">Upload '+esc(snake(x.t))+'.pdf</button><span class="cap">Sends the document back for review.</span>':e.status==='replied'?'<span class="sp v"><i></i>Sent, waiting for review</span><button class="btn" data-back="'+n+'">Go to '+esc(roleLabel(e.fromRole))+'</button>':'<span class="sp r"><i></i>Accepted</span>')+'</div></div>'});
+  $('#host').innerHTML=h;
+  document.querySelectorAll('#host [data-up]').forEach(function(b){b.onclick=function(){var x=it[+b.dataset.up];x.e.status='replied';x.e.file=snake(x.t)+'.pdf';x.e.seen=false;showInbox()}});
+  document.querySelectorAll('#host [data-back]').forEach(function(b){b.onclick=function(){var x=it[+b.dataset.back];HT[SC]=x.e.fromRole;openFromHost(x.e.cid)}});
+  hostBar();window.scrollTo({top:0});
+}
+function supplierPreview(d){var e=chOf(d.t);if(!e)return;var body=msgBox(e,d.t)+'<div class="ibf"><button class="btn gold" id="spSend">Send '+esc(snake(d.t))+'.pdf</button><span class="cap">The supplier replies with the document. It goes to review at the requester.</span></div></div>';openDrawer('Preview as supplier','What '+esc(e.to)+' receives. Sample for the demonstration.',body);var sb=document.getElementById('spSend');if(sb)sb.onclick=function(){e.status='replied';e.file=snake(d.t)+'.pdf';e.seen=true;closeDrawer();roundGo({t:'reply',key:keyOfTitle(d.t)})}}
 function showHost(){
-  pause();API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
+  pause();stashApi();HV='list';API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
   var w=W(),h='';
   if(SC===2){
     h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a '+(HT[2]==='ff'?'forwarder':'broker')+' platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
