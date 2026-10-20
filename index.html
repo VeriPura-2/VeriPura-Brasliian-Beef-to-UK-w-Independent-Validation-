@@ -853,7 +853,7 @@ function report(v){
   +'<div class="card"><h3>Cold chain, traceability, label and packaging examples</h3><p style="color:var(--ink2)">Core reads temperature logs, GS1 EPCIS events, label claims and packaging data. These examples use illustrative data, never real consignments. The packaging categories follow GOV.UK guidance.</p>'+[['cc','Cold chain'],['ep','EPCIS lot'],['lc','Label claims'],['pk','Packaging EPR']].map(function(b){return '<button class="btn" data-fy="'+b[0]+'">'+(FRY===b[0]?'Hide ':'Show ')+b[1]+' example</button> '}).join('')+(xcOn(FRY)?'<div style="margin-top:12px">'+XC[FRY].docs.map(paper).join('')+xcPanel(FRY)+'</div>':'')+'</div>'
   +'<div class="card"><h3>Route example</h3><p style="color:var(--ink2)">When the route on the documents differs from the plan, Core asks a person to confirm it and records the name and the reason. This example uses fictional ports.</p><button class="btn" id="rtBtn">'+(FRZ?'Hide the example':'Show a route mismatch example')+'</button>'+(xcOn(FRZ)?'<div style="margin-top:12px">'+XC[FRZ].docs.map(paper).join('')+xcPanel(FRZ)+'</div>':'')+'</div>'
   +'<div class="card"><h3>Commodity codes and duty</h3><p style="color:var(--ink2)">Core checks each commodity code on the documents against the UK tariff and shows the duty and controls.</p>'+tarHTML(false)+'</div>'
-  +'<div class="card"><h3>Evidence trail</h3><p style="color:var(--ink2)">Every event is fingerprinted and linked in time order, then anchored, so anyone can later check that nothing was changed or back-dated.</p>'+(trEntries('food').length?trailHTML(trEntries('food'),'food'):'<div class="cap">No events yet. Documents and checks appear here as they happen.</div>')+'</div>'+ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Flag and every Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
+  +'<div class="card"><h3>Evidence trail</h3><p style="color:var(--ink2)">Every event is fingerprinted and linked in time order, then anchored, so anyone can later check that nothing was changed or back-dated.</p>'+trailPanel('food')+'</div>'+ovReport()+'<div class="grid2" style="margin-top:16px"><div class="card"><h3>Who decides</h3><p style="color:var(--ink2)">VeriPura shows findings with the rule, the evidence and the next step. Your team reviews every Flag and every Not checked finding and makes the decision.</p></div><div class="card"><h3>Evidence bundle</h3><p style="color:var(--ink2)">Documents, findings and event records are indexed by phase. Verified document hashes are anchored on IOTA Rebased and shown in the visibility layer.</p></div></div>'
   +(n?'<div class="card" style="margin-top:16px"><h3>Every check leaves a trail.</h3><table class="t"><thead><tr><th>Phase</th><th>Agent</th><th>Parameter</th><th>Status</th></tr></thead><tbody>'+trail+'</tbody></table><div class="cap">'+esc(CUR.trailNote)+'</div></div>':'')
   +'<div class="pager"><button class="btn" id="back">Back to phase '+pad(NP)+'</button><span class="sp"></span><button class="btn" id="print">Print report</button><button class="btn gold" id="again">Restart demo</button></div>';
   document.querySelectorAll('tr[data-j]').forEach(function(r){r.onclick=function(){go(+r.dataset.j)}});
@@ -1807,6 +1807,7 @@ function ppData(src){
 function ppHTML(src){
   var key=ppKey(src),seals=SEALS[key]||[],cur=ppData(src),hs=sha256(JSON.stringify(cur)),last=seals[seals.length-1],state=!last?'u':last.hash===hs?'s':'c',sm=cur.summary;
   var h='<div class="ibx" style="max-width:none"><b>Consignment Passport</b><div class="ibm">'+esc(CUR.name)+' · '+esc(cur.consignment.id)+' · example built from the demonstration data</div>'+vdHTML(sm.pass,sm.flag,sm.not_checked,cur.findings.filter(function(f){return f.acknowledged}).length)+'</div>';
+  var tow=trOwner(src==='core'?'core':'food');h+='<div class="cap" style="margin:6px 0">Audit trail: '+esc('trail_'+curId())+', owned by '+esc((tow.name?tow.name+', ':'')+tow.label)+', kept permanently, cannot be deleted. Only the owner can read it.</div>';
   h+='<div class="hlab">Findings and evidence</div>'+cfNote();
   h+=cur.findings.length?'<table class="ckl"><thead><tr><th>Status</th><th>Phase</th><th>Finding</th></tr></thead><tbody>'+cur.findings.map(function(f){return '<tr><td><span class="tg '+(f.status==='flag'?'mis':'nc')+'">'+(f.status==='flag'?'Flag':'Not checked')+'</span></td><td class="mono">'+(f.phase?pad(f.phase):'Ex.')+'</td><td><b>'+esc(f.title)+'</b><div class="cap">'+esc(f.detail)+(f.rule_and_source?' Rule and source: '+esc(f.rule_and_source):'')+'</div>'+cfHTMLo(f.confidence)+(f.acknowledged?'<div class="cap">Acknowledged by '+(f.acknowledged.name?esc(f.acknowledged.name)+', ':'')+esc(roleLabel(f.acknowledged.role))+': '+esc(f.acknowledged.reason)+'</div>':'')+'</td></tr>'}).join('')+'</tbody></table>':'<div class="cap">No flags and nothing unchecked so far.</div>';
   h+='<div class="hlab" style="margin-top:12px">Documents and fingerprints</div><table class="ckl"><thead><tr><th>Document</th><th>Version</th><th>Fingerprint</th></tr></thead><tbody>'+(cur.documents.map(function(d){return '<tr><td>'+esc(d.document_type)+'</td><td>1</td><td class="pph">'+d.fingerprint.slice(0,23)+'…</td></tr>'}).join('')||'<tr><td colspan="3" class="cap">No documents yet.</td></tr>')+'</tbody></table>';
@@ -1826,6 +1827,39 @@ function ppBind(src){var sb=document.getElementById('ppSeal'),vb=document.getEle
   if(vb)vb.onclick=function(){var a=SEALS[ppKey(src)],last=a[a.length-1],o=JSON.parse(last.snap);if(PPS.t){if(o.findings.length)o.findings.shift();else o.summary.pass+=1;}var ok=sha256(JSON.stringify(o))===last.hash;PPS.r={ok:ok};if(src==='core'&&API.on)roundGo({t:'pver',ver:last.version,hash:last.hash,valid:ok});redraw()}}
 function docFp(d){return sha256(d.t+'|'+d.ref+'|'+JSON.stringify(d.rows||[]))}
 function TR(src){return TRS[src]=TRS[src]||{tam:0,bd:0,res:null}}
+
+var TOWN={},FEV={};
+function trForeign(o,at,t){(FEV[SC+':'+curId()]||[]).forEach(function(f){if(f.at===at)o.push({t:t,a:f.a,e:f.e,d:f.d})})}
+function trOwner(src){var cid=curId(),o;
+  if(src==='core'){var k=SC+':'+cid,r=TOWN[k]||HT[SC];o={role:r,label:roleLabel(r),name:SC===3?(r==='exp'?expName(cid):impName(cid)):'',can:HT[SC]===r,team:false,viewer:roleLabel(HT[SC])}}
+  else{var q=ROLES.filter(function(x){return x[0]===ROLE})[0];o={role:'imp',label:'Importer',name:impName(cid),can:ROLE==='imp'||ROLE==='all',team:ROLE==='all',viewer:q?q[3]:ROLE}}
+  return o}
+function trailHead(src,ow,es){var h='<div class="ibx" style="max-width:none"><b>Audit trail</b><div class="ibm">'+esc('trail_'+curId())+' · consignment '+esc(cnsId())+'</div>'
+  +'<div class="cap">Owner: '+esc((ow.name?ow.name+', ':'')+ow.label)+' (the initiator of the process)</div><div class="cap">Access: only the owner can read this trail.</div><div class="cap">Retention: kept permanently. It cannot be deleted by anyone.</div>'
+  +(ow.can?'<div class="cap">Entries: '+es.length+(es.length?' · started '+esc(es[0].t):'')+'</div>':'')
+  +(ow.team?'<div class="cap">Shown here in the demonstration team view. In production only the owner reads it.</div>':'')+'</div>';return h}
+function trailPanel(src){var es=trEntries(src),ow=trOwner(src),h=trailHead(src,ow,es);
+  if(!ow.can)return h+'<div class="note">Only the owner can read this trail. You are signed in as the '+esc(ow.viewer)+'. The trail exists and is kept permanently, but its entries are not shown to you.</div>';
+  if(!es.length)return h+'<div class="cap">No events yet. Documents and checks appear here as they happen.</div>';
+  return h+'<div class="ibf" style="margin:8px 0;flex-wrap:wrap;gap:8px;align-items:center"><b style="margin-right:4px">Download trail</b><button class="btn" data-trx="json">JSON</button><button class="btn" data-trx="csv">CSV</button><button class="btn" data-trx="pdf">PDF</button></div><div class="cap" style="margin:0 0 6px">Owner only. Each download is recorded in the trail.</div>'+trailHTML(es,src)}
+function trAsc(x){return String(x).normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/·/g,'|').replace(/…/g,'...').replace(/[^\x20-\x7e]/g,'?')}
+function trWrap(t,w,ind){var o=[],l='';String(t).split(' ').forEach(function(x){if((l+' '+x).length>w&&l){o.push(l);l=ind+x}else l=l?l+' '+x:ind+x});if(l)o.push(l);return o}
+function trPdf(lines){var per=62,pg=[],i;for(i=0;i<lines.length;i+=per)pg.push(lines.slice(i,i+per));if(!pg.length)pg.push(['']);
+  var ob=[],add=function(x){ob.push(x)};add('<< /Type /Catalog /Pages 2 0 R >>');var kids=pg.map(function(p,j){return (4+2*j)+' 0 R'}).join(' ');add('<< /Type /Pages /Kids ['+kids+'] /Count '+pg.length+' >>');add('<< /Type /Font /Subtype /Type1 /BaseFont /Courier >>');
+  pg.forEach(function(p,j){add('<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R >> >> /Contents '+(5+2*j)+' 0 R >>');
+    var c='BT /F1 8 Tf 10 TL 40 800 Td '+p.map(function(l){return '('+trAsc(l).replace(/\\/g,'\\\\').replace(/\(/g,'\\(').replace(/\)/g,'\\)')+') Tj T*'}).join(' ')+' ET';add('<< /Length '+c.length+' >>\nstream\n'+c+'\nendstream')});
+  var out='%PDF-1.4\n',off=[];ob.forEach(function(x,n){off.push(out.length);out+=(n+1)+' 0 obj\n'+x+'\nendobj\n'});var xr=out.length;out+='xref\n0 '+(ob.length+1)+'\n0000000000 65535 f \n'+off.map(function(x){return ('0000000000'+x).slice(-10)+' 00000 n \n'}).join('')+'trailer\n<< /Size '+(ob.length+1)+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF';
+  var u=new Uint8Array(out.length);for(i=0;i<out.length;i++)u[i]=out.charCodeAt(i)&255;return u}
+function trFile(src,fmt){var es=trEntries(src),ch=trChain(es),an=ANCH[trKey(src)]||[],ow=trOwner(src),cid=curId(),tid='trail_'+cid,
+  meta={trail_id:tid,consignment_id:cnsId(),route:CUR.name,owner:{role:ow.label,name:ow.name||null},retention:'Kept permanently. It cannot be deleted by anyone.',access:'Only the owner can read this trail.',exported_by:{role:ow.label,name:ow.name||null},note:'Demonstration export. Fingerprints and anchors are examples. Nothing is written to the real ledger.'},
+  rows=es.map(function(e,i){return {n:i+1,time:e.t,by:e.a,event:e.e,detail:e.d,link:ch[i]}}),ans=an.map(function(q){return {anchor_id:q.id,entries_covered:q.n,fingerprint:q.link}});
+  if(fmt==='json')return {name:tid+'.json',mime:'application/json',data:JSON.stringify(Object.assign({},meta,{entries:rows,anchors:ans}),null,2)};
+  if(fmt==='csv'){var q=function(v){v=String(v==null?'':v);return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};var L=['trail_id,consignment_id,n,time,by,event,detail,link'];rows.forEach(function(r){L.push([tid,meta.consignment_id,r.n,r.time,r.by,r.event,r.detail,r.link].map(q).join(','))});ans.forEach(function(a){L.push([tid,meta.consignment_id,'','','Core','audit.anchored',a.anchor_id+' covers '+a.entries_covered+' entries',a.fingerprint].map(q).join(','))});return {name:tid+'.csv',mime:'text/csv',data:L.join('\n')}}
+  var P2=['VeriPura Core audit trail','',tid+' | consignment '+meta.consignment_id,'Route: '+CUR.name,'Owner: '+(ow.name?ow.name+', ':'')+ow.label,'Retention: kept permanently. It cannot be deleted by anyone.','Access: only the owner can read this trail.','Entries: '+rows.length,meta.note,''];
+  rows.forEach(function(r){P2.push(r.n+'. '+r.time+'  '+r.by+'  '+r.event);trWrap(r.detail,96,'    ').forEach(function(x){P2.push(x)});P2.push('    link '+r.link.slice(0,32)+'...')});
+  if(ans.length){P2.push('');P2.push('Anchors (example)');ans.forEach(function(a){P2.push(a.anchor_id+' covers '+a.entries_covered+' entries, '+a.fingerprint.slice(0,32)+'...')})}
+  return {name:tid+'.pdf',mime:'application/pdf',data:trPdf(P2.reduce(function(a,l){return a.concat(trWrap(l,100,''))},[]))}}
+function trSave(fl){var b=new Blob([fl.data],{type:fl.mime}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=fl.name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},2000)}
 function trKey(src){return src==='core'?'a'+SC+':'+HT[SC]+':'+curId():'f:'+curId()}
 function trChain(es){var prev='genesis',o=[];es.forEach(function(e){prev=sha256(prev+'|'+e.t+'|'+e.a+'|'+e.e+'|'+e.d);o.push(prev)});return o}
 function fe(L,a,e,d){var n=L.e.length;L.e.push({t:'t+'+pad(Math.floor(n*7/60))+':'+pad(n*7%60),a:a,e:e,d:d})}
@@ -1842,6 +1876,7 @@ function trailHTML(es,src){var k=trKey(src),an=ANCH[k]||[],ch=trChain(es),last=a
   es.forEach(function(e,i){h+='<tr><td>'+esc(e.t)+'</td><td>'+esc(e.a)+'</td><td>'+esc(e.e)+'</td><td>'+esc(e.d)+'</td><td class="pph">'+ch[i].slice(0,10)+'</td></tr>';an.forEach(function(q){if(q.n===i+1)h+='<tr class="ph"><td colspan="5">Anchored: '+esc(q.id)+' · covers '+q.n+' entries · '+q.link.slice(0,16)+'… (example)</td></tr>'})});
   return h+'</tbody></table>'}
 function trailBind(src){var g=function(i){return document.getElementById(i)},redo=function(){if(src==='core')apiPaint();else{var y=window.scrollY;view();window.scrollTo(0,y)}};
+  document.querySelectorAll('[data-trx]').forEach(function(b){b.onclick=function(){var es=trEntries(src),ow=trOwner(src);if(!ow.can||!es.length)return;var fmt=b.dataset.trx;trSave(trFile(src,fmt));if(src==='core')roundGo({t:'texp',fmt:fmt.toUpperCase(),n:es.length});else{foodLog(ow.label,'trail.exported',fmt.toUpperCase()+' · '+es.length+' entries');redo()}}});
   if(g('trTam'))g('trTam').onchange=function(){TR(src).tam=this.checked?1:0};if(g('trBd'))g('trBd').onchange=function(){TR(src).bd=this.checked?1:0};
   if(g('trAnch'))g('trAnch').onclick=function(){var a=anchorNow(src);if(!a)return;TR(src).res=null;if(src==='core')roundGo({t:'anch',n:a.n,link:a.link,id:a.id});else{foodLog('Core','audit.anchored',a.n+' entries · sha256:'+a.link.slice(0,16)+'… · example anchor '+a.id);redo()}};
   if(g('trVer'))g('trVer').onclick=function(){var k=trKey(src),an=ANCH[k]||[],a=an[an.length-1];if(!a)return;var es=trEntries(src).map(function(e){return {t:e.t,a:e.a,e:e.e,d:e.d}});var m=Math.min(Math.floor(a.n/2),es.length-1);
@@ -1882,6 +1917,7 @@ function apiSteps(){
     else if(r.t==='reply')s.push({t:'reply',key:r.key,rx:rx.slice()});
     else if(r.t==='reject')s.push({t:'reject',key:r.key,rx:rx.slice()});
     else if(r.t==='anch')s.push({t:'anch',n:r.n,link:r.link,id:r.id,rx:rx.slice()});
+    else if(r.t==='texp')s.push({t:'texp',fmt:r.fmt,n:r.n,rx:rx.slice()});
     else if(r.t==='averify')s.push({t:'averify',ok:r.ok,id:r.id,n:r.n,rx:rx.slice()});
     else if(r.t==='pseal'||r.t==='pver')s.push({t:r.t,ver:r.ver,hash:r.hash,valid:r.valid,rx:rx.slice()});
     else if(r.t==='ack'||r.t==='unack'){s.push({t:r.t,fid:r.fid,title:r.title,role:r.role,reason:r.reason,name:r.name,rx:rx.slice()});if(r.t==='ack'&&upd==='cb')s.push({t:'ackc',fid:r.fid,title:r.title,role:r.role,reason:r.reason,name:r.name,rx:rx.slice()})}
@@ -1970,7 +2006,7 @@ function foldHost(st){if(!st.cls)return '';var fi=foldInfo(),h='<div class="hok"
   return h}
 function chanBar(rest,st){var any=Object.keys(st.found).length,et=expTarget(st.rx);return '<div class="chsel"><label>Chase by <select id="chasChan"'+(rest?'':' disabled')+'>'+Object.keys(CHAN).map(function(k){return '<option value="'+k+'"'+(API.chan===k?' selected':'')+'>'+esc(CHAN[k].s)+'</option>'}).join('')+'</select></label><label class="cap"><input type="checkbox" id="chasLnk"'+(API.lnk?' checked':'')+(rest?'':' disabled')+'> Include a secure upload link</label><button class="btn" id="expPref"'+(rest?'':' disabled')+'>Alert settings</button> <button class="btn" id="expGo"'+(rest&&et&&!st.exp?'':' disabled')+' title="'+(et?'':'Needs a received certificate')+'">Run expiry check</button></div>'}
 function hostPaint(){var hp=$('#hostp');if(!hp)return;var k=hp.scrollTop;hp.innerHTML=hostHTML();hp.scrollTop=k;bindHost(hp)}
-function roundGo(){apiPause();var base=API.steps.filter(function(x){return !x.c}).length;API.pos=Math.min(API.pos,base);for(var q=0;q<arguments.length;q++)API.rounds.push(arguments[q]);API.steps=apiSteps();apiPlay()}
+function roundGo(){apiPause();for(var z=0;z<arguments.length;z++){var r0=arguments[z];if(r0.t==='ack'||r0.t==='unack'){var ow0=trOwner('core');if(!ow0.can){var sv0=STASH[SC+':'+ow0.role+':'+curId()],fl=FEV[SC+':'+curId()]=FEV[SC+':'+curId()]||[];fl.push({at:sv0?sv0.pos:0,a:'Host',e:r0.t==='ack'?'finding.acknowledged':'finding.acknowledgement_reversed',d:r0.title+' · by '+(r0.name&&r0.t==='ack'?r0.name+', ':'')+roleLabel(r0.role)+' · '+r0.reason})}}}var base=API.steps.filter(function(x){return !x.c}).length;API.pos=Math.min(API.pos,base);for(var q=0;q<arguments.length;q++)API.rounds.push(arguments[q]);API.steps=apiSteps();apiPlay()}
 function bindHost(hp){
   hp.querySelectorAll('input[data-t]').forEach(function(c){c.onchange=function(){if(c.checked)API.tick[c.dataset.t]=1;else delete API.tick[c.dataset.t];hostPaint()}});
   hp.querySelectorAll('button[data-c]').forEach(function(b){b.onclick=function(){var ch=API.chan,k=b.dataset.c,ln=API.lnk&&ch!=='register';setChase(k,ch,ln);if(ch==='register'){var d=docAt(k);CH[chKey()][d.t].status='replied';CH[chKey()][d.t].file=snake(d.t)+'.pdf';roundGo({t:'chase',key:k,chan:ch},{t:'reply',key:k})}else roundGo({t:'chase',key:k,chan:ch,lnk:ln})}});
@@ -2014,7 +2050,7 @@ function addView(v){
 function auditEntries(){
   var S=API.steps,o=[],q=function(k){return 't+'+pad(Math.floor(k*7/60))+':'+pad(k*7%60)};
   var tc=P.reduce(function(a,x){return a+x.checks.length},0),td=allDocs().filter(function(x){return !isDerived(x.d)}).length;
-  for(var k=0;k<API.pos;k++){var x=S[k],t=q(k);
+  for(var k=0;k<API.pos;k++){var x=S[k],t=q(k);trForeign(o,k,t);
     if(x.t==='create')o.push({t:t,a:'Host',e:'consignment.created',d:CUR.name+' · reference document via '+origin(API.rsrc,[refKey()]).type});
     else if(x.t==='req')o.push({t:t,a:'Core',e:'requirements.generated',d:td+' documents, '+tc+' checks'});
     else if(x.t==='docs'||x.t==='batch'){docsOf(x.keys).forEach(function(y){o.push({t:t,a:'Host',e:'document.received',d:y.d.t+' · version 1 · '+origin(x.src,[y.k]).type+' · sha256:'+docFp(y.d).slice(0,12)+'…'})})}
@@ -2030,6 +2066,7 @@ function auditEntries(){
     else if(x.t==='lused')o.push({t:t,a:'Core',e:'upload_link.used',d:docAt(x.key).t+' · checked on arrival'});
     else if(x.t==='revoke')o.push({t:t,a:'Host',e:'upload_link.revoked',d:docAt(x.key).t});
     else if(x.t==='anch')o.push({t:t,a:'Core',e:'audit.anchored',d:x.n+' entries · sha256:'+x.link.slice(0,16)+'… · example anchor '+x.id});
+    else if(x.t==='texp')o.push({t:t,a:trOwner('core').label,e:'trail.exported',d:x.fmt+' · '+x.n+' entries'});
     else if(x.t==='averify')o.push({t:t,a:'Host',e:'audit.verified',d:(x.ok?'matches ':'does not match ')+x.id});
     else if(x.t==='pseal')o.push({t:t,a:'Core',e:'passport.sealed',d:'Version '+x.ver+' · sha256:'+x.hash.slice(0,16)+'… · example seal'});
     else if(x.t==='pver')o.push({t:t,a:'Border post',e:'passport.verified',d:'Version '+x.ver+' · '+(x.valid?'matches the sealed record':'does not match the sealed record')});
@@ -2047,6 +2084,7 @@ function auditEntries(){
     else if(x.t==='rechk'){var f2=fixTarget();o.push({t:t,a:'Core',e:'checks.rerun',d:affected(f2).length+' checks for '+f2.d.t})}
     else if(x.t==='err'){var m={token:['request.rejected','401 invalid_token'],bad:['document.failed','unreadable_file'],dup:['request.rejected','409 duplicate_document'],miss:['requirements.checked',missingDocs(x.rx).length+' documents missing']}[x.k];o.push({t:t,a:'Core',e:m[0],d:m[1]})}
   }
+  trForeign(o,API.pos,q(Math.max(API.pos-1,0)));
   return o;
 }
 function apiView(v){
@@ -2067,7 +2105,7 @@ function openFromHost(id){
   document.body.classList.remove('hl');
   if(PK[id]!==CUR)loadPack(id,-1);
   pause();var r=HT[SC];if(r==='ff')ensureFF();ROLE=r;buildP(r);NP=P.length;build();if(r!=='ff')rs.value=r;
-  stashApi();var nk=SC+':'+HT[SC]+':'+curId(),sv=STASH[nk];HV='app';
+  stashApi();var nk=SC+':'+HT[SC]+':'+curId(),sv=STASH[nk];HV='app';if(!TOWN[SC+':'+curId()])TOWN[SC+':'+curId()]=HT[SC];
   API.on=true;API.playing=false;API.key=nk;
   if(sv){Object.assign(API,sv);API.rounds=sv.rounds.slice();API.tick=Object.assign({},sv.tick)}
   else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email';API.fplace='match';API.funrec=false;API.ackN=0;API.lnk=true}
@@ -2080,7 +2118,7 @@ function callOf(st){
   var id=cnsId(),auth='Authorization: Bearer <token>',js='Content-Type: application/json',c={};
   CTX={src:st.src||API.rsrc,keys:st.keys||[refKey()]};
   if(st.t==='create'){var m={};CUR.meta.forEach(function(q){m[snake(q[0])]=q[1]});
-    c={out:1,method:'POST',path:'/consignments',status:'201 Created',req:[auth,js],reqBody:Object.assign({external_reference:'ORD-'+curId().toUpperCase(),route:CUR.name,client:impName(curId()),origin:origin(API.rsrc,[refKey()]),consignment:m},API.rsrc==='erp'?{order:docData(erpTarget().d)}:{reference_document:API.mode==='data'?docData(erpTarget().d):{document_type:erpTarget().d.t,filename:snake(erpTarget().d.t)+'.pdf'}}),resBody:{id:id,status:'created',links:{requirements:'/v1/consignments/'+id+'/requirements',documents:'/v1/consignments/'+id+'/documents'}},note:'The host system registers the consignment. Names and references are examples.'}}
+    c={out:1,method:'POST',path:'/consignments',status:'201 Created',req:[auth,js],reqBody:Object.assign({external_reference:'ORD-'+curId().toUpperCase(),route:CUR.name,client:impName(curId()),origin:origin(API.rsrc,[refKey()]),consignment:m},API.rsrc==='erp'?{order:docData(erpTarget().d)}:{reference_document:API.mode==='data'?docData(erpTarget().d):{document_type:erpTarget().d.t,filename:snake(erpTarget().d.t)+'.pdf'}}),resBody:{id:id,status:'created',owner:{role:trOwner('core').label,name:trOwner('core').name||undefined},trail:{id:'trail_'+curId(),retention:'permanent',access:'owner_only'},links:{requirements:'/v1/consignments/'+id+'/requirements',documents:'/v1/consignments/'+id+'/documents'}},note:'The host system registers the consignment. Names and references are examples.'}}
   else if(st.t==='req'){c={out:1,method:'GET',path:'/consignments/'+id+'/requirements',status:'200 OK',req:[auth],resBody:{consignment_id:id,phases:P.map(function(p,i){return {number:i+1,name:p.n,documents_required:p.docs.map(function(d,j){return {document_type:d.t,typical_supplier:supplierOf(d),status:(i+':'+j)===refKey()?'received':isDerived(d)?'derived':'waiting'}}),checks:p.checks.length}}),totals:{documents:P.reduce(function(a,p){return a+p.docs.length},0),checks:P.reduce(function(a,p){return a+p.checks.length},0)}},note:'CORE generates the requirements for this route. The host decides how to show them.'}}
   else if(st.t==='batch'){var bl=docsOf(st.keys);
     c={out:1,method:'POST',path:'/consignments/'+id+'/batches',status:'202 Accepted',req:[auth,API.mode==='data'?js:'Content-Type: multipart/form-data; boundary=----vp'],reqBody:API.mode==='data'?{batch_id:'bat_example_001',origin:origin(),source:'extracted_data',documents:bl.map(function(x){return Object.assign({phase:x.i+1},docData(x.d))})}:{batch_id:'bat_example_001',origin:origin(),source:'files',documents:bl.map(function(x){return {phase:x.i+1,document_type:x.d.t,filename:snake(x.d.t)+'.pdf'}})},resBody:{consignment_id:id,batch_id:'bat_example_001',accepted:bl.length,documents:bl.map(function(x){return {document_id:'doc_'+snake(x.d.t),status:'processing'}})},note:'All selected documents in one request. CORE sorts them into the phases of the route.'}}
@@ -2093,6 +2131,7 @@ function callOf(st){
   else if(st.t==='rule'){var ru=ruleOf(),rb={consignment_id:id,topic:ru.topic,jurisdiction:ru.jurisdiction,status:ru.status,summary:ru.summary,expected:ru.expected,effect_on_checklist:'None today',affected_consignments:[id],source:ru.source,action_for_team:'Flag. Findings only, your team decides.'};if(ru.note)rb.note=ru.note;
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: rules.pending','X-VeriPura-Signature: sha256=<hmac>'],reqBody:Object.assign({event:'rules.pending'},rb),note:'CORE watches the rules for this route. The in-house team does not have to. The host decides how to alert its users.'}:{out:1,method:'GET',path:'/consignments/'+id+'/rule-updates',status:'200 OK',req:[auth],resBody:{updates:[rb]},note:'CORE watches the rules for this route. The host asks for updates and decides how to alert its users.'}}
   else if(st.t==='anch'){c={out:1,method:'POST',path:'/consignments/'+id+'/audit/anchors',status:'201 Created',req:[auth,js],reqBody:{anchor:'latest'},resBody:{anchor_id:st.id,entries_covered:st.n,fingerprint:{algorithm:'sha256',value:st.link},ledger:{name:'iota',status:'example'}},note:'Core links the entries in time order and anchors the latest link on the ledger. In this demonstration the anchor is an example and nothing is written to the real ledger.'}}
+  else if(st.t==='texp'){c={out:1,method:'GET',path:'/consignments/'+id+'/audit/export?format='+st.fmt.toLowerCase(),status:'200 OK',req:[auth],resBody:{trail_id:'trail_'+curId(),format:st.fmt.toLowerCase(),entries:st.n,owner:trOwner('core').label,retention:'permanent'},note:'Only the owner can export the trail. Each export is recorded in the trail.'}}
   else if(st.t==='averify'){c={out:1,method:'GET',path:'/consignments/'+id+'/audit/verify?anchor='+st.id,status:'200 OK',req:[auth],resBody:{anchor_id:st.id,entries_checked:st.n,valid:!!st.ok,statement:st.ok?'Nothing was changed or back-dated.':'The trail does not match the anchor.'},note:'Anyone can recompute the links and compare them with the anchor.'}}
   else if(st.t==='pseal'){c={out:1,method:'POST',path:'/consignments/'+id+'/passport',status:'201 Created',req:[auth,js],reqBody:{include:['findings','evidence','acknowledgements','documents'],seal:true},resBody:{passport_id:'pas_'+id+'_v'+st.ver,version:st.ver,fingerprint:{algorithm:'sha256',value:st.hash},seal:{ledger:'iota',status:'example',entry:'iota_example_'+pad(st.ver)},verify_url:'https://verify.example/passport/'+id+'/v'+st.ver+'?f='+st.hash.slice(0,16),decision:'Findings only. The decision rests with your team.'},note:'Core builds the Passport, fingerprints it and seals the fingerprint. In this demonstration the seal is an example and nothing is written to the real ledger.'}}
   else if(st.t==='pver'){c={out:1,method:'GET',path:'/passports/pas_'+id+'_v'+st.ver+'/verify?fingerprint='+st.hash.slice(0,16),status:'200 OK',req:['Accept: application/json'],resBody:{passport_id:'pas_'+id+'_v'+st.ver,version:st.ver,matches_sealed_record:!!st.valid,checked:'sha256 recomputed from the Passport content'},note:st.valid?'A border post verifies by QR code. The recomputed fingerprint matches the sealed one.':'The recomputed fingerprint does not match the sealed one, so the Passport was changed after sealing.'}}
@@ -2146,8 +2185,7 @@ function callHTML(st,k,open){
 function auditHTML(){
   var es=auditEntries(),id=cnsId();
   var h='<div class="bl">Request</div><pre><span class="h">GET '+esc(API_BASE)+'/consignments/'+id+'/audit\nAuthorization: Bearer &lt;token&gt;</span></pre><div class="bl">Entries so far · times are relative to the first call</div>';
-  if(!es.length)return h+'<div class="note">No entries yet.</div>';
-  h+=trailHTML(es,'core');
+  h+=trailPanel('core');
   return h+'<div class="note">Every entry is kept and linked to the one before it. A replaced document stays as an earlier version, so each check can be traced to the file and version it used.</div>';
 }
 function apiPaint(){
