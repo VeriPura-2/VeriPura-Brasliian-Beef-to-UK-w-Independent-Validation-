@@ -1904,7 +1904,7 @@ function docFp(d){return sha256(d.t+'|'+d.ref+'|'+JSON.stringify(d.rows||[]))}
 function TR(src){return TRS[src]=TRS[src]||{tam:0,bd:0,res:null}}
 
 var TOWN={},FEV={},HREV=0,NXT='';
-function reveal(el){if(!el)return;var r=el.getBoundingClientRect(),vh=window.innerHeight;if(r.top>=128&&r.top<=vh*0.5)return;el.style.scrollMarginTop='140px';el.scrollIntoView({behavior:'smooth',block:'start'})}
+function reveal(el){if(!el)return;if(typeof PRS!=='undefined'&&PRS.on){if(PRS.quiet)return;var rr=el.getBoundingClientRect();if(rr.top>=128&&rr.top<=window.innerHeight*0.5)return;prWin(window.scrollY+rr.top-140);return}var r=el.getBoundingClientRect(),vh=window.innerHeight;if(r.top>=128&&r.top<=vh*0.5)return;el.style.scrollMarginTop='140px';el.scrollIntoView({behavior:'smooth',block:'start'})}
 function trForeign(o,at,t){(FEV[SC+':'+curId()]||[]).forEach(function(f){if(f.at===at)o.push({t:t,a:f.a,e:f.e,d:f.d})})}
 function trOwner(src){var cid=curId(),o;
   if(src==='core'){var k=SC+':'+cid,r=TOWN[k]||HT[SC];o={role:r,label:roleLabel(r),name:SC===3?(r==='exp'?expName(cid):impName(cid)):'',can:HT[SC]===r,team:false,viewer:roleLabel(HT[SC])}}
@@ -2427,18 +2427,34 @@ function prVis(sels){for(var n=0;n<(sels||[]).length;n++){var e=document.querySe
 function prVars(){var c=$('#pres'),hb=$('#hostBar'),r=document.documentElement.style;
   r.setProperty('--prh',((c&&c.classList.contains('on')?c.offsetHeight:0)+(document.body.classList.contains('prplayer')?84:12)+14)+'px');
   r.setProperty('--hh',(hb&&hb.offsetParent!==null?hb.offsetHeight:($('.top')?$('.top').offsetHeight:66))+'px')}
-function prFood(s,hh,card,again){var at=prVis(s.at);if(at&&s.card)at=at.closest('.card')||at;
-  if(at){var d=at.getBoundingClientRect().top-hh-12;if(!again||Math.abs(d)>40)window.scrollBy({top:d,behavior:'smooth'})}else if(!again)window.scrollTo({top:0,behavior:'smooth'});
-  setTimeout(function(){var hl=prVis(s.hl);if(!hl)return;if(again){hl.classList.remove('pulse');void hl.offsetWidth;hl.classList.add('pulse')}
-    var r=hl.getBoundingClientRect(),cr=card.getBoundingClientRect();if(r.top<hh||r.bottom>cr.top-8)window.scrollBy({top:r.top-Math.round(window.innerHeight*0.3),behavior:'smooth'})},again?1000:900)}
+function prPulse(e){if(e){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse')}}
+/* slow, single-pass scrolling: slow enough to explain what is on screen; no movement when the target is already well placed */
+var PRA={};
+function prAnim(key,get,set,to,min,max){var from=get(),d=to-from;if(Math.abs(d)<24)return;var id=(PRA[key]||0)+1;PRA[key]=id;
+  var dur=Math.min(max,Math.max(min,Math.abs(d)*2.4)),t0=null;
+  function ease(t){return t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2}
+  function step(ts){if(PRA[key]!==id)return;if(t0===null)t0=ts;var k=Math.min(1,(ts-t0)/dur);set(from+d*ease(k));if(k<1)requestAnimationFrame(step)}
+  requestAnimationFrame(step)}
+function prWin(y){y=Math.max(0,y);var d=y-window.scrollY;if(Math.abs(d)>900)window.scrollTo(0,y-(d>0?900:-900));
+  prAnim('win',function(){return window.scrollY},function(v){window.scrollTo(0,v)},y,1000,2600)}
+/* Food: wait for the target to exist, then place it in one slow move */
+function prFood(s,hh,card){var n=0;
+  setTimeout(function wait(){var need=s.at&&s.at.length&&!prVis(s.at);if(need&&n++<25){setTimeout(wait,120);return}
+    setTimeout(function(){var at=prVis(s.at),hl=prVis(s.hl),vh=window.innerHeight,cr=card.getBoundingClientRect(),d;
+      if(at&&s.card)at=at.closest('.card')||at;
+      if(at){var tg=s.fr?Math.round(vh*s.fr):hh+12;d=at.getBoundingClientRect().top-tg;if(Math.abs(d)<60)d=0}else d=-window.scrollY;
+      if(hl){var r=hl.getBoundingClientRect();if(r.top-d<hh||r.bottom-d>cr.top-8)d=r.top-Math.round(vh*0.3)}
+      if(d)prWin(window.scrollY+d);prPulse(hl)},120)},s.delay||0)}
+/* Food: the documents that exist for this consignment count as received, so the checks run on them (genuinely missing documents stay Not checked) */
+function prFoodDocs(){if(SC!==1)return;var n=0;PALL.forEach(function(p){p.docs.forEach(function(d){if(isDerived(d)||d.real===3)return;if(!FARR[d.t]){FARR[d.t]=1;n++}})});REQ=true;if(n)foodRebuild()}
 function prAll(){if(SC!==1)return;var t=totals();if(t.ok+t.mis+t.rev+t.nc===0){pause();ST.pos=STEPS.length;calc();nav()}}
 /* put what is being demonstrated at the top of the screen and clear of the card */
 function prShow(s){setTimeout(function(){
   prVars();var core=document.body.classList.contains('api')&&API.on&&!document.body.classList.contains('hl'),hl=prVis(s.hl),hh=parseInt(getComputedStyle(document.documentElement).getPropertyValue('--hh'))||66,card=$('#pres');
-  if(core){var g=$('.apigrid');if(g)window.scrollTo({top:Math.max(0,window.scrollY+g.getBoundingClientRect().top-hh-10),behavior:'smooth'});
-    var pane=hl&&hl.closest('#hostp,#apip');if(pane){var pr=pane.getBoundingClientRect(),er=hl.getBoundingClientRect();pane.scrollTo({top:pane.scrollTop+er.top-pr.top-14,behavior:'smooth'})}}
-  else{prFood(s,hh,card,false);setTimeout(function(){prFood(s,hh,card,true)},1500)}
-  if(hl){hl.classList.remove('pulse');void hl.offsetWidth;hl.classList.add('pulse')}},300)}
+  if(core){var g=$('.apigrid');if(g)prAnim('win',function(){return window.scrollY},function(v){window.scrollTo(0,v)},Math.max(0,window.scrollY+g.getBoundingClientRect().top-hh-10),900,1800);
+    var pane=hl&&hl.closest('#hostp,#apip');if(pane){var pr=pane.getBoundingClientRect(),er=hl.getBoundingClientRect();if(er.top<pr.top+8||er.bottom>pr.bottom-30)prAnim('pane'+pane.id,function(){return pane.scrollTop},function(v){pane.scrollTop=v},pane.scrollTop+er.top-pr.top-14,800,2000)}}
+  else{prFood(s,hh,card);return}
+  prPulse(hl)},300)}
 function prPk(){return PRS.sc==='ff'?'maspo':'beef'}
 function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost(prPk())}
 function prAt(t){apiPause();var n=API.steps.length;if(t){var ix=-1;API.steps.forEach(function(s,k){if(ix<0&&s.t===t)ix=k});if(ix>=0)n=ix+1}if(API.pos<n){API.pos=n;apiPaint();apiPlayer()}}
@@ -2529,30 +2545,30 @@ imp:{name:'Importer (Food)',stops:[
 {s:1,lead:'Documents are read by content, and gaps are chased.',
  w:['Tick what has arrived','Outstanding documents are listed with their supplier','A message can go to the supplier'],
  n:'Tick the documents, then press Validate before shipment.',
- go:function(){prSetup('imp');go(-2);setTimeout(function(){if(!REQ){var g=$('#genReq');if(g)g.click()}},400)},hl:['#faAll','#faGo','#goVal','#genReq']},
+ go:function(){prSetup('imp');go(-2);PRS.quiet=true;setTimeout(function(){if(!REQ){var g=$('#genReq');if(g)g.click()}},400);setTimeout(function(){var a=$('#faAll'),m=$('#faGo');if(a&&m){a.click();m.click()}else prFoodDocs()},1700);setTimeout(function(){PRS.quiet=false},2600)},hl:['#goVal','#faGo','#faAll']},
 {s:1,lead:'Every check shows its source. Core does not guess.',
  w:['All checks of the phase appear at once','Pass, Flag or Not checked','Select a finding to see the document field'],
  n:'Press Run on the phase, then open one finding.',
- go:function(){prSetup('imp');go(0)},hl:['#runBtn']},
+ go:function(){prSetup('imp');prFoodDocs();go(0)},hl:['#runBtn']},
 {s:1,lead:'A flag is acknowledged by a person, and it is recorded.',
  w:['Acknowledge with a name and a reason','The role is recorded with it','The verdict line counts acknowledged flags'],
  n:'Run the phase, open a flag, acknowledge it.',
- go:function(){prSetup('imp');go(prFlagPh())},hl:['#runBtn']},
+ go:function(){prSetup('imp');prFoodDocs();go(prFlagPh())},hl:['#runBtn']},
 {s:0,lead:'Core looks for what a tired eye misses.',
  w:['Stamps, signatures and signs of editing','This example is illustrative','Core shows evidence, your team decides'],
  n:'Skip this one in the short version.',
- go:function(){prSetup('imp');prRes()},hl:['#altBtn']},
+ go:function(){prSetup('imp');prFoodDocs();prRes()},hl:['#altBtn']},
 {s:1,lead:'Seal the Passport and any later change shows.',
  w:['Sealed as version 1','A change after sealing is flagged','The earlier seal stays on record'],
  n:'Change one item, then reseal.',
- go:function(){prSetup('imp');prAll();prRes()},hl:['#ppFood','#finds','.stats']},
+ go:function(){prSetup('imp');prFoodDocs();prAll();prRes()},hl:['#ppFood','#finds','.stats']},
 {s:1,lead:'The trail is yours, permanent and exportable.',
  w:['The importer owns the trail','The tamper check shows where a chain breaks','Export as JSON, CSV or PDF'],
  n:'Run the tamper test, then export.',
- go:function(){prSetup('imp');prAll();prRes()},hl:['#trVer','#trAnch','#trBd']}
+ go:function(){prSetup('imp');prFoodDocs();prAll();prRes()},hl:['#trVer','#trAnch','#trBd']}
 ]}};
-(function(){var A=[[],['#genReq'],['#faAll','#faGo'],['.phase-head'],['.phase-head'],['#altBtn'],['#ppFood','.stats'],['#trVer']];
-  PRSCR.imp.stops.forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1})})();
+(function(){var A=[[],['#genReq'],['#goVal','#faAll'],['.phase-head'],['.phase-head'],['#altBtn'],['#ppFood','.stats'],['#trVer']];
+  PRSCR.imp.stops.forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1;if(i===1)st.fr=0.4;if(i===2)st.delay=2400})})();
 function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return !PRS.short||s.s})}
 function prPlace(){var c=$('#pres');if(!c)return;c.classList.toggle('up',PRS.left);c.classList.toggle('mini',PRS.mini)}
 function prPaint(){
@@ -2590,8 +2606,8 @@ function prStart(k){/* each script starts from a fresh page, so nothing from an 
   var ok=false;try{sessionStorage.setItem('vpPres',JSON.stringify({k:k,s:PRS.short}));ok=true}catch(e){}
   if(ok){location.reload();return}
   prGo(k)}
-function prGo(k){PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
-function prClose(){document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
+function prGo(k){document.documentElement.style.scrollBehavior='auto';PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
+function prClose(){document.documentElement.style.scrollBehavior='';document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
 function prPick(){
   var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
   c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
