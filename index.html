@@ -339,6 +339,35 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
 @media (max-width:1100px){.cols{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:860px){.player{left:0;padding:10px 18px}.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
 @media print{aside,.top,.banner,.pager,.btn,.player,.drawer,.dov{display:none!important}body{background:#fff}main{max-width:none}}
+
+#prTab{position:fixed;right:0;top:44%;z-index:40;writing-mode:vertical-rl;font:inherit;font-size:12px;letter-spacing:.06em;padding:10px 5px;border:1px solid var(--line);border-right:0;background:var(--card);color:var(--mut);border-radius:8px 0 0 8px;cursor:pointer;opacity:.55}
+#prTab:hover,#prTab:focus-visible{opacity:1}
+body.pron #prTab,body.prhide #pres,body.prhide #prTab{display:none!important}
+#pres{display:none;position:fixed;left:290px;right:18px;bottom:84px;z-index:45;background:var(--card);color:var(--ink);border:1.5px solid var(--gold-bg);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.28);padding:10px 16px}
+#pres.on{display:block}
+body.hosted #pres{left:18px}
+#pres.up{bottom:auto;top:76px}
+body.pron main#view,body.pron #hostp{scroll-padding-bottom:170px}
+body.pron:not(.hosted) main#view{padding-bottom:190px}
+#pres .pgrid{display:grid;grid-template-columns:1fr auto;gap:6px 22px;align-items:center}
+#pres .phd{display:flex;align-items:center;gap:6px;margin-bottom:2px}
+#pres .pct{font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--mut)}
+#pres .plead{font-size:17px;font-weight:700;line-height:1.3;margin-bottom:4px}
+#pres .pwl{display:inline;font-size:11.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);margin-right:10px}
+#pres ul{display:inline-flex;flex-wrap:wrap;gap:2px 18px;list-style:none;margin:0;padding:0;font-size:14px;color:var(--ink2);vertical-align:baseline}
+#pres li::before{content:"\2022\00a0";color:var(--gold)}
+#pres button{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--card2);color:var(--ink);border-radius:8px;padding:6px 11px;cursor:pointer;min-height:34px}
+#pres button.gold{background:var(--gold-bg);color:var(--gold-ink);border-color:var(--gold-bg);font-weight:700}
+#pres button:disabled{opacity:.4;cursor:default}
+#pres .pr{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+#pres .pft{display:flex;gap:8px}
+#pres .popt{display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;justify-content:flex-end;font-size:12.5px;color:var(--mut)}
+#pres .popt label{display:flex;gap:5px;align-items:center}
+#pres .pbt{display:flex;gap:6px}
+#pres.mini .pbody,#pres.mini .pr{display:none}
+#pres.mini .pgrid{grid-template-columns:1fr}
+#pres.mini{left:auto}
+@media (max-width:860px){#pres,#pres.up{left:12px;right:12px}#pres .pgrid{grid-template-columns:1fr}#pres .pr{align-items:flex-start}}
 </style>
 </head>
 <body>
@@ -2374,6 +2403,148 @@ var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
 $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
 $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1){if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)}};
+/* ---------- presenter mode ---------- */
+var PRS={on:false,sc:'ff',i:0,short:false,move:true,left:false,mini:false,win:null,hide:false};
+function prSetup(k){
+  var sc=k==='ff'?2:1,pk=k==='ff'?'maspo':'beef';
+  if(SC!==sc)setScenario(sc);
+  if(curId()!==pk){$('#packSel').value=pk;$('#packSel').onchange()}
+}
+function prHl(sels){setTimeout(function(){for(var n=0;n<sels.length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse');reveal(e);return}}},300)}
+function prOpen(){if(document.body.classList.contains('hl')||!API.on)openFromHost('maspo')}
+function prAt(t){apiPause();var n=API.steps.length;if(t){var ix=-1;API.steps.forEach(function(s,k){if(ix<0&&s.t===t)ix=k});if(ix>=0)n=ix+1}if(API.pos<n){API.pos=n;apiPaint();apiPlayer()}}
+function prRun(t){prOpen();if(API.stage==='ref'){API.rsrc='folder';view();var g=$('#goRun');if(g)g.click()}prAt(t)}
+function prFlagPh(){var f=0;for(var i=0;i<P.length;i++){if(P[i].checks.some(function(c){return c.s==='mis'||c.s==='rev'})){f=i;break}}return f}
+function prRes(){var b=$('#resBtn');if(b)b.click()}
+var PRSCR={
+ff:{name:'Forwarder (Core)',stops:[
+{s:1,lead:'One shipment, many rules, many parties. Core turns it into one checked file.',
+ w:['The forwarder’s list of client files','Open Compliance to enter a file','Every party works from the same file'],
+ n:'Set the scene in 30 seconds. Maspo groupage from Poland is a real consignment.',
+ go:function(){prSetup('ff');showHost()},hl:['#hostBar .ht[data-t="app"]']},
+{s:1,lead:'The requirements come from the shipment, not from a checklist.',
+ w:['Built from route, commodity and origin','Grouped by phase','Each line names who normally supplies it'],
+ n:'Next sends the folder and stops once the requirements are back.',
+ go:function(){prRun('req')},hl:['.ckl','#hostp']},
+{s:1,lead:'Core reads documents by content, not by file name.',
+ w:['Each file recognised by its content','The batch placed by seller and buyer names','One drop is one shipment'],
+ n:'Point at the box that says the folder was read by content.',
+ go:function(){prRun('req')},hl:['#hostp .hok']},
+{s:1,lead:'Core shows the evidence. Your team decides.',
+ w:['Pass, Flag or Not checked on every check','A source behind each one','Not supplied is stated openly'],
+ n:'Open one flag and read its source aloud.',
+ go:function(){prRun();prAt(null)},hl:['#hostp .cn','#hostp']},
+{s:1,lead:'Gaps close themselves.',
+ w:['A chase goes to the right party by the chosen channel','A single-use upload link','Expiry alerts before a certificate lapses'],
+ n:'Chase one missing document, then show the expiry alert settings.',
+ go:function(){prRun();prAt(null)},hl:['#hostp .ckl .chs','#hostp .ckl']},
+{s:0,lead:'Rules change while the cargo moves.',
+ w:['The Rule update notice sits on the live file','It names the rule and its source','Your team decides what to change'],
+ n:'Skip this one in the short version.',
+ go:function(){prRun();var b=document.querySelector('.apihead button[data-k="cs"][data-v="rule"]');if(b&&!b.classList.contains('on'))b.click();prAt(null)},hl:['#hostp .hinfo']},
+{s:0,lead:'Everyone works on the same file, each with their own view.',
+ w:['Switch “I am” between Forwarder and Broker','Each role sees what concerns it','Acknowledgements are recorded by role'],
+ n:'Switch the role, then switch back.',
+ go:function(){prRun();prAt(null)},hl:['#hostBar .seg']},
+{s:1,lead:'The record stands up to an auditor, and it runs through an API.',
+ w:['A permanent trail for this consignment','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
+ n:'Close on the export.',
+ go:function(){prRun();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
+]},
+imp:{name:'Importer (Food)',stops:[
+{s:1,lead:'You carry the liability. Core gives you the evidence.',
+ w:['The phases of the route in the Workflow menu','One consignment, one file','Real documents are marked Provided'],
+ n:'Open the Workflow group once.',
+ go:function(){prSetup('imp');go(-1)},hl:['#wfLbl']},
+{s:1,lead:'The requirements come from your product and route.',
+ w:['Documents listed by phase','Who supplies each one','The checks behind each phase'],
+ n:'Press Generate requirements.',
+ go:function(){prSetup('imp');go(-2)},hl:['#genReq']},
+{s:1,lead:'Documents are read by content, and gaps are chased.',
+ w:['Tick what has arrived','Outstanding documents are listed with their supplier','A message can go to the supplier'],
+ n:'Tick the documents, then press Validate before shipment.',
+ go:function(){prSetup('imp');go(-2)},hl:['#faAll','#faGo','#goVal','#genReq']},
+{s:1,lead:'Every check shows its source. Core does not guess.',
+ w:['All checks of the phase appear at once','Pass, Flag or Not checked','Select a finding to see the document field'],
+ n:'Press Run on the phase, then open one finding.',
+ go:function(){prSetup('imp');go(0)},hl:['#runBtn']},
+{s:1,lead:'A flag is acknowledged by a person, and it is recorded.',
+ w:['Acknowledge with a name and a reason','The role is recorded with it','The verdict line counts acknowledged flags'],
+ n:'Run the phase, open a flag, acknowledge it.',
+ go:function(){prSetup('imp');go(prFlagPh())},hl:['#runBtn']},
+{s:0,lead:'Core looks for what a tired eye misses.',
+ w:['Stamps, signatures and signs of editing','This example is illustrative','Core shows evidence, your team decides'],
+ n:'Skip this one in the short version.',
+ go:function(){prSetup('imp');prRes()},hl:['#altBtn']},
+{s:1,lead:'Seal the Passport and any later change shows.',
+ w:['Sealed as version 1','A change after sealing is flagged','The earlier seal stays on record'],
+ n:'Change one item, then reseal.',
+ go:function(){prSetup('imp');prRes()},hl:['#ppFood','#finds','.stats']},
+{s:1,lead:'The trail is yours, permanent and exportable.',
+ w:['The importer owns the trail','The tamper check shows where a chain breaks','Export as JSON, CSV or PDF'],
+ n:'Run the tamper test, then export.',
+ go:function(){prSetup('imp');prRes()},hl:['#trVer','#trAnch','#trBd']}
+]}};
+function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return !PRS.short||s.s})}
+function prPlace(){var c=$('#pres');if(!c)return;c.classList.toggle('up',PRS.left);c.classList.toggle('mini',PRS.mini)}
+function prPaint(){
+  var c=$('#pres');if(!c)return;var L=prList(),s=L[PRS.i];
+  if(!s){return}
+  var h='<div class="pgrid"><div class="pl"><div class="phd"><span class="pct">'+esc(PRSCR[PRS.sc].name)+' · '+(PRS.i+1)+' of '+L.length+'</span><span class="sp"></span>'
+   +'<button id="prMini" aria-label="Minimise" title="Minimise">'+(PRS.mini?'+':'\u2212')+'</button><button id="prX" aria-label="Close presenter mode" title="Close">\u00d7</button></div>'
+   +'<div class="plead">'+esc(s.lead)+'</div>'
+   +'<div class="pbody"><span class="pwl">Watch for</span><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div></div>'
+   +'<div class="pr"><div class="pft"><button id="prBack"'+(PRS.i===0?' disabled':'')+'>Back</button><button class="gold" id="prNext"'+(PRS.i>=L.length-1?' disabled':'')+'>Next</button><button id="prGo">Take me there</button></div>'
+   +'<div class="popt"><label><input type="checkbox" id="prMove"'+(PRS.move?' checked':'')+'> Next moves the screen</label>'
+   +'<label><input type="checkbox" id="prShort"'+(PRS.short?' checked':'')+'> Short version</label>'
+   +'<span class="pbt"><button id="prSide" title="Move the card to the top or the bottom">Top/bottom</button><button id="prNotes">Notes</button><button id="prHide" title="Hide the card for a clean recording. Press P to bring it back">Hide</button></span></div></div></div>';
+  c.innerHTML=h;prPlace();
+  $('#prMini').onclick=function(){PRS.mini=!PRS.mini;prPaint()};
+  $('#prX').onclick=function(){prClose()};
+  var b=$('#prBack');if(b)b.onclick=function(){prStep(-1)};
+  var nx=$('#prNext');if(nx)nx.onclick=function(){prStep(1)};
+  $('#prGo').onclick=function(){prMove()};
+  $('#prMove').onchange=function(){PRS.move=this.checked};
+  $('#prShort').onchange=function(){var cur=prList()[PRS.i];PRS.short=this.checked;var L2=prList(),k=L2.indexOf(cur);PRS.i=k>-1?k:Math.min(PRS.i,L2.length-1);prPaint();prNotes()};
+  $('#prSide').onclick=function(){PRS.left=!PRS.left;prPlace()};
+  $('#prNotes').onclick=function(){prNotesOpen()};
+  $('#prHide').onclick=function(){prHideSet(true)};
+  prNotes();
+}
+function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prHl(s.hl||[])}catch(e){}}
+function prStep(d){var L=prList(),n=PRS.i+d;if(n<0||n>=L.length)return;PRS.i=n;prPaint();if(PRS.move)prMove()}
+function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h)}
+function prStart(k){PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
+function prClose(){PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
+function prPick(){
+  var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
+  c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
+  $('#prX').onclick=prClose;$('#prShort0').onchange=function(){PRS.short=this.checked};
+  $('#prF').onclick=function(){prStart('ff')};$('#prI').onclick=function(){prStart('imp')};
+}
+function prNotesOpen(){
+  if(PRS.win&&!PRS.win.closed){PRS.win.focus();prNotes();return}
+  var w=window.open('','vpnotes','width=430,height=560');if(!w)return;
+  w.document.write('<!doctype html><meta charset="utf-8"><title>Presenter notes</title><style>body{font:15px/1.5 system-ui,sans-serif;margin:0;padding:16px;background:#0F2444;color:#fff}h1{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#D9A93F;margin:0 0 6px}.l{font-size:19px;font-weight:700;margin:6px 0 12px}.n{background:#1b3560;border-left:3px solid #D9A93F;padding:10px 12px;border-radius:6px;margin:10px 0}ul{padding-left:18px}button{font:inherit;padding:8px 14px;border-radius:8px;border:0;margin:6px 6px 0 0;cursor:pointer}.g{background:#D9A93F;color:#0F2444;font-weight:700}</style><div id="r"></div>');
+  w.document.close();PRS.win=w;prNotes();
+}
+function prNotes(){
+  var w=PRS.win;if(!w||w.closed)return;var L=prList(),s=L[PRS.i];if(!s)return;
+  w.document.getElementById('r').innerHTML='<h1>'+esc(PRSCR[PRS.sc].name)+' · '+(PRS.i+1)+' of '+L.length+'</h1><div class="l">'+esc(s.lead)+'</div><div class="n"><b>For you only</b><br>'+esc(s.n)+'</div><b>Watch for</b><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><button id="b">Back</button><button class="g" id="f">Next</button>';
+  w.document.getElementById('b').onclick=function(){prStep(-1)};w.document.getElementById('f').onclick=function(){prStep(1)};
+}
+(function(){
+  var c=document.createElement('div');c.id='pres';c.setAttribute('role','region');c.setAttribute('aria-label','Presenter card');document.body.appendChild(c);
+  var t=document.createElement('button');t.id='prTab';t.textContent='Presenter';t.setAttribute('aria-label','Open presenter mode');document.body.appendChild(t);
+  t.onclick=function(){if(!PRS.on)prPick()};
+  document.addEventListener('keydown',function(e){
+    if(e.target.closest&&e.target.closest('button,select,input,summary,textarea,[role="button"]'))return;
+    var k=e.key.toLowerCase();
+    if(k==='p'){if(PRS.hide){prHideSet(false)}else if(!PRS.on)prPick()}
+    else if(PRS.on&&!PRS.hide&&PRS.i>=0&&$('#prNext')){if(k==='n')prStep(1);else if(k==='b')prStep(-1);else if(k==='h')prHideSet(true)}
+  });
+})();
+
 setScenario(1);
 </script>
 </body>
