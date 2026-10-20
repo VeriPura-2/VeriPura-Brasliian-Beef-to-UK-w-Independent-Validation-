@@ -36,6 +36,9 @@ aside{width:272px;flex-shrink:0;background:var(--side);border-right:1px solid va
 .brand sup{font-family:var(--sans);font-size:10px;color:var(--mut)}
 .tag-demo{font-family:var(--mono);font-size:10px;letter-spacing:.1em;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:2px 6px;background:transparent}
 .nav-i{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;border-radius:8px;padding:9px 10px;color:var(--ink2);min-height:40px}
+.wf-head{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;cursor:pointer;text-align:left;padding:8px 10px;margin:6px 0 2px;border-radius:8px}
+.wf-head:hover{background:var(--tint)}.wf-sum{flex:1;text-transform:none;letter-spacing:0;font-size:12px;color:var(--ink);text-align:right}.wf-chev{display:inline-block;transition:transform .15s;font-size:16px}.wf-head[aria-expanded=true] .wf-chev{transform:rotate(90deg)}
+#phaseNav.shut .nav-i:not(.on){display:none}#phaseNav .nav-i .t{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .nav-i:hover{background:var(--tint)}
 .nav-i.on{background:var(--tint);color:var(--ink);font-weight:600}
 .nav-i .n{font-family:var(--mono);font-size:11px;color:var(--mut);width:22px;flex-shrink:0}
@@ -350,7 +353,7 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
   <select id="packSel" aria-label="Choose a consignment"></select>
   <button class="nav-i" data-go="-2" id="startBtn"><span class="n">00</span><span class="t">Start from a document</span></button>
   <button class="nav-i" data-go="-1"><span class="n">00</span><span class="t">Overview</span></button>
-  <div class="side-sec label" id="wfLbl">Workflow</div>
+  <button class="side-sec label wf-head" id="wfLbl" aria-expanded="false"><span>Workflow</span><span class="wf-sum" id="wfSum"></span><span class="wf-chev" aria-hidden="true">›</span></button>
   <div id="phaseNav"></div>
   <div class="side-sec label" id="resLbl">Results</div>
   <button class="nav-i" id="resBtn" data-go="11"><span class="n">12</span><span class="t">Findings report and audit trail</span></button>
@@ -695,6 +698,7 @@ function twinHTML(t){return '<div class="twin"><div class="sec-title"><span clas
 function vdHTML(ok,fl,nc,ak){var tot=ok+fl+nc;if(!tot)return '<div class="vd"><div class="vh">Verdict: no checks have run yet</div><div class="vn">The verdict is built only from check results.</div></div>';var f=fl>0,h=f?'Verdict: flags to resolve':nc>0?'Verdict: no flags, some checks not made':'Verdict: no flags';return '<div class="vd '+(f?'f':!nc?'p':'')+'"><div class="vh">'+h+'</div><div class="vs">Score: '+ok+' of '+tot+' checks passed · '+fl+' flag'+(fl===1?'':'s')+(ak!==undefined&&fl>0?' ('+ak+' acknowledged)':'')+' · '+nc+' not checked</div><div class="vn">Built only from the check results. Your team makes the decision.</div></div>'}
 function sum(i){var c=P[i].checks,p=c.filter(function(x){return x.s==='ok'}).length,m=c.filter(function(x){return x.s!=='ok'&&x.s!=='nc'}).length,n=c.filter(function(x){return x.s==='nc'}).length;return 'Result: '+p+' pass, '+m+' flag'+(m===1?'':'s')+', '+n+' not checked.'}
 /* ---------- navigation ---------- */
+var WFOPEN=false;
 function nav(){
   var rb=$('#resBtn');rb.dataset.go=NP;rb.querySelector('.n').textContent=pad(NP+1);
   $('#phaseNav').innerHTML=P.map(function(p,i){
@@ -702,6 +706,9 @@ function nav(){
     return '<button class="nav-i" data-go="'+i+'"><span class="n">'+pad(i+1)+'</span><span class="t">'+p.n+'</span><span class="dot '+d+'" title="'+(d?LBL[d]:'Not run')+'"></span></button>';
   }).join('');
   document.querySelectorAll('aside .nav-i').forEach(function(b){b.classList.toggle('on',+b.dataset.go===ST.cur);b.onclick=function(){go(+b.dataset.go)}});
+  document.querySelectorAll('#phaseNav .nav-i').forEach(function(b,i){b.title=P[i].n});
+  var pn=$('#phaseNav'),wl=$('#wfLbl'),inPh=ST.cur>=0&&ST.cur<NP;pn.classList.toggle('shut',!WFOPEN);wl.setAttribute('aria-expanded',WFOPEN?'true':'false');$('#wfSum').textContent=inPh?'Phase '+pad(ST.cur+1)+' of '+NP:NP+' phases';
+  wl.onclick=function(){WFOPEN=!WFOPEN;nav()};
 }
 function go(i){if(i<-3||i>NP)return;ST.cur=i;nav();view();window.scrollTo({top:0})}
 /* ---------- phase view ---------- */
