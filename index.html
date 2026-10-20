@@ -1537,7 +1537,7 @@ function loadPack(id,startCur){
 
 
 /* ---------- Core scenarios: API exchange ---------- */
-var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls',chan:'email',key:'',fplace:'match',funrec:false,ackN:0};
+var API={on:false,pos:0,mode:'data',upd:'callback',timer:null,playing:false,steps:[],json:[],stage:'ref',src:'drive',rsrc:'erp',rounds:[],tick:{},rx:[],cs:'',tab:'calls',chan:'email',key:'',fplace:'match',funrec:false,ackN:0,lnk:true};
 var ACKL={};
 var CH={},STASH={},HV='list',HFL=[],SEALS={},PPS={t:0,r:null},ANCH={},TRS={tam:0,bd:0,res:null},FLOG={};
 var CHAN={email:{t:'email',s:'Email'},register:{t:'public register search',s:'Register search'},whatsapp:{t:'WhatsApp',s:'WhatsApp'},line:{t:'LINE',s:'LINE'},sms:{t:'SMS',s:'SMS'}};
@@ -1581,7 +1581,8 @@ function supplierOf(d){var t=d.t;
   if(/licen|trq|permit|ched|notification|import/i.test(t))return 'Importer or agent';
   if(/haccp|residue|sisbov|traceab|establishment|slaughter|farm|analysis|test/i.test(t))return 'Producer';
   return 'Exporter'}
-function chaseDraft(k){var d=docAt(k),i=+k.split(':')[0];return {to:supplierOf(d),subject:'Document needed: '+d.t,body:'Please send the '+d.t+' for '+CUR.name+' (reference ORD-'+curId().toUpperCase()+'). It is needed for phase '+pad(i+1)+', '+P[i].n+'. Reply to this message or file it in the shared folder.'}}
+function lnkUrl(d){return 'https://upload.veripura.example/u/'+snake(d.t).slice(0,12)+'_example'}
+function chaseDraft(k,lnk){var d=docAt(k),i=+k.split(':')[0];return {to:supplierOf(d),subject:'Document needed: '+d.t,body:'Please send the '+d.t+' for '+CUR.name+' (reference ORD-'+curId().toUpperCase()+'). It is needed for phase '+pad(i+1)+', '+P[i].n+'. Reply to this message or file it in the shared folder.'+(lnk?' Or upload it here, no account needed: '+lnkUrl(d):'')}}
 function keyCt(rx){var m={};rx.forEach(function(k){var d=docAt(k);if(d)docKeys(d).forEach(function(q){m[q]=(m[q]||0)+1})});return m}
 function keyTot(){var m={};P.forEach(function(p){p.docs.forEach(function(d){if(d.real!==3)docKeys(d).forEach(function(q){m[q]=(m[q]||0)+1})})});return m}
 function effStat(c,rx,m,t){m=m||keyCt(rx);t=t||keyTot();return (c.k||[]).every(function(k){return (m[k]||0)>=Math.min(t[k]||0,2)})?c.s:'nc'}
@@ -1684,10 +1685,10 @@ function chKey(){return SC+':'+curId()}
 function chOf(t){var m=CH[chKey()];return m&&m[t]}
 function recipRole(d){var l=supplierOf(d),m=SC===3?{'Exporter':'exp','Importer or agent':'imp'}:{'Customs agent':'agt'},r=m[l]||null;return r===HT[SC]?null:r}
 function roleLabel(r){return {imp:'Importer',exp:'Exporter',ff:'Forwarder',agt:'Broker'}[r]||r}
-function setChase(k,chan){var d=docAt(k),m=CH[chKey()]=CH[chKey()]||{};m[d.t]={chan:chan,to:supplierOf(d),role:chan==='register'?null:recipRole(d),fromRole:HT[SC],from:SC===3?partyName(curId()):roleLabel(HT[SC]),cons:CUR.name,cid:curId(),phase:+k.split(':')[0]+1,pname:P[+k.split(':')[0]].n,status:'requested',seen:true,draft:chaseDraft(k)}}
+function setChase(k,chan,lnk){var d=docAt(k),m=CH[chKey()]=CH[chKey()]||{};m[d.t]={chan:chan,to:supplierOf(d),role:chan==='register'?null:recipRole(d),fromRole:HT[SC],from:SC===3?partyName(curId()):roleLabel(HT[SC]),cons:CUR.name,cid:curId(),phase:+k.split(':')[0]+1,pname:P[+k.split(':')[0]].n,status:'requested',seen:true,draft:chaseDraft(k,lnk),link:lnk?{id:'lnk_example_'+snake(d.t).slice(0,8),url:lnkUrl(d),status:'open'}:null}}
 function keyOfTitle(t){var f=allDocs().filter(function(x){return x.d.t===t})[0];return f&&f.k}
 function expTarget(rx){return allDocs().filter(function(x){return (rx||[]).indexOf(x.k)>-1&&x.d.real!==3&&!isDerived(x.d)&&/certificate|licen|permit|attestation/i.test(x.d.t)})[0]}
-function stashApi(){if(!API.key||API.stage!=='run')return;clearTimeout(API.timer);API.playing=false;var o={};['pos','mode','upd','stage','src','rsrc','cs','tab','chan','fplace','funrec','ackN'].forEach(function(f){o[f]=API[f]});o.rounds=API.rounds.slice();o.tick=Object.assign({},API.tick);STASH[API.key]=o}
+function stashApi(){if(!API.key||API.stage!=='run')return;clearTimeout(API.timer);API.playing=false;var o={};['pos','mode','upd','stage','src','rsrc','cs','tab','chan','fplace','funrec','ackN','lnk'].forEach(function(f){o[f]=API[f]});o.rounds=API.rounds.slice();o.tick=Object.assign({},API.tick);STASH[API.key]=o}
 function clearExchange(cid){var m=CH[SC+':'+cid];if(m)Object.keys(m).forEach(function(t){if(m[t].fromRole===HT[SC])delete m[t]});delete STASH[SC+':'+HT[SC]+':'+cid];(ACKL[SC+':'+cid]||[]).forEach(function(e){if(e.role===HT[SC])e.void=1});API.ackN=(ACKL[SC+':'+cid]||[]).length}
 function apiSteps(){
   var cs=API.cs,s=[],rk=refKey();
@@ -1708,7 +1709,8 @@ function apiSteps(){
       else{var ph={};r.keys.forEach(function(k){var i=+k.split(':')[0];(ph[i]=ph[i]||[]).push(k)});Object.keys(ph).sort(function(a,b){return a-b}).forEach(function(i){s.push({t:'docs',i:+i,keys:ph[i],src:r.src,rx:rx.slice()});after()})}
       P.forEach(function(p,i){if(!p.checks.length)return;var hasKey=r.keys.some(function(k){return +k.split(':')[0]===i}),ch=p.checks.some(function(c){return effStat(c,prev,m0,t0)!==effStat(c,rx,m1,t0)});if(hasKey||ch)s.push({t:upd,i:i,rx:rx.slice(),trig:trig})})
     }
-    else if(r.t==='chase')s.push({t:'chase',key:r.key,chan:r.chan||'email',rx:rx.slice()});
+    else if(r.t==='chase'){if(r.lnk)s.push({t:'ulink',key:r.key,rx:rx.slice()});s.push({t:'chase',key:r.key,chan:r.chan||'email',lnk:r.lnk,rx:rx.slice()})}
+    else if(r.t==='lused'||r.t==='revoke')s.push({t:r.t,key:r.key,rx:rx.slice()});
     else if(r.t==='reply')s.push({t:'reply',key:r.key,rx:rx.slice()});
     else if(r.t==='reject')s.push({t:'reject',key:r.key,rx:rx.slice()});
     else if(r.t==='anch')s.push({t:'anch',n:r.n,link:r.link,id:r.id,rx:rx.slice()});
@@ -1724,12 +1726,13 @@ function apiSteps(){
   if(cs==='rule')s.push({t:'rule',rx:rx.slice(),c:1});
   return s}
 function hostState(){
-  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},replied:{},acks:{},lastChase:null,lastChan:'email',exp:0,shared:false};
+  var S=API.steps,n=API.pos,o={created:false,req:false,found:{},frx:{},rx:[],chased:{},replied:{},acks:{},link:{},lastChase:null,lastChan:'email',exp:0,shared:false};
   for(var k=0;k<n;k++){var x=S[k];if(x.rx)o.rx=x.rx;
     if(x.t==='create')o.created=true;else if(x.t==='req')o.req=true;
     else if(x.t==='cb'||x.t==='poll'){o.found[x.i]=true;o.frx[x.i]=x.rx}
     else if(x.t==='chase'){o.chased[x.key]=true;o.lastChase=x.key;o.lastChan=x.chan||'email'}
     else if(x.t==='reply'){o.replied[x.key]=true;o.chased[x.key]=true}
+    else if(x.t==='ulink')o.link[x.key]='open';else if(x.t==='lused')o.link[x.key]='used';else if(x.t==='revoke')o.link[x.key]='revoked'
     else if(x.t==='accept'||x.t==='reject'){delete o.replied[x.key]}
     else if(x.t==='exp'){o.exp=x.days;o.expKey=x.key}
     else if(x.t==='ack')o.acks[x.fid]={role:x.role,reason:x.reason};
@@ -1776,7 +1779,7 @@ function hostHTML(){
   h+='</tbody></table>';
   if(st.lastChase){var cd=chaseDraft(st.lastChase),cdoc=docAt(st.lastChase),cl=CHAN[st.lastChan]||CHAN.email,rr=cdoc?recipRole(cdoc):null,ce=cdoc&&chOf(cdoc.t),pend=ce&&ce.status==='requested'&&st.lastChan!=='register';
     if(st.lastChan==='register')h+='<div class="msg"><div class="hlab">Register search run by VeriPura Core</div>Core searched the public registers for <b>'+esc(cdoc.t)+'</b> and found a possible match. It goes to a person for review before it counts. Sample result for the demonstration.</div>';
-    else h+='<div class="msg"><div class="hlab">Sent by VeriPura Core by '+esc(cl.t)+' to '+esc(cd.to)+'</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'<div class="cap" style="margin-top:6px">Sample text for the demonstration. Core sends it; the host does not.</div>'+(pend?'<div class="ibf" style="margin-top:8px">'+(rr?'<button class="btn" data-ib="role">Open the '+esc(roleLabel(rr))+' inbox</button>':'<button class="btn" data-ib="prev">Preview as supplier ('+esc(cd.to)+')</button>')+'<span class="cap">See what the recipient sees and send the document back.</span></div>':'')+'</div>'}
+    else h+='<div class="msg"><div class="hlab">Sent by VeriPura Core by '+esc(cl.t)+' to '+esc(cd.to)+'</div><b>'+esc(cd.subject)+'</b><br>'+esc(cd.body)+'<div class="cap" style="margin-top:6px">Sample text for the demonstration. Core sends it; the host does not.</div>'+(st.link[st.lastChase]?'<div class="cap" style="margin-top:6px">Secure upload link (example): '+esc(lnkUrl(cdoc))+' · '+({open:'open, works once',used:'used',revoked:'revoked, expired'}[st.link[st.lastChase]])+'</div>'+(st.link[st.lastChase]==='open'?'<button class="chs" data-rv="'+st.lastChase+'"'+(rest?'':' disabled')+'>Revoke link</button>':''):'')+(pend?'<div class="ibf" style="margin-top:8px">'+(rr?'<button class="btn" data-ib="role">Open the '+esc(roleLabel(rr))+' inbox</button>':'<button class="btn" data-ib="prev">Preview as supplier ('+esc(cd.to)+')</button>')+'<span class="cap">See what the recipient sees and send the document back.</span></div>':'')+'</div>'}
   if(st.exp){var et=st.expKey&&docAt(st.expKey);h+='<div class="hinfo"><b>Certificate expiring (example): '+esc(et?et.t:'')+'</b><br>Core alerts at 30, 14 and 7 days and starts a chase for the renewed certificate. Latest alert: '+st.exp+' days. Any reply goes to review before it counts.</div>'}
   var items=[];P.forEach(function(p,i){if(st.found[i]){var m=keyCt(st.frx[i]);p.checks.forEach(function(c){var e=effStat(c,st.frx[i],m,tt);if(e==='rev'||e==='mis')items.push({i:i,c:c,fid:fidOf(c)})})}});
   HFL=items;var AK=acksMap();
@@ -1788,12 +1791,14 @@ function foldHost(st){if(!st.cls)return '';var fi=foldInfo(),h='<div class="hok"
   if(fi.un&&!st.taught)h+='<div class="hinfo"><b>Waiting for you: '+esc(fi.un.name)+'</b><br>Core did not recognise this document type, so the file is held and not dropped. The admin team can teach Core the new type.<div class="ibf" style="margin-top:8px"><button class="btn" id="teachGo"'+(API.pos>=API.steps.length&&!API.playing?'':' disabled')+'>Ask admin to teach Core</button></div></div>';
   if(fi.un&&st.taught)h+='<div class="hok">'+esc(fi.un.name)+' was taught as <b>'+esc(docAt(fi.un.key).t)+'</b> and filed. Core now recognises this type.</div>';
   return h}
-function chanBar(rest,st){var any=Object.keys(st.found).length,et=expTarget(st.rx);return '<div class="chsel"><label>Chase by <select id="chasChan"'+(rest?'':' disabled')+'>'+Object.keys(CHAN).map(function(k){return '<option value="'+k+'"'+(API.chan===k?' selected':'')+'>'+esc(CHAN[k].s)+'</option>'}).join('')+'</select></label><button class="btn" id="expGo"'+(rest&&et&&!st.exp?'':' disabled')+' title="'+(et?'':'Needs a received certificate')+'">Run expiry check</button></div>'}
+function chanBar(rest,st){var any=Object.keys(st.found).length,et=expTarget(st.rx);return '<div class="chsel"><label>Chase by <select id="chasChan"'+(rest?'':' disabled')+'>'+Object.keys(CHAN).map(function(k){return '<option value="'+k+'"'+(API.chan===k?' selected':'')+'>'+esc(CHAN[k].s)+'</option>'}).join('')+'</select></label><label class="cap"><input type="checkbox" id="chasLnk"'+(API.lnk?' checked':'')+(rest?'':' disabled')+'> Include a secure upload link</label><button class="btn" id="expGo"'+(rest&&et&&!st.exp?'':' disabled')+' title="'+(et?'':'Needs a received certificate')+'">Run expiry check</button></div>'}
 function hostPaint(){var hp=$('#hostp');if(!hp)return;var k=hp.scrollTop;hp.innerHTML=hostHTML();hp.scrollTop=k;bindHost(hp)}
 function roundGo(){apiPause();var base=API.steps.filter(function(x){return !x.c}).length;API.pos=Math.min(API.pos,base);for(var q=0;q<arguments.length;q++)API.rounds.push(arguments[q]);API.steps=apiSteps();apiPlay()}
 function bindHost(hp){
   hp.querySelectorAll('input[data-t]').forEach(function(c){c.onchange=function(){if(c.checked)API.tick[c.dataset.t]=1;else delete API.tick[c.dataset.t];hostPaint()}});
-  hp.querySelectorAll('button[data-c]').forEach(function(b){b.onclick=function(){var ch=API.chan,k=b.dataset.c;setChase(k,ch);if(ch==='register'){var d=docAt(k);CH[chKey()][d.t].status='replied';CH[chKey()][d.t].file=snake(d.t)+'.pdf';roundGo({t:'chase',key:k,chan:ch},{t:'reply',key:k})}else roundGo({t:'chase',key:k,chan:ch})}});
+  hp.querySelectorAll('button[data-c]').forEach(function(b){b.onclick=function(){var ch=API.chan,k=b.dataset.c,ln=API.lnk&&ch!=='register';setChase(k,ch,ln);if(ch==='register'){var d=docAt(k);CH[chKey()][d.t].status='replied';CH[chKey()][d.t].file=snake(d.t)+'.pdf';roundGo({t:'chase',key:k,chan:ch},{t:'reply',key:k})}else roundGo({t:'chase',key:k,chan:ch,lnk:ln})}});
+  var cl=hp.querySelector('#chasLnk');if(cl)cl.onchange=function(){API.lnk=cl.checked};
+  hp.querySelectorAll('button[data-rv]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.rv),e=chOf(d.t);if(e&&e.link)e.link.status='revoked';roundGo({t:'revoke',key:b.dataset.rv})}});
   hp.querySelectorAll('button[data-ac]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.ac),e=chOf(d.t);if(e)e.status='accepted';roundGo({t:'accept',key:b.dataset.ac})}});
   hp.querySelectorAll('button[data-rj]').forEach(function(b){b.onclick=function(){var d=docAt(b.dataset.rj),e=chOf(d.t);if(e){e.status='requested';delete e.file}roundGo({t:'reject',key:b.dataset.rj})}});
   var cc=hp.querySelector('#chasChan');if(cc)cc.onchange=function(){API.chan=cc.value};
@@ -1838,6 +1843,9 @@ function auditEntries(){
     else if(x.t==='ing')o.push({t:t,a:'Host',e:'ingestion.received',d:foldInfo().files.length+(API.funrec?1:0)+' files · folder drop · sha256:<example>'});
     else if(x.t==='cls'){var fi=foldInfo();o.push({t:t,a:'Core',e:'ingestion.classified',d:fi.files.length+' files read by content · '+(fi.place==='match'?'matched to existing consignment':'new consignment')+(fi.un?' · 1 file held, not recognised':'')})}
     else if(x.t==='teach')o.push({t:t,a:'Host',e:'document_type.taught',d:docAt(x.key).t+' · by admin'});
+    else if(x.t==='ulink')o.push({t:t,a:'Core',e:'upload_link.created',d:docAt(x.key).t+' · single use'});
+    else if(x.t==='lused')o.push({t:t,a:'Core',e:'upload_link.used',d:docAt(x.key).t+' · checked on arrival'});
+    else if(x.t==='revoke')o.push({t:t,a:'Host',e:'upload_link.revoked',d:docAt(x.key).t});
     else if(x.t==='anch')o.push({t:t,a:'Core',e:'audit.anchored',d:x.n+' entries · sha256:'+x.link.slice(0,16)+'… · example anchor '+x.id});
     else if(x.t==='averify')o.push({t:t,a:'Host',e:'audit.verified',d:(x.ok?'matches ':'does not match ')+x.id});
     else if(x.t==='pseal')o.push({t:t,a:'Core',e:'passport.sealed',d:'Version '+x.ver+' · sha256:'+x.hash.slice(0,16)+'… · example seal'});
@@ -1877,12 +1885,12 @@ function openFromHost(id){
   stashApi();var nk=SC+':'+HT[SC]+':'+curId(),sv=STASH[nk];HV='app';
   API.on=true;API.playing=false;API.key=nk;
   if(sv){Object.assign(API,sv);API.rounds=sv.rounds.slice();API.tick=Object.assign({},sv.tick)}
-  else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email';API.fplace='match';API.funrec=false;API.ackN=0}
+  else{API.pos=0;API.stage='ref';API.rounds=[];API.tick={};API.rsrc='erp';API.src='drive';API.chan='email';API.fplace='match';API.funrec=false;API.ackN=0;API.lnk=true}
   API.steps=apiSteps();
   document.body.classList.add('api');ST.pos=0;ST.cur=-3;calc();nav();view();updPlayer();hostBar();window.scrollTo({top:0});
   if(sv)syncReplies();
 }
-function syncReplies(){var m=CH[chKey()]||{},rs=[];Object.keys(m).forEach(function(t){var e=m[t];if(e.status==='replied'&&!e.seen){e.seen=true;var k=keyOfTitle(t);if(k)rs.push({t:'reply',key:k})}});if(rs.length)roundGo.apply(null,rs)}
+function syncReplies(){var m=CH[chKey()]||{},rs=[];Object.keys(m).forEach(function(t){var e=m[t];if(e.status==='replied'&&!e.seen){e.seen=true;var k=keyOfTitle(t);if(k){if(e.link&&e.link.status==='used'&&!e.lseen){e.lseen=true;rs.push({t:'lused',key:k})}rs.push({t:'reply',key:k})}}});if(rs.length)roundGo.apply(null,rs)}
 function callOf(st){
   var id=cnsId(),auth='Authorization: Bearer <token>',js='Content-Type: application/json',c={};
   CTX={src:st.src||API.rsrc,keys:st.keys||[refKey()]};
@@ -1909,8 +1917,12 @@ function callOf(st){
   else if(st.t==='cls'){var fi1=foldInfo(),nid=fi1.place==='match'?id:'cns_new_example',cb1={event:'ingestion.classified',ingestion_id:'ing_example_001',files:fi1.files.map(function(f){return {filename:f.name,recognised_as:f.doc,phase:f.phase}}),unrecognised:fi1.un?[{filename:fi1.un.name,status:'held',reason:'document_type_not_recognised'}]:[],placement:fi1.place==='match'?{decision:'matched_existing_consignment',consignment_id:nid,matched_on:['seller_name','buyer_name'],seller:expName(curId()),buyer:impName(curId())}:{decision:'new_consignment',consignment_id:nid,built_around:fi1.anchor.kind,anchor_file:fi1.anchor.f.name}};
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: ingestion.classified','X-VeriPura-Signature: sha256=<hmac>'],reqBody:cb1,note:'CORE tells the host what each file is and where the batch belongs. Files it does not recognise are held for a person, not dropped.'}:{out:1,method:'GET',path:'/ingestions/ing_example_001',status:'200 OK',req:[auth],resBody:cb1,note:'The host asks about the drop. Files that are not recognised are held for a person, not dropped.'}}
   else if(st.t==='teach'){var tf=foldInfo();c={out:1,method:'PUT',path:'/ingestions/ing_example_001/files/'+FNAMES[6]+'/type',status:'200 OK',req:[auth,js],reqBody:{document_type:docAt(st.key).t,taught_by:'admin_example'},resBody:{filename:FNAMES[6],recognised_as:docAt(st.key).t,status:'filed'},note:'The admin team teaches Core the new document type. The held file is then filed against the consignment and its checks run.'}}
+  else if(st.t==='ulink'){var ud=docAt(st.key);c={out:1,method:'POST',path:'/consignments/'+id+'/outstanding/doc_'+snake(ud.t)+'/upload-links',status:'201 Created',req:[auth,js],reqBody:{single_use:true,expires:'set_by_host'},resBody:{link_id:'lnk_example_'+snake(ud.t).slice(0,8),url:lnkUrl(ud),single_use:true,status:'open',expires_at:'set by the host'},note:'A one-time link for a supplier who will never sign in to a new system. Expired or used links stop working. The address is an example.'}}
+  else if(st.t==='lused'){var ld=docAt(st.key),lb={event:'upload_link.used',consignment_id:id,link_id:'lnk_example_'+snake(ld.t).slice(0,8),document_type:ld.t,checked_on_arrival:{read_as:ld.t,matches_request:true},status:'used',next:'pending_review'};
+    c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: upload_link.used','X-VeriPura-Signature: sha256=<hmac>'],reqBody:lb,note:'The supplier uploaded without an account. Core checked the file on arrival. The result is held for review.'}:{out:1,method:'GET',path:'/consignments/'+id+'/outstanding/doc_'+snake(ld.t)+'/upload-links',status:'200 OK',req:[auth],resBody:lb,note:'The host asks about the link and finds it used. The result is held for review.'}}
+  else if(st.t==='revoke'){var rd=docAt(st.key);c={out:1,method:'DELETE',path:'/consignments/'+id+'/outstanding/doc_'+snake(rd.t)+'/upload-links/lnk_example_'+snake(rd.t).slice(0,8),status:'200 OK',req:[auth],resBody:{status:'revoked'},note:'The link stops working at once. The supplier sees that it has expired.'}}
   else if(st.t==='chase'){var cdd=docAt(st.key),cch=st.chan||'email',cdr=chaseDraft(st.key),cdi='doc_'+snake(cdd.t);
-    c=cch==='register'?{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:{channel:'public_register',document_type:cdd.t},resBody:{chase_id:'chs_example_001',status:'searching',channel:'public_register',result_goes_to:'review'},note:'The host asks Core to look for the document. Core searches public registers itself. Whatever it finds goes to a person for review before it counts.'}:{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:{channel:cch,recipient:{party:cdr.to}},resBody:{chase_id:'chs_example_001',status:'sent',channel:cch,recipient:{party:cdr.to},message:{subject:cdr.subject,body:cdr.body},reminders:'Core follows up if there is no reply',result_goes_to:'review'},note:'The host asks Core to chase. Core (the Compliance Concierge) sends the request itself by '+(CHAN[cch]||CHAN.email).t+'. Message text is sample text.'}}
+    c=cch==='register'?{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:{channel:'public_register',document_type:cdd.t},resBody:{chase_id:'chs_example_001',status:'searching',channel:'public_register',result_goes_to:'review'},note:'The host asks Core to look for the document. Core searches public registers itself. Whatever it finds goes to a person for review before it counts.'}:{out:1,method:'POST',path:'/consignments/'+id+'/outstanding/'+cdi+'/chase',status:'202 Accepted',req:[auth,js],reqBody:Object.assign({channel:cch,recipient:{party:cdr.to}},st.lnk?{upload_link:'lnk_example_'+snake(cdd.t).slice(0,8)}:{}),resBody:{chase_id:'chs_example_001',status:'sent',channel:cch,recipient:{party:cdr.to},message:{subject:cdr.subject,body:chaseDraft(st.key,st.lnk).body},reminders:'Core follows up if there is no reply',result_goes_to:'review'},note:'The host asks Core to chase. Core (the Compliance Concierge) sends the request itself by '+(CHAN[cch]||CHAN.email).t+'. Message text is sample text.'}}
   else if(st.t==='reply'){var rdd=docAt(st.key),rdi='doc_'+snake(rdd.t),rrb={event:'concierge.result.pending_review',consignment_id:id,chase_id:'chs_example_001',document_id:rdi,document_type:rdd.t,received_via:(chOf(rdd.t)||{chan:'public_register'}).chan==='register'?'public_register':((chOf(rdd.t)||{}).chan||'email'),status:'pending_review',action:'A person must accept or reject this before it counts.'};
     c=API.upd==='callback'?{out:0,method:'POST',path:hookUrl(),status:'204 No Content',req:['Content-Type: application/json','X-VeriPura-Event: concierge.result.pending_review','X-VeriPura-Signature: sha256=<hmac>'],reqBody:rrb,note:'Core found or received something. It is held for review. The result is a sample.'}:{out:1,method:'GET',path:'/consignments/'+id+'/outstanding/'+rdi,status:'200 OK',req:[auth],resBody:rrb,note:'The host asks about the chase and finds a result waiting for review. The result is a sample.'}}
   else if(st.t==='accept'||st.t==='reject'){var acd=docAt(st.key);c={out:1,method:'PUT',path:'/consignments/'+id+'/outstanding/doc_'+snake(acd.t)+'/review',status:'200 OK',req:[auth,js],reqBody:{decision:st.t==='accept'?'accepted':'rejected',reviewer:'host_user_example'},resBody:{document_id:'doc_'+snake(acd.t),decision:st.t==='accept'?'accepted':'rejected',status:st.t==='accept'?'received':'requested'},note:st.t==='accept'?'A person accepted it, so it now counts as received and the documents are sent to Core.':'A person rejected it. The request stays open.'}}
@@ -2048,13 +2060,20 @@ function showInbox(){
   pause();stashApi();HV='inbox';API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
   var it=inboxItems(),h='<h2>Inbox</h2><div class="hn">Requests sent to the '+esc(roleLabel(HT[SC]))+' by other parties. Illustrative mock of a host platform. Messages are sample text.</div>';
   if(!it.length)h+='<div class="hn" style="margin-top:14px">No requests yet. Chase a document as the other role and it arrives here.</div>';
-  it.forEach(function(x,n){var e=x.e;h+=msgBox(e,x.t)+'<div class="ibf">'+(e.status==='requested'?'<button class="btn gold" data-up="'+n+'">Upload '+esc(snake(x.t))+'.pdf</button><span class="cap">Sends the document back for review.</span>':e.status==='replied'?'<span class="sp v"><i></i>Sent, waiting for review</span><button class="btn" data-back="'+n+'">Go to '+esc(roleLabel(e.fromRole))+'</button>':'<span class="sp r"><i></i>Accepted</span>')+'</div></div>'});
+  it.forEach(function(x,n){var e=x.e;h+=msgBox(e,x.t)+'<div class="ibf">'+(e.status==='requested'?(e.link?'<button class="btn gold" data-ln="'+n+'">Open the secure link</button><span class="cap">No account needed. The link works once.</span>':'<button class="btn gold" data-up="'+n+'">Upload '+esc(snake(x.t))+'.pdf</button><span class="cap">Sends the document back for review.</span>'):e.status==='replied'?'<span class="sp v"><i></i>Sent, waiting for review</span><button class="btn" data-back="'+n+'">Go to '+esc(roleLabel(e.fromRole))+'</button>':'<span class="sp r"><i></i>Accepted</span>')+'</div></div>'});
   $('#host').innerHTML=h;
+  document.querySelectorAll('#host [data-ln]').forEach(function(b){b.onclick=function(){var x=it[+b.dataset.ln];linkPage(x.e,x.t,function(){showInbox()})}});
   document.querySelectorAll('#host [data-up]').forEach(function(b){b.onclick=function(){var x=it[+b.dataset.up];x.e.status='replied';x.e.file=snake(x.t)+'.pdf';x.e.seen=false;showInbox()}});
   document.querySelectorAll('#host [data-back]').forEach(function(b){b.onclick=function(){var x=it[+b.dataset.back];HT[SC]=x.e.fromRole;openFromHost(x.e.cid)}});
   hostBar();window.scrollTo({top:0});
 }
-function supplierPreview(d){var e=chOf(d.t);if(!e)return;var body=msgBox(e,d.t)+'<div class="ibf"><button class="btn gold" id="spSend">Send '+esc(snake(d.t))+'.pdf</button><span class="cap">The supplier replies with the document. It goes to review at the requester.</span></div></div>';openDrawer('Preview as supplier','What '+esc(e.to)+' receives. Sample for the demonstration.',body);var sb=document.getElementById('spSend');if(sb)sb.onclick=function(){e.status='replied';e.file=snake(d.t)+'.pdf';e.seen=true;closeDrawer();roundGo({t:'reply',key:keyOfTitle(d.t)})}}
+function linkPage(e,t,done){var d={t:t},st=e.link?e.link.status:'none',h='<div style="padding:4px 18px 18px"><div class="ibx" style="max-width:none"><b>VeriPura secure upload (example)</b><div class="ibm">No account needed. '+esc(e.from)+' has asked for one document for '+esc(e.cons)+'.</div>';
+  if(st==='used')h+='<div class="ppv bad">This link has already been used. It works once.</div>';
+  else if(st==='revoked')h+='<div class="ppv bad">This link has expired. Ask the sender for a new one.</div>';
+  else h+='<div class="ibb">Document asked for: <b>'+esc(t)+'</b></div><div class="ibf"><span class="mono">'+esc(snake(t))+'.pdf</span><button class="btn gold" id="lnUp">Upload</button></div><div class="cap">Sample file for the demonstration. Nothing is uploaded.</div>';
+  h+='</div></div>';openDrawer('Secure upload','Opened from the link. No sign-in.',h);
+  var u=document.getElementById('lnUp');if(u)u.onclick=function(){e.status='replied';e.file=snake(t)+'.pdf';e.link.status='used';e.seen=false;e.lseen=false;document.getElementById('drawerBody').innerHTML='<div style="padding:4px 18px 18px"><div class="ibx" style="max-width:none"><b>Received</b><div class="ibb">Core read it as: <b>'+esc(t)+'</b>. It matches what was asked for. Thank you.</div><div class="cap" style="margin-top:8px">The link has now been used and cannot be used again. The document goes to '+esc(e.from)+' for review.</div></div></div>';if(done)done()}}
+function supplierPreview(d){var e=chOf(d.t);if(!e)return;var body=msgBox(e,d.t)+(e.link?'<div class="ibf"><button class="btn gold" id="spLink">Open the secure link</button><span class="cap">No account needed. The link works once.</span></div></div>':'<div class="ibf"><button class="btn gold" id="spSend">Send '+esc(snake(d.t))+'.pdf</button><span class="cap">The supplier replies with the document. It goes to review at the requester.</span></div></div>');openDrawer('Preview as supplier','What '+esc(e.to)+' receives. Sample for the demonstration.',body);var sl=document.getElementById('spLink');if(sl)sl.onclick=function(){linkPage(e,d.t,function(){e.seen=true;e.lseen=true;setTimeout(function(){closeDrawer();roundGo({t:'lused',key:keyOfTitle(d.t)},{t:'reply',key:keyOfTitle(d.t)})},1800)})};var sb=document.getElementById('spSend');if(sb)sb.onclick=function(){e.status='replied';e.file=snake(d.t)+'.pdf';e.seen=true;closeDrawer();roundGo({t:'reply',key:keyOfTitle(d.t)})}}
 function showHost(){
   pause();stashApi();HV='list';API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
   var w=W(),h='';
