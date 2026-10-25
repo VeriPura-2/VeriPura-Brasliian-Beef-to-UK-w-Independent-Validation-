@@ -2445,19 +2445,21 @@ var WFD={
   row:[wfNode('Buyer / importer','places the order and starts the file'),wfArr('works in',1),wfNode('VeriPura Food™','the platform, built on Core','vp'),wfArr('documents, or a one-time upload link','l'),wfNode('Seller / exporter','from any country')],
   cards:['The requirements are built from the route and the product','Each document is read by content and checked as it arrives','Every finding shows its evidence. Anything not checked is stated','The importer holds one sealed record that stands up to audit'],
   ft:'VeriPura provides information. Your team makes the decision.'},
- tms:{tab:'TMS with Core',h:'With VeriPura: a transport management system connects Core',sub:'The forwarder keeps working in its own system. Core does the checking behind it, through the API.',
-  row:[wfNode('Buyer / importer','places the order'),wfArr('order'),wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Transport management system','the platform the shipment runs on','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
-  cards:['The system pushes each document to Core through the API','Core returns the requirements, the checks and the evidence','Compliance is a tab in the system, built from what Core returns','Everyone on the shipment works from the same file'],
-  ft:'Core never sits inside the system. It works behind it, through the API. Your team makes the decision.'},
- erp:{tab:'In-house system with Core',h:'With VeriPura: the importer connects Core to its own order processing',sub:'The importer keeps its purchasing and order processing system. Core does the checking behind it, through the API.',
-  row:[wfNode('Buyer / importer','places the order'),wfArr('purchase order'),wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Importer’s order processing system','in-house','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
-  cards:['The purchase order starts the file and sets the requirements','Supplier documents are pushed to Core as they arrive','Findings and evidence return into the importer’s own system','The importer owns the record and the audit trail'],
+ tms:{tab:'Core with a forwarder’s TMS',h:'With VeriPura: Core connects to the freight forwarder’s TMS',sub:'The forwarder serves the importer and runs the shipment in its transport management system. The buyer and the seller are both connected to it. Core works behind it, through the API.',
+  row:[wfNode('Buyer / importer','places the order, follows the shipment'),wfArr('order, tracking',1),wfNode('Freight forwarder’s TMS','the shipment runs here','sys'),wfArr('shipping documents','l'),wfNode('Seller / exporter','from any country')],
+  row2:[wfNode('Freight forwarder’s TMS','calls Core for each document','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
+  cards:['The TMS sends each document to Core through the API','Core returns the requirements, the checks and the evidence','Compliance is a tab in the TMS, built from what Core returns','Everyone on the shipment works from the same file'],
+  ft:'Core never sits inside the TMS. It works behind it, through the API. Your team makes the decision.'},
+ erp:{tab:'Core with the importer’s purchasing system',h:'With VeriPura: Core connects to the importer’s purchasing system',sub:'The importer keeps its own purchasing system. Core does the checking behind it, through the API. No freight forwarder is needed.',
+  row:[wfNode('Buyer / importer','places the order in its own system'),wfArr('works in',1),wfNode('Importer’s purchasing system','the system the buyer already uses','sys'),wfArr('shipping documents','l'),wfNode('Seller / exporter','from any country')],
+  row2:[wfNode('Importer’s purchasing system','calls Core for each document','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
+  cards:['The purchase order starts the file and sets the requirements','Supplier documents are sent to Core as they arrive','Findings and evidence return into the importer’s own system','The importer owns the record and the audit trail'],
   ft:'Core never sits inside the system. It works behind it, through the API. Your team makes the decision.'}
 };
 var WFK=['today','food','tms','erp'],WFS=null;
 function wfShow(k){var d=WFD[k];if(!d)return;WFS=k;var o=$('#wfx');
   o.innerHTML='<div class="wfh"><h2>'+esc(d.h)+'</h2><span class="sp"></span>'+WFK.map(function(x){return '<button data-k="'+x+'"'+(x===k?' class="on" aria-pressed="true"':' aria-pressed="false"')+'>'+esc(WFD[x].tab)+'</button>'}).join('')+'<button id="wfClose" aria-label="Back to the demo">Back to demo</button></div>'
-   +'<p class="wfsub">'+esc(d.sub)+'</p><div class="wfrow">'+d.row.join('')+'</div>'+wfCards(d.cards,d.bad)+(d.ft?'<div class="wfft">'+esc(d.ft)+'</div>':'');
+   +'<p class="wfsub">'+esc(d.sub)+'</p><div class="wfrow">'+d.row.join('')+'</div>'+(d.row2?'<div class="wfrow">'+d.row2.join('')+'</div>':'')+wfCards(d.cards,d.bad)+(d.ft?'<div class="wfft">'+esc(d.ft)+'</div>':'');
   o.classList.add('on');o.scrollTop=0;
   o.querySelectorAll('.wfh button[data-k]').forEach(function(b){b.onclick=function(){wfShow(b.dataset.k)}});
   $('#wfClose').onclick=wfHide;prVars()}
