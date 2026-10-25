@@ -2434,23 +2434,23 @@ $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'
 $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1){if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)}};
 /* ---------- how it works: generic workflow screens ---------- */
 function wfNode(l,sb,k){return '<div class="wfn '+(k||'')+'"><b>'+esc(l)+'</b>'+(sb?'<span>'+esc(sb)+'</span>':'')+'</div>'}
-function wfArr(t,two){return '<div class="wfa"><i>'+(two?'⇄':'→')+'</i>'+esc(t)+'</div>'}
+function wfArr(t,m){return '<div class="wfa"><i>'+(m==='l'?'←':m?'⇄':'→')+'</i>'+esc(t)+'</div>'}
 function wfCards(a,bad){return '<div class="wfcs">'+a.map(function(t,i){return '<div class="wfc'+(bad?' bad':'')+'"><span class="wn">'+(i+1)+'</span><span>'+esc(t)+'</span></div>'}).join('')+'</div>'}
 var WFD={
  today:{tab:'Today',h:'How it works today',sub:'Each party holds a piece of the file. Nobody sees the whole picture until the cargo is at the border.',
-  row:[wfNode('Seller / exporter','from any country'),wfArr('documents by email, in pieces'),wfNode('Forwarder or broker','holds some documents'),wfArr('copies and re-keying'),wfNode('Importer','holds others'),wfArr('declarations and certificates'),wfNode('Border post','compares them')],
+  row:[wfNode('Buyer / importer','places the order'),wfArr('order'),wfNode('Seller / exporter','from any country'),wfArr('documents by email, in pieces'),wfNode('Forwarder or broker','holds some documents'),wfArr('declarations and certificates'),wfNode('Border post','compares them')],
   cards:['Documents arrive in pieces, by email, from several parties','Someone checks them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','In the worst case a rejection means the whole consignment is lost'],bad:1,
   ft:''},
  food:{tab:'Importer on Food',h:'With VeriPura: the importer works on the platform',sub:'The importer starts directly on VeriPura Food. No integration is needed.',
-  row:[wfNode('Seller / exporter','from any country'),wfArr('documents, or a one-time upload link'),wfNode('Importer','starts the file'),wfArr('works in',1),wfNode('VeriPura Food™','the platform, built on Core','vp'),wfArr('findings and evidence'),wfNode('Importer’s team','reviews, fixes and decides')],
+  row:[wfNode('Buyer / importer','places the order and starts the file'),wfArr('works in',1),wfNode('VeriPura Food™','the platform, built on Core','vp'),wfArr('documents, or a one-time upload link','l'),wfNode('Seller / exporter','from any country')],
   cards:['The requirements are built from the route and the product','Each document is read by content and checked as it arrives','Every finding shows its evidence. Anything not checked is stated','The importer holds one sealed record that stands up to audit'],
   ft:'VeriPura provides information. Your team makes the decision.'},
  tms:{tab:'TMS with Core',h:'With VeriPura: a transport management system connects Core',sub:'The forwarder keeps working in its own system. Core does the checking behind it, through the API.',
-  row:[wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Transport management system','the forwarder’s own platform','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp'),wfArr('findings back into the system'),wfNode('Forwarder, broker and importer','one shared file')],
+  row:[wfNode('Buyer / importer','places the order'),wfArr('order'),wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Transport management system','the platform the shipment runs on','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
   cards:['The system pushes each document to Core through the API','Core returns the requirements, the checks and the evidence','Compliance is a tab in the system, built from what Core returns','Everyone on the shipment works from the same file'],
   ft:'Core never sits inside the system. It works behind it, through the API. Your team makes the decision.'},
  erp:{tab:'In-house system with Core',h:'With VeriPura: the importer connects Core to its own order processing',sub:'The importer keeps its purchasing and order processing system. Core does the checking behind it, through the API.',
-  row:[wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Importer’s order processing system','in-house','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp'),wfArr('findings back into the system'),wfNode('Importer’s team','reviews, fixes and decides')],
+  row:[wfNode('Buyer / importer','places the order'),wfArr('purchase order'),wfNode('Seller / exporter','from any country'),wfArr('documents'),wfNode('Importer’s order processing system','in-house','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
   cards:['The purchase order starts the file and sets the requirements','Supplier documents are pushed to Core as they arrive','Findings and evidence return into the importer’s own system','The importer owns the record and the audit trail'],
   ft:'Core never sits inside the system. It works behind it, through the API. Your team makes the decision.'}
 };
