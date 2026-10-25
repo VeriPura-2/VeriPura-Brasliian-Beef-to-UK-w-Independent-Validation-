@@ -2480,7 +2480,7 @@ function prSetup(k){
 })();
 function prVis(sels){for(var n=0;n<(sels||[]).length;n++){var e=document.querySelector(sels[n]);if(e&&e.offsetParent!==null)return e}return null}
 function prVars(){var c=$('#pres'),hb=$('#hostBar'),r=document.documentElement.style;
-  r.setProperty('--prh',((c&&c.classList.contains('on')?c.offsetHeight:0)+(document.body.classList.contains('prplayer')?84:12)+14)+'px');
+  r.setProperty('--prh',((c&&c.classList.contains('on')&&!document.body.classList.contains('prhide')?c.offsetHeight:0)+(document.body.classList.contains('prplayer')?84:12)+14)+'px');
   r.setProperty('--hh',(hb&&hb.offsetParent!==null?hb.offsetHeight:($('.top')?$('.top').offsetHeight:66))+'px')}
 function prPulse(e){if(e){e.classList.remove('pulse');void e.offsetWidth;e.classList.add('pulse')}}
 /* slow, single-pass scrolling: slow enough to explain what is on screen; no movement when the target is already well placed */
@@ -2732,7 +2732,7 @@ function prPaint(){
 }
 function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prShow(s);if(s.wf)wfShow(s.wf);else wfHide()}catch(e){}}
 function prStep(d){var L=prList(),n=PRS.i+d;if(n<0||n>=L.length)return;PRS.i=n;prPaint();if(PRS.move)prMove()}
-function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h)}
+function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h);prVars()}
 function prStart(k){/* each script starts from a fresh page, so nothing from an earlier run carries over */
   var ok=false;try{sessionStorage.setItem('vpPres',JSON.stringify({k:k,s:PRS.short,c:PRS.skipctx}));ok=true}catch(e){}
   if(ok){location.reload();return}
