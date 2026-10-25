@@ -2467,16 +2467,16 @@ function prRes(){var b=$('#resBtn');if(b)b.click()}
 var PRSCR={
 ff:{name:'Forwarder (Core)',stops:[
 {s:1,c:1,tk:1,lead:'Core checks a shipment\u2019s documents before the cargo reaches the border.',
- w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them'],
- n:'Opening statement, 30 seconds. Say it in your own words and add a scale or customer figure if you have one. No screen needed yet.',
+ w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,c:1,tk:1,lead:'A shipment crosses a border only when many parties and systems agree.',
  w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: seller, forwarder, broker, carrier, importer, border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
  n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Maspo groupage from Poland as the example: one lorry, several buyers, many documents.',
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
- w:['Documents arrive by email from different parties at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, held cargo, storage and rework, and a forwarder who carries the blame'],
- n:'Describe what happens today without VeriPura. If you have a real case with a cost or a delay, give the number here. Do not invent one.',
+ w:['Documents arrive by email from different parties at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
+ n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file.',
  w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Your team still makes the decision'],
@@ -2520,10 +2520,26 @@ ff:{name:'Forwarder (Core)',stops:[
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,tk:1,lead:'The ask: start a trial with a very low gate.',
  w:['You email the shipment documents to VeriPura','VeriPura runs them through Core and sends the checked file back','Repeat as documents arrive, until the consignment is complete','No integration and no new system to adopt. The same works for an importer'],
- n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later.',
+ n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later. Lead with the trial. Mention the partner revenue-share offer only later, if they ask about commercial terms.',
  go:function(){prSetup('ff');showHost()},hl:[]}
 ]},
 imc:{name:'Importer (Core)',stops:[
+{s:1,c:1,tk:1,lead:'Core checks your supplier\u2019s documents before the cargo reaches the border.',
+ w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
+ go:function(){prSetup('imc');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
+ w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: exporter, forwarder, broker, carrier, you, the border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
+ n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Brazil beef consignment as the example.',
+ go:function(){prSetup('imc');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+ w:['Documents arrive by email from the exporter and others, in pieces and at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
+ n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
+ go:function(){prSetup('imc');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
+ w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Stale data is not used: Core says it cannot confirm instead','Your data is not used to train models for other customers','Your team still makes the decision'],
+ n:'High level only, 30 seconds. Data trust matters to importers, so say both data points plainly. Then say you will show it on the real Brazil beef consignment.',
+ go:function(){prSetup('imc');showHost()},hl:[]},
 {s:1,lead:'Your platform pushes the order to Core. Core returns one checked file.',
  w:['The importer’s own purchasing platform','The platform pushes the purchase order to Core through the API','Compliance is the platform’s own tab, built from what Core returns'],
  n:'Set the scene in 30 seconds. Brazil beef is a real consignment. Core never sits inside the platform. It interacts with it through the API.',
@@ -2556,8 +2572,33 @@ imc:{name:'Importer (Core)',stops:[
  w:['The importer started the process, so the importer owns the trail','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
  n:'Verify the trail, then show the downloads.',
  go:function(){prRun('req');prTickPush();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
+,
+{s:1,e:1,tk:1,lead:'What have you heard, and what is missing?',
+ w:['Recap in three lines: requirements, checks with evidence, a record that stands up to audit','Ask for questions or other areas to cover','Ask what they heard, in their words, and what would matter most to their business'],
+ n:'Stop talking and listen. Note the answers. They tell you what to emphasise in the trial.',
+ go:function(){prSetup('imc');showHost()},hl:[]},
+{s:1,e:1,tk:1,lead:'The ask: start a trial with a very low gate.',
+ w:['You email the shipment documents to VeriPura','VeriPura runs them through Core and sends the checked file back','Repeat as documents arrive, until the consignment is complete','No integration and no new system to adopt'],
+ n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later.',
+ go:function(){prSetup('imc');showHost()},hl:[]}
 ]},
 imp:{name:'Importer (Food)',stops:[
+{s:1,c:1,tk:1,lead:'Core checks your supplier\u2019s documents before the cargo reaches the border.',
+ w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
+ go:function(){prSetup('imp')},hl:[]},
+{s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
+ w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: exporter, forwarder, broker, carrier, you, the border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
+ n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Brazil beef consignment as the example.',
+ go:function(){prSetup('imp')},hl:[]},
+{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+ w:['Documents arrive by email from the exporter and others, in pieces and at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
+ n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
+ go:function(){prSetup('imp')},hl:[]},
+{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
+ w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Stale data is not used: Core says it cannot confirm instead','Your data is not used to train models for other customers','Your team still makes the decision'],
+ n:'High level only, 30 seconds. Data trust matters to importers, so say both data points plainly. Then say you will show it on the real Brazil beef consignment.',
+ go:function(){prSetup('imp')},hl:[]},
 {s:1,lead:'You carry the liability. Core gives you the evidence.',
  w:['The phases of the route in the Workflow menu','One consignment, one file','Real documents are marked Provided'],
  n:'Open the Workflow group once.',
@@ -2590,9 +2631,18 @@ imp:{name:'Importer (Food)',stops:[
  w:['The importer owns the trail','The tamper check shows where a chain breaks','Export as JSON, CSV or PDF'],
  n:'Run the tamper test, then export.',
  go:function(){prSetup('imp');prFoodDocs();prAll();prRes()},hl:['#trVer','#trAnch','#trBd']}
+
+,{s:1,e:1,tk:1,lead:'What have you heard, and what is missing?',
+ w:['Recap in three lines: requirements, checks with evidence, a record that stands up to audit','Ask for questions or other areas to cover','Ask what they heard, in their words, and what would matter most to their business'],
+ n:'Stop talking and listen. Note the answers. They tell you what to emphasise in the trial.',
+ go:function(){prSetup('imp')},hl:[]},
+{s:1,e:1,tk:1,lead:'The ask: start a platform trial directly, with one consignment.',
+ w:['You start on the VeriPura Food platform yourself','One live consignment, from requirements to the sealed Passport','Your team makes every decision, and the record is yours','No email relay: you work in the platform from day one'],
+ n:'Close on the ask. Agree one live consignment and a start date. Point them to food.veripura.com. Offer a technical workshop only if they want the API later.',
+ go:function(){prSetup('imp')},hl:[]}
 ]}};
 (function(){var A=[[],['#genReq'],['#goVal','#faAll'],['.phase-head'],['.phase-head'],['#altBtn'],['#ppFood','.stats'],['#trVer']];
-  PRSCR.imp.stops.forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1;if(i===1)st.fr=0.4;if(i===2)st.delay=2400})})();
+  PRSCR.imp.stops.filter(function(st){return !st.c&&!st.e}).forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1;if(i===1)st.fr=0.4;if(i===2)st.delay=2400})})();
 function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return (!PRS.short||s.s)&&!(PRS.skipctx&&s.c)})}
 function prPlace(){var c=$('#pres');if(!c)return;c.classList.toggle('up',PRS.left);c.classList.toggle('mini',PRS.mini)}
 function prPaint(){
