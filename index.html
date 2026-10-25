@@ -2411,7 +2411,7 @@ rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
 $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
 $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1){if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)}};
 /* ---------- presenter mode ---------- */
-var PRS={on:false,sc:'ff',i:0,short:false,move:true,left:false,mini:false,win:null,hide:false};
+var PRS={on:false,sc:'ff',i:0,short:false,skipctx:false,move:true,left:false,mini:false,win:null,hide:false};
 function prSetup(k){
   var sc=k==='ff'?2:k==='imc'?3:1,pk=k==='ff'?'maspo':'beef';
   PRS.busy=true;
@@ -2466,6 +2466,22 @@ function prFlagPh(){var f=0;for(var i=0;i<P.length;i++){if(P[i].checks.some(func
 function prRes(){var b=$('#resBtn');if(b)b.click()}
 var PRSCR={
 ff:{name:'Forwarder (Core)',stops:[
+{s:1,c:1,tk:1,lead:'Core checks a shipment\u2019s documents before the cargo reaches the border.',
+ w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them'],
+ n:'Opening statement, 30 seconds. Say it in your own words and add a scale or customer figure if you have one. No screen needed yet.',
+ go:function(){prSetup('ff');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'A shipment crosses a border only when many parties and systems agree.',
+ w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: seller, forwarder, broker, carrier, importer, border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
+ n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Maspo groupage from Poland as the example: one lorry, several buyers, many documents.',
+ go:function(){prSetup('ff');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+ w:['Documents arrive by email from different parties at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, held cargo, storage and rework, and a forwarder who carries the blame'],
+ n:'Describe what happens today without VeriPura. If you have a real case with a cost or a delay, give the number here. Do not invent one.',
+ go:function(){prSetup('ff');showHost()},hl:[]},
+{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file.',
+ w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Your team still makes the decision'],
+ n:'High level only, 30 seconds. Then say you will show it on the real Maspo consignment.',
+ go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,lead:'One shipment, many rules, many parties. Core turns it into one checked file.',
  w:['The platform pushes the document to Core through the API','Compliance is the platform’s own tab, built from what Core returns','Every party works from the same file'],
  n:'Set the scene in 30 seconds. Maspo groupage from Poland is a real consignment. Core never sits inside the platform. It interacts with it through the API.',
@@ -2497,7 +2513,15 @@ ff:{name:'Forwarder (Core)',stops:[
 {s:1,lead:'The record stands up to an auditor, and it runs through an API.',
  w:['A permanent trail for this consignment','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
  n:'Close on the export.',
- go:function(){prRun();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
+ go:function(){prRun();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']},
+{s:1,tk:1,lead:'What have you heard, and what is missing?',
+ w:['Recap in three lines: requirements, checks with evidence, a record that stands up to audit','Ask for questions or other areas to cover','Ask what they heard, in their words, and what would matter most to their business'],
+ n:'Stop talking and listen. Note the answers. They tell you what to emphasise in the trial.',
+ go:function(){prSetup('ff');showHost()},hl:[]},
+{s:1,tk:1,lead:'The ask: start a trial with a very low gate.',
+ w:['You email the shipment documents to VeriPura','VeriPura runs them through Core and sends the checked file back','Repeat as documents arrive, until the consignment is complete','No integration and no new system to adopt. The same works for an importer'],
+ n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later.',
+ go:function(){prSetup('ff');showHost()},hl:[]}
 ]},
 imc:{name:'Importer (Core)',stops:[
 {s:1,lead:'Your platform pushes the order to Core. Core returns one checked file.',
@@ -2569,7 +2593,7 @@ imp:{name:'Importer (Food)',stops:[
 ]}};
 (function(){var A=[[],['#genReq'],['#goVal','#faAll'],['.phase-head'],['.phase-head'],['#altBtn'],['#ppFood','.stats'],['#trVer']];
   PRSCR.imp.stops.forEach(function(st,i){st.at=A[i];if(i===2||i===5||i===7)st.card=1;if(i===1)st.fr=0.4;if(i===2)st.delay=2400})})();
-function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return !PRS.short||s.s})}
+function prList(){return PRSCR[PRS.sc].stops.filter(function(s){return (!PRS.short||s.s)&&!(PRS.skipctx&&s.c)})}
 function prPlace(){var c=$('#pres');if(!c)return;c.classList.toggle('up',PRS.left);c.classList.toggle('mini',PRS.mini)}
 function prPaint(){
   var c=$('#pres');if(!c)return;var L=prList(),s=L[PRS.i];
@@ -2577,10 +2601,11 @@ function prPaint(){
   var h='<div class="pgrid"><div class="pl"><div class="phd"><span class="pct">'+esc(PRSCR[PRS.sc].name)+' · '+(PRS.i+1)+' of '+L.length+'</span><span class="sp"></span>'
    +'<button id="prMini" aria-label="Minimise" title="Minimise">'+(PRS.mini?'+':'\u2212')+'</button><button id="prX" aria-label="Close presenter mode" title="Close">\u00d7</button></div>'
    +'<div class="plead">'+esc(s.lead)+'</div>'
-   +'<div class="pbody"><span class="pwl">Watch for</span><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div></div>'
+   +'<div class="pbody"><span class="pwl">'+(s.tk?'Cover':'Watch for')+'</span><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul></div></div>'
    +'<div class="pr"><div class="pft"><button id="prBack"'+(PRS.i===0?' disabled':'')+'>Back</button><button class="gold" id="prNext"'+(PRS.i>=L.length-1?' disabled':'')+'>Next</button><button id="prGo">Take me there</button></div>'
    +'<div class="popt"><label><input type="checkbox" id="prMove"'+(PRS.move?' checked':'')+'> Next moves the screen</label>'
    +'<label><input type="checkbox" id="prShort"'+(PRS.short?' checked':'')+'> Short version</label>'
+   +'<label><input type="checkbox" id="prCtx"'+(PRS.skipctx?' checked':'')+'> Experts: skip context</label>'
    +'<label><input type="checkbox" id="prPl"'+(document.body.classList.contains('prplayer')?' checked':'')+'> Show player</label>'
    +(document.body.classList.contains('api')?'<label><input type="checkbox" id="prSet"'+(document.body.classList.contains('prset')?' checked':'')+'> Show settings</label>':'')
    +'<span class="pbt"><button id="prSide" title="Move the card to the top or the bottom">Top/bottom</button><button id="prNotes">Notes</button><button id="prHide" title="Hide the card for a clean recording. Press P to bring it back">Hide</button></span></div></div></div>';
@@ -2592,6 +2617,7 @@ function prPaint(){
   $('#prGo').onclick=function(){prMove()};
   $('#prMove').onchange=function(){PRS.move=this.checked};
   $('#prShort').onchange=function(){var cur=prList()[PRS.i];PRS.short=this.checked;var L2=prList(),k=L2.indexOf(cur);PRS.i=k>-1?k:Math.min(PRS.i,L2.length-1);prPaint();prNotes()};
+  $('#prCtx').onchange=function(){var cur=prList()[PRS.i];PRS.skipctx=this.checked;var L2=prList(),k=L2.indexOf(cur);PRS.i=k>-1?k:Math.min(PRS.i,L2.length-1);prPaint();prNotes();if(PRS.move)prMove()};
   var pp=$('#prPl');if(pp)pp.onchange=function(){document.body.classList.toggle('prplayer',this.checked);prVars();prShow(prList()[PRS.i])};
   var ps=$('#prSet');if(ps)ps.onchange=function(){document.body.classList.toggle('prset',this.checked);prShow(prList()[PRS.i])};
   $('#prSide').onclick=function(){PRS.left=!PRS.left;prPlace()};
@@ -2603,15 +2629,15 @@ function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prShow(s)}catch(
 function prStep(d){var L=prList(),n=PRS.i+d;if(n<0||n>=L.length)return;PRS.i=n;prPaint();if(PRS.move)prMove()}
 function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h)}
 function prStart(k){/* each script starts from a fresh page, so nothing from an earlier run carries over */
-  var ok=false;try{sessionStorage.setItem('vpPres',JSON.stringify({k:k,s:PRS.short}));ok=true}catch(e){}
+  var ok=false;try{sessionStorage.setItem('vpPres',JSON.stringify({k:k,s:PRS.short,c:PRS.skipctx}));ok=true}catch(e){}
   if(ok){location.reload();return}
   prGo(k)}
 function prGo(k){document.documentElement.style.scrollBehavior='auto';PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
 function prClose(){document.documentElement.style.scrollBehavior='';document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
 function prPick(){
   var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
-  c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label></div></div>';
-  $('#prX').onclick=prClose;$('#prShort0').onchange=function(){PRS.short=this.checked};
+  c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label><label><input type="checkbox" id="prCtx0"'+(PRS.skipctx?' checked':'')+'> Experts: skip the context stops</label></div></div>';
+  $('#prX').onclick=prClose;$('#prShort0').onchange=function(){PRS.short=this.checked};$('#prCtx0').onchange=function(){PRS.skipctx=this.checked};
   $('#prF').onclick=function(){prStart('ff')};$('#prI').onclick=function(){prStart('imp')};$('#prC').onclick=function(){prStart('imc')};
 }
 function prNotesOpen(){
@@ -2622,7 +2648,7 @@ function prNotesOpen(){
 }
 function prNotes(){
   var w=PRS.win;if(!w||w.closed)return;var L=prList(),s=L[PRS.i];if(!s)return;
-  w.document.getElementById('r').innerHTML='<h1>'+esc(PRSCR[PRS.sc].name)+' · '+(PRS.i+1)+' of '+L.length+'</h1><div class="l">'+esc(s.lead)+'</div><div class="n"><b>For you only</b><br>'+esc(s.n)+'</div><b>Watch for</b><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><button id="b">Back</button><button class="g" id="f">Next</button>';
+  w.document.getElementById('r').innerHTML='<h1>'+esc(PRSCR[PRS.sc].name)+' · '+(PRS.i+1)+' of '+L.length+'</h1><div class="l">'+esc(s.lead)+'</div><div class="n"><b>For you only</b><br>'+esc(s.n)+'</div><b>'+(s.tk?'Cover':'Watch for')+'</b><ul>'+s.w.map(function(x){return '<li>'+esc(x)+'</li>'}).join('')+'</ul><button id="b">Back</button><button class="g" id="f">Next</button>';
   w.document.getElementById('b').onclick=function(){prStep(-1)};w.document.getElementById('f').onclick=function(){prStep(1)};
 }
 (function(){
@@ -2639,7 +2665,7 @@ function prNotes(){
 })();
 
 setScenario(1);
-try{var vq=sessionStorage.getItem('vpPres');if(vq){sessionStorage.removeItem('vpPres');vq=JSON.parse(vq);PRS.short=!!vq.s;prGo(vq.k)}}catch(e){}
+try{var vq=sessionStorage.getItem('vpPres');if(vq){sessionStorage.removeItem('vpPres');vq=JSON.parse(vq);PRS.short=!!vq.s;PRS.skipctx=!!vq.c;prGo(vq.k)}}catch(e){}
 </script>
 </body>
 </html>
