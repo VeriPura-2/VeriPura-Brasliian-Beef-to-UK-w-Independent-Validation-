@@ -340,6 +340,27 @@ body.hl .top,body.hl .banner,body.hl #view,body.hl .player{display:none!importan
 @media (max-width:860px){.player{left:0;padding:10px 18px}.grid3{grid-template-columns:1fr}body{display:block}aside{position:static;width:auto;height:auto;border-right:0;border-bottom:1px solid var(--line)}.top,main,.banner{padding-left:18px;padding-right:18px}.banner{margin-left:18px;margin-right:18px}.grid2{grid-template-columns:1fr}.kv{grid-template-columns:120px 1fr}h2{font-size:28px}}
 @media print{aside,.top,.banner,.pager,.btn,.player,.drawer,.dov{display:none!important}body{background:#fff}main{max-width:none}}
 
+#wfx{display:none;position:fixed;inset:0;z-index:40;background:var(--bg);color:var(--ink);overflow:auto;padding:22px 32px calc(var(--prh,120px) + 8px)}
+#wfx.on{display:block}
+.wfh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.wfh h2{font-family:var(--serif);font-weight:400;font-size:28px;margin:0 16px 0 0}
+.wfh .sp{flex:1}
+.wfh button{font:inherit;font-size:14px;font-weight:600;padding:8px 14px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;cursor:pointer;min-height:40px}
+.wfh button.on{background:var(--gold-bg);border-color:var(--gold-bg);color:var(--gold-ink)}
+#wfx .wfsub{font-size:16px;color:var(--ink2);margin:6px 0 4px;max-width:60em}
+.wfrow{display:flex;align-items:stretch;gap:10px;flex-wrap:wrap;margin:18px 0}
+.wfn{flex:1 1 170px;min-width:150px;background:var(--card);border:1.5px solid var(--line);border-radius:12px;padding:16px 14px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:4px}
+.wfn b{font-size:18px;line-height:1.2}
+.wfn span{font-size:13px;color:var(--mut)}
+.wfn.vp{border-color:var(--gold-bg);background:var(--tint)}
+.wfn.sys{border-color:var(--blue)}
+.wfa{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--mut);max-width:140px;text-align:center;gap:2px}
+.wfa i{font-style:normal;font-size:26px;color:var(--gold)}
+.wfcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin-top:6px}
+.wfc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;font-size:15px;line-height:1.4;display:flex;gap:10px;align-items:flex-start}
+.wfc .wn{flex:none;width:26px;height:26px;border-radius:50%;background:var(--gold-bg);color:var(--gold-ink);font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.wfc.bad .wn{background:#C0392B;color:#fff}
+.wfft{margin-top:16px;font-size:15px;font-weight:600;color:var(--ink2)}
 #prTab{position:fixed;right:0;top:40%;z-index:60;writing-mode:vertical-rl;font:inherit;font-size:13px;font-weight:700;letter-spacing:.08em;padding:14px 8px;border:0;background:var(--gold-bg);color:var(--gold-ink);border-radius:10px 0 0 10px;cursor:pointer;box-shadow:-2px 2px 10px rgba(0,0,0,.35);opacity:.9}
 #prTab:hover,#prTab:focus-visible{opacity:1;padding-right:12px}
 body.pron #prTab,body.prhide #pres,body.prhide #prTab{display:none!important}
@@ -401,7 +422,7 @@ body.pron.api #hostBar .pw{display:none}
     <h1 id="topTitle">Demonstration</h1>
     <span class="label">VeriPura Core™</span>
     <span class="sp"></span>
-    <label class="rolesel"><span class="label">View as</span><select id="roleSel"></select></label><button class="btn" id="mtxBtn" style="min-height:40px;padding:6px 12px;font-size:13px">Who sees what</button>
+    <label class="rolesel"><span class="label">View as</span><select id="roleSel"></select></label><button class="btn" id="wfBtn" style="min-height:40px;padding:6px 12px;font-size:13px">How it works</button><button class="btn" id="mtxBtn" style="min-height:40px;padding:6px 12px;font-size:13px">Who sees what</button>
     <span class="pill"><i></i>Visibility layer: proposed</span>
     <button class="theme" id="themeBtn" aria-label="Toggle light and dark theme"><span id="themeIco">☀</span></button>
   </div>
@@ -409,6 +430,7 @@ body.pron.api #hostBar .pw{display:none}
   <div class="banner" id="roleBar"></div>
   <main id="view" tabindex="-1"></main>
 </div>
+<div id="wfx" role="region" aria-label="How a shipment is checked"></div>
 <div class="player" role="group" aria-label="Walkthrough controls">
   <button class="btn" id="pBack">Back</button>
   <button class="btn gold" id="pPlay">Play</button>
@@ -2410,6 +2432,39 @@ var rs=$('#roleSel');
 rs.onchange=function(){setRole(this.value)};$('#mtxBtn').onclick=openMatrix;
 $('#packSel').innerHTML=Object.keys(PK).map(function(k){return '<option value="'+k+'">'+esc(PK[k].name)+'</option>'}).join('');
 $('#packSel').onchange=function(){REQ=false;loadPack(this.value,SC===1?-2:-1);if(SC!==1){if(document.body.classList.contains('hl'))showHost();else openFromHost(this.value)}};
+/* ---------- how it works: generic workflow screens ---------- */
+function wfNode(l,sb,k){return '<div class="wfn '+(k||'')+'"><b>'+esc(l)+'</b>'+(sb?'<span>'+esc(sb)+'</span>':'')+'</div>'}
+function wfArr(t,m){return '<div class="wfa"><i>'+(m==='l'?'←':m?'⇄':'→')+'</i>'+esc(t)+'</div>'}
+function wfCards(a,bad){return '<div class="wfcs">'+a.map(function(t,i){return '<div class="wfc'+(bad?' bad':'')+'"><span class="wn">'+(i+1)+'</span><span>'+esc(t)+'</span></div>'}).join('')+'</div>'}
+var WFD={
+ today:{tab:'Today',h:'How it works today',sub:'Each party holds a piece of the file. Nobody sees the whole picture until the cargo is at the border.',
+  row:[wfNode('Buyer / importer','places the order'),wfArr('order'),wfNode('Seller / exporter','from any country'),wfArr('documents by email, in pieces'),wfNode('Forwarder or broker','holds some documents'),wfArr('declarations and certificates'),wfNode('Border post','compares them')],
+  cards:['Documents arrive in pieces, by email, from several parties','Someone checks them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','In the worst case a rejection means the whole consignment is lost'],bad:1,
+  ft:''},
+ food:{tab:'Importer on Food',h:'With VeriPura: the importer works on the platform',sub:'The importer starts directly on VeriPura Food. No integration is needed.',
+  row:[wfNode('Buyer / importer','places the order and starts the file'),wfArr('works in',1),wfNode('VeriPura Food™','the platform, built on Core','vp'),wfArr('documents, or a one-time upload link','l'),wfNode('Seller / exporter','from any country')],
+  cards:['The requirements are built from the route and the product','Each document is read by content and checked as it arrives','Every finding shows its evidence. Anything not checked is stated','The importer holds one sealed record that stands up to audit'],
+  ft:'VeriPura provides information. Your team makes the decision.'},
+ tms:{tab:'Core with a forwarder’s TMS',h:'With VeriPura: Core connects to the freight forwarder’s TMS',sub:'The forwarder serves the importer and runs the shipment in its transport management system. The buyer and the seller are both connected to it. Core works behind it, through the API.',
+  row:[wfNode('Buyer / importer','places the order, follows the shipment'),wfArr('order, tracking',1),wfNode('Freight forwarder’s TMS','the shipment runs here','sys'),wfArr('shipping documents','l'),wfNode('Seller / exporter','from any country')],
+  row2:[wfNode('Freight forwarder’s TMS','calls Core for each document','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
+  cards:['The TMS sends each document to Core through the API','Core returns the requirements, the checks and the evidence','Compliance is a tab in the TMS, built from what Core returns','Everyone on the shipment works from the same file'],
+  ft:'Core never sits inside the TMS. It works behind it, through the API. Your team makes the decision.'},
+ erp:{tab:'Core with the importer’s purchasing system',h:'With VeriPura: Core connects to the importer’s purchasing system',sub:'The importer keeps its own purchasing system. Core does the checking behind it, through the API. No freight forwarder is needed.',
+  row:[wfNode('Buyer / importer','places the order in its own system'),wfArr('works in',1),wfNode('Importer’s purchasing system','the system the buyer already uses','sys'),wfArr('shipping documents','l'),wfNode('Seller / exporter','from any country')],
+  row2:[wfNode('Importer’s purchasing system','calls Core for each document','sys'),wfArr('API',1),wfNode('VeriPura Core™','checks and evidence','vp')],
+  cards:['The purchase order starts the file and sets the requirements','Supplier documents are sent to Core as they arrive','Findings and evidence return into the importer’s own system','The importer owns the record and the audit trail'],
+  ft:'Core never sits inside the system. It works behind it, through the API. Your team makes the decision.'}
+};
+var WFK=['today','food','tms','erp'],WFS=null;
+function wfShow(k){var d=WFD[k];if(!d)return;WFS=k;var o=$('#wfx');
+  o.innerHTML='<div class="wfh"><h2>'+esc(d.h)+'</h2><span class="sp"></span>'+WFK.map(function(x){return '<button data-k="'+x+'"'+(x===k?' class="on" aria-pressed="true"':' aria-pressed="false"')+'>'+esc(WFD[x].tab)+'</button>'}).join('')+'<button id="wfClose" aria-label="Back to the demo">Back to demo</button></div>'
+   +'<p class="wfsub">'+esc(d.sub)+'</p><div class="wfrow">'+d.row.join('')+'</div>'+(d.row2?'<div class="wfrow">'+d.row2.join('')+'</div>':'')+wfCards(d.cards,d.bad)+(d.ft?'<div class="wfft">'+esc(d.ft)+'</div>':'');
+  o.classList.add('on');o.scrollTop=0;
+  o.querySelectorAll('.wfh button[data-k]').forEach(function(b){b.onclick=function(){wfShow(b.dataset.k)}});
+  $('#wfClose').onclick=wfHide;prVars()}
+function wfHide(){var o=$('#wfx');if(o)o.classList.remove('on');WFS=null}
+(function(){var b=$('#wfBtn');if(b)b.onclick=function(){wfShow(WFS||'today')}})();
 /* ---------- presenter mode ---------- */
 var PRS={on:false,sc:'ff',i:0,short:false,skipctx:false,move:true,left:false,mini:false,win:null,hide:false};
 function prSetup(k){
@@ -2470,15 +2525,15 @@ ff:{name:'Forwarder (Core)',stops:[
  w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('ff');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'A shipment crosses a border only when many parties and systems agree.',
+{s:1,c:1,tk:1,wf:'today',lead:'A shipment crosses a border only when many parties and systems agree.',
  w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: seller, forwarder, broker, carrier, importer, border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
  n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Maspo groupage from Poland as the example: one lorry, several buyers, many documents.',
  go:function(){prSetup('ff');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+{s:1,c:1,tk:1,wf:'today',lead:'Today the checking is manual, late and spread across inboxes.',
  w:['Documents arrive by email from different parties at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
  n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
  go:function(){prSetup('ff');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file.',
+{s:1,c:1,tk:1,wf:'tms',lead:'Core turns the same documents into one checked file.',
  w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Your team still makes the decision'],
  n:'High level only, 30 seconds. Then say you will show it on the real Maspo consignment.',
  go:function(){prSetup('ff');showHost()},hl:[]},
@@ -2528,15 +2583,15 @@ imc:{name:'Importer (Core)',stops:[
  w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('imc');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
+{s:1,c:1,tk:1,wf:'today',lead:'As the importer, you carry the risk when the paperwork does not match.',
  w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: exporter, forwarder, broker, carrier, you, the border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
  n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Brazil beef consignment as the example.',
  go:function(){prSetup('imc');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+{s:1,c:1,tk:1,wf:'today',lead:'Today the checking is manual, late and spread across inboxes.',
  w:['Documents arrive by email from the exporter and others, in pieces and at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
  n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
  go:function(){prSetup('imc');showHost()},hl:[]},
-{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
+{s:1,c:1,tk:1,wf:'erp',lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
  w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Stale data is not used: Core says it cannot confirm instead','Your data is not used to train models for other customers','Your team still makes the decision'],
  n:'High level only, 30 seconds. Data trust matters to importers, so say both data points plainly. Then say you will show it on the real Brazil beef consignment.',
  go:function(){prSetup('imc');showHost()},hl:[]},
@@ -2587,15 +2642,15 @@ imp:{name:'Importer (Food)',stops:[
  w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('imp')},hl:[]},
-{s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
+{s:1,c:1,tk:1,wf:'today',lead:'As the importer, you carry the risk when the paperwork does not match.',
  w:['A border check compares what the documents say with what the rules require','Several parties each hold a piece: exporter, forwarder, broker, carrier, you, the border post','Several government systems are involved, for example the customs declaration and the health certificate','The rules differ by route and commodity, and they change'],
  n:'Assume the audience knows little about trade. Explain a border check in one plain sentence. Use the Brazil beef consignment as the example.',
  go:function(){prSetup('imp')},hl:[]},
-{s:1,c:1,tk:1,lead:'Today the checking is manual, late and spread across inboxes.',
+{s:1,c:1,tk:1,wf:'today',lead:'Today the checking is manual, late and spread across inboxes.',
  w:['Documents arrive by email from the exporter and others, in pieces and at different times','Someone compares them by eye against a checklist from memory','A mismatch is often found at the border, when it is expensive to fix','Impact: delay, storage and rework, and in the worst case a rejection, which can mean the whole consignment is lost'],
  n:'Describe what happens today without VeriPura. Do not quote figures. The message is that a rejection can mean total loss of the cargo.',
  go:function(){prSetup('imp')},hl:[]},
-{s:1,c:1,tk:1,lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
+{s:1,c:1,tk:1,wf:'food',lead:'Core turns the same documents into one checked file, and you can trust how it handles them.',
  w:['It works out what the shipment needs from route, commodity and origin','It reads each document by content and checks it against the rules','It shows Pass, Flag or Not checked, with the source behind each one','Stale data is not used: Core says it cannot confirm instead','Your data is not used to train models for other customers','Your team still makes the decision'],
  n:'High level only, 30 seconds. Data trust matters to importers, so say both data points plainly. Then say you will show it on the real Brazil beef consignment.',
  go:function(){prSetup('imp')},hl:[]},
@@ -2675,7 +2730,7 @@ function prPaint(){
   $('#prHide').onclick=function(){prHideSet(true)};
   prVars();prNotes();
 }
-function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prShow(s)}catch(e){}}
+function prMove(){var s=prList()[PRS.i];if(!s)return;try{s.go();prShow(s);if(s.wf)wfShow(s.wf);else wfHide()}catch(e){}}
 function prStep(d){var L=prList(),n=PRS.i+d;if(n<0||n>=L.length)return;PRS.i=n;prPaint();if(PRS.move)prMove()}
 function prHideSet(h){PRS.hide=h;document.body.classList.toggle('prhide',h)}
 function prStart(k){/* each script starts from a fresh page, so nothing from an earlier run carries over */
@@ -2683,7 +2738,7 @@ function prStart(k){/* each script starts from a fresh page, so nothing from an 
   if(ok){location.reload();return}
   prGo(k)}
 function prGo(k){document.documentElement.style.scrollBehavior='auto';PRS.sc=k;PRS.i=0;PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');$('#pres').classList.add('on');prPaint();prMove()}
-function prClose(){document.documentElement.style.scrollBehavior='';document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
+function prClose(){wfHide();document.documentElement.style.scrollBehavior='';document.body.classList.remove('prset','prplayer');PRS.on=false;document.body.classList.remove('pron','prhide');$('#pres').classList.remove('on');if(PRS.win&&!PRS.win.closed)PRS.win.close();PRS.win=null}
 function prPick(){
   var c=$('#pres');c.classList.add('on');PRS.on=true;PRS.hide=false;document.body.classList.remove('prhide');document.body.classList.add('pron');
   c.innerHTML='<div class="phd"><span class="pct">Presenter mode</span><span class="sp"></span><button id="prX" aria-label="Close">×</button></div><div class="plead">Which demonstration?</div><div class="pbody"><div class="pft" style="flex-direction:column;align-items:stretch"><button class="gold" id="prF">Forwarder (Core), Maspo groupage</button><button class="gold" id="prC">Importer (Core), Brazil beef</button><button class="gold" id="prI">Importer (Food), Brazil beef</button></div><div class="popt"><label><input type="checkbox" id="prShort0"'+(PRS.short?' checked':'')+'> Short version (about 10 minutes)</label><label><input type="checkbox" id="prCtx0"'+(PRS.skipctx?' checked':'')+'> Experts: skip the context stops</label></div></div>';
