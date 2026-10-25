@@ -2467,7 +2467,7 @@ function prRes(){var b=$('#resBtn');if(b)b.click()}
 var PRSCR={
 ff:{name:'Forwarder (Core)',stops:[
 {s:1,c:1,tk:1,lead:'Core checks a shipment\u2019s documents before the cargo reaches the border.',
- w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ w:['Who it is for: freight forwarders, brokers and importers','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,c:1,tk:1,lead:'A shipment crosses a border only when many parties and systems agree.',
@@ -2511,7 +2511,7 @@ ff:{name:'Forwarder (Core)',stops:[
  n:'Switch the role, then switch back.',
  go:function(){prRun();prAt(null)},hl:['#hostBar .seg']},
 {s:1,lead:'The record stands up to an auditor, and it runs through an API.',
- w:['A permanent trail for this consignment','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
+ w:['A permanent trail for this consignment','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it','Connect by hosted API, webhooks or a file drop for legacy sites','AI assistants can query Core through MCP, read-only and limited to your own consignments'],
  n:'Close on the export.',
  go:function(){prRun();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']},
 {s:1,tk:1,lead:'What have you heard, and what is missing?',
@@ -2520,12 +2520,12 @@ ff:{name:'Forwarder (Core)',stops:[
  go:function(){prSetup('ff');showHost()},hl:[]},
 {s:1,tk:1,lead:'The ask: start a trial with a very low gate.',
  w:['You email the shipment documents to VeriPura','VeriPura runs them through Core and sends the checked file back','Repeat as documents arrive, until the consignment is complete','No integration and no new system to adopt. The same works for an importer'],
- n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later. Lead with the trial. Mention the partner revenue-share offer only later, if they ask about commercial terms.',
+ n:'Close on the ask. Agree one live consignment and a named contact on their side. Offer a technical workshop only if they want the API later.',
  go:function(){prSetup('ff');showHost()},hl:[]}
 ]},
 imc:{name:'Importer (Core)',stops:[
 {s:1,c:1,tk:1,lead:'Core checks your supplier\u2019s documents before the cargo reaches the border.',
- w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('imc');showHost()},hl:[]},
 {s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
@@ -2569,7 +2569,7 @@ imc:{name:'Importer (Core)',stops:[
  n:'Press Consignment Passport, then Seal. Tick Change something and verify as a border post.',
  go:function(){prRun('req');prTickPush();prAt(null)},hl:['#ppGo']},
 {s:1,lead:'The record is yours, and it runs through an API.',
- w:['The importer started the process, so the importer owns the trail','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it'],
+ w:['The importer started the process, so the importer owns the trail','Export as JSON, CSV or PDF','Every screen is built from the API calls beside it','Connect by hosted API, webhooks or a file drop for legacy sites','AI assistants can query Core through MCP, read-only and limited to your own consignments'],
  n:'Verify the trail, then show the downloads.',
  go:function(){prRun('req');prTickPush();prAt(null);API.tab='audit';apiPaint()},hl:['.ptabs button[data-tb="audit"]','#apip']}
 ,
@@ -2584,7 +2584,7 @@ imc:{name:'Importer (Core)',stops:[
 ]},
 imp:{name:'Importer (Food)',stops:[
 {s:1,c:1,tk:1,lead:'Core checks your supplier\u2019s documents before the cargo reaches the border.',
- w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Patent pending'],
+ w:['Who it is for: importers, and the forwarders and brokers who work for them','What it does: reads the documents, checks them against the rules of the route, and shows the evidence','The result: problems found while there is still time to fix them','Under the hood: Core coordinates more than 70 specialist agents and keeps a tamper-evident record, the Witness Engine','Covered under VeriPura\u2019s USPTO filing, U.S. provisional patent application 64/088,697'],
  n:'Opening statement, 30 seconds. Say it in your own words. Do not quote figures. No screen needed yet.',
  go:function(){prSetup('imp')},hl:[]},
 {s:1,c:1,tk:1,lead:'As the importer, you carry the risk when the paperwork does not match.',
