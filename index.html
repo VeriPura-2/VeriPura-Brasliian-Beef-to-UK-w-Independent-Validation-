@@ -2370,7 +2370,7 @@ var HT={2:'ff',3:'imp'};
 function ensureFF(){Object.keys(DOCVIS).forEach(function(t){var a=DOCVIS[t];if((a.indexOf('agt')>-1||a.indexOf('car')>-1)&&a.indexOf('ff')<0)a.push('ff')})}
 function expName(id){var x=PK[id].roles.filter(function(q){return q[0]==='exp'})[0];return x?x[1].replace(/^[^,]*,\s*/,''):''}
 function W(){
-  if(SC===2)return HT[2]==='ff'?{brand:'Forwarder platform',list:'Client queue',file:'client file'}:{brand:'Broker platform',list:'Client queue',file:'customs file'};
+  if(SC===2)return HT[2]==='ff'?{brand:'Forwarder’s TMS',list:'Client queue',file:'client file'}:{brand:'Broker platform',list:'Client queue',file:'customs file'};
   return HT[3]==='imp'?{brand:'trade platform',list:'Orders',title:'Order'}:{brand:'trade platform',list:'Shipments',title:'Shipment'};
 }
 function partyName(id){return (SC===3&&HT[3]==='exp')?expName(id):impName(id)}
@@ -2411,7 +2411,7 @@ function showHost(){
   pause();stashApi();HV='list';API.on=false;document.body.classList.remove('api','adding');document.body.classList.add('hl');
   var w=W(),h='';
   if(SC===2){
-    h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside this platform. Illustrative mock of a '+(HT[2]==='ff'?'forwarder':'broker')+' platform, with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
+    h='<h2>'+w.list+'</h2><div class="hn">Consignments your clients have asked you to handle. Each row opens the compliance view inside the '+(HT[2]==='ff'?'TMS':'platform')+'. Illustrative mock of '+(HT[2]==='ff'?'the transport management system a forwarder uses':'a broker platform')+', with the five demonstration consignments as clients.</div><table><thead><tr><th>Client</th><th>Route</th><th>Findings</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(impName(k))+'</b></td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }else{
     h='<h2>'+w.list+'</h2><div class="hn">'+(HT[3]==='imp'?'Open orders':'Outbound shipments')+' across the companies on this platform. The Compliance tab is built by the platform from the data VeriPura Core returns through its API. Illustrative mock of a trade platform.</div><table><thead><tr><th>Company</th><th>'+w.title+'</th><th>Route</th><th>Compliance</th><th></th></tr></thead><tbody>'+Object.keys(PK).map(function(k){return '<tr class="lnk" data-p="'+k+'"><td><b>'+esc(partyName(k))+'</b></td><td>'+esc(startDoc(k).t)+'</td><td>'+esc(PK[k].name)+'</td><td>'+cnHTML(packCounts(k))+'</td><td>Open</td></tr>'}).join('')+'</tbody></table>';
   }
